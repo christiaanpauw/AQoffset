@@ -43,7 +43,7 @@ buitepunt <- SpatialPointsDataFrame(coords = matrix(apply(EMM@bbox, 1, min)-c(22
                                     proj4string = CRS(proj4string(EMM)),
                                     bbox = NULL)
 
-ssize = 30
+ssize = 100
 households <- SpatialPointsDataFrame(coords = spsample(x = EMM, n = ssize, type = "random"),
                                      data = data.frame(id = 1:ssize, name = paste("sample point",1:ssize)),
                                      proj4string = CRS(proj4string(EMM)),
@@ -135,16 +135,18 @@ source.all.b <- brick("AllSources365.nc")
 sapply(ls(pattern = "source[[:digit:]]+\\.b"), function(x) do.call("inMemory", list(get(x))))
 
 # simuleer data vir 365 dae op die verkeerde manier (in die geheue)
-x <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  a = 10, b = 15, k = rnorm(1,5), phi = pi/rnorm(1, mean = 4)))
-y <- sapply(1:365, function(x) plume(src = buitepunt, dst = SpatialPoints(ref), a = 40, b = 50, k = rnorm(1,5), phi = pi/rnorm(1, mean = 4)))
+# daaglikse windrigting en sterkte
+kk = rnorm(365, 5)
+pp = pi/rnorm(365, mean = 4)
+# simuleer pluime
+x <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  a = 10, b = 15, k = get("kk")[x], phi = get("pp")[x]))
+y <- sapply(1:365, function(x) plume(src = buitepunt, dst = SpatialPoints(ref), a = 40, b = 50, k = get("kk")[x], phi = get("pp")[x]))
 z <- sapply(1:365, function(x){
-  kk = rnorm(1, 5)
-  pp = pi/rnorm(1, mean = 4)
   res <- colSums(do.call("rbind",lapply(1:nrow(households),
-                           function(x){
+                           function(j){
                              #message(get("kk"))
                              #message(get("pp"))
-                             plume(src = households[x,], dst = SpatialPoints(ref), a = 1, b = 15, k = get("kk"), phi = get("pp"))  
+                             plume(src = households[j,], dst = SpatialPoints(ref), a = 1, b = 15, k = get("kk")[x], phi = get("pp")[x])  
                            })))
   message(x)
   return(res)
