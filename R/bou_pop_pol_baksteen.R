@@ -88,32 +88,6 @@ totaal.hh <- sum(s, na.rm = TRUE)
 # PM en SO2 is self elkeen 'n stack met daaglikse data
 # b <- brick(s1, s2, s3)
 
-# bronne
-source1 <- plume(src = minpunt, dst = SpatialPoints(ref), a = 10, b = 15, k = 5, phi = pi/4) 
-source3 <- plume(src = buitepunt, dst = SpatialPoints(ref), a = 40, b = 50, k = 5, phi = pi/4) 
-# hierdie is nogal stadig want dit rbind: werk aan iets vinniger
-# source2 <- source3/4
-source2 <- colSums(do.call("rbind", lapply(1:nrow(households),function(x){
-  plume(src = households[x,], dst = SpatialPoints(ref), a = 1, b = 15, k = 5, phi = pi/4)
-})))
-
-source1.r <- raster(extent(EMM)*3, nrows = rye, ncols = kolomme)
-source1.r[] <- source1
-source2.r <- raster(extent(EMM)*3, nrows = rye, ncols = kolomme)
-source2.r[] <- source2
-source3.r <- raster(extent(EMM)*3, nrows = rye, ncols = kolomme)
-source3.r[] <- source3
-
-# stack pollution
-pop.stack <- stack(source1.r, source2.r, source3.r)
-names(pop.stack@layers) <- c("small point", "hh", "large point")
-
-# maak nog 'n klomp stacks en sit hulle in in Brick en skryf hulle na CDF op skyf
-br <- crop(brick(x = list(s, totaal.hh, pop.stack)), ext)
-bfn <- c(names(s@layers), "Totaal.hh", names(pop.stack@layers))
-writeRaster(x = br,  filename='popbrick.nc', overwrite=TRUE)
-save(bfn, ext, file ="bfnames.Rda")
-
 ########################## 1 jaar #######################
 
 # maak en skryf 'n leë steen met 365 dae
@@ -139,18 +113,18 @@ sapply(ls(pattern = "source[[:digit:]]+\\.b"), function(x) do.call("inMemory", l
 kk = rnorm(365, 5)
 pp = pi/rnorm(365, mean = 4)
 # simuleer pluime
-x <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  a = 10, b = 15, k = get("kk")[x], phi = get("pp")[x]))
+x <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  a = 50, b = 15, k = get("kk")[x], phi = get("pp")[x]))
 y <- sapply(1:365, function(x) plume(src = buitepunt, dst = SpatialPoints(ref), a = 40, b = 50, k = get("kk")[x], phi = get("pp")[x]))
 z <- sapply(1:365, function(x){
   res <- colSums(do.call("rbind",lapply(1:nrow(households),
-                           function(j){
-                             #message(get("kk"))
-                             #message(get("pp"))
-                             plume(src = households[j,], dst = SpatialPoints(ref), a = 1, b = 15, k = get("kk")[x], phi = get("pp")[x])  
-                           })))
+                                        function(j){
+                                          #message(get("kk"))
+                                          #message(get("pp"))
+                                          plume(src = households[j,], dst = SpatialPoints(ref), a = 10, b = 15, k = get("kk")[x], phi = get("pp")[x])  
+                                        })))
   message(x)
   return(res)
-  })
+})
 
 # Skryf die waardes in
 source1.b <- setValues(x = source1.b, x) # hierdie moet met 'n meer komplekse (block) funksie gedoen word vir groter rasters
@@ -174,4 +148,32 @@ animate(source.all.b, n=1, pause = 0.1)
 #   source1.b <- writeValues(source1.b, x, start = ((i-1)*rye*kolomme)+1)
 # }
 # source1.b <- writeStop(source1.b)
+
+################### aggregasie ###################
+source1.year <- stackApply(source1.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
+source2.year <- stackApply(source2.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
+source3.year <- stackApply(source3.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
+all.year <- stackApply(source.all.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
+year.brick <- brick(source1.year, source2.year, source3.year, all.year)
+plot(year.brick)
+writeRaster(year.brick, filename = "yearAll.nc")
+
+################### blootgestelde populasie ###################
+# populasie
+people <- bf$Totaal.hh * 3.7
+
+# population extraction functions. Select the appropriate number of people to apply ERF to
+# you need a propability fnction of age and sex
+# e.g. 
+sexify <- function(x, prop = 0.5){
+  res = x *prop
+}
+bf$men <- sexify(people) # mens wil eintlik 'n funskie maak wat 'n hele stack maak met die regte geslag en ouderdomsgroepe
+bf$women <- people - bf$men
+
+exposed.year <- brick(ext, nl=365, nrows = rye, ncols = kolomme)
+writeRaster(exposed.year, filename = "ExposureSource1.nc")
+exposed.year <- brick("ExposureSource1.nc")
+exposed.year <- setValues(exposed.soure1, people * year.brick, na.rm=TRUE)
+
 
