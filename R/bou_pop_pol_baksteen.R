@@ -92,15 +92,19 @@ totaal.hh <- sum(s, na.rm = TRUE)
 
 # maak en skryf 'n leë steen met 365 dae
 source1.b <- brick(extent(EMM)*3, nl=365, nrows = rye, ncols = kolomme)
+source1.baseline.b <- source1.b
 source2.b <- source1.b
-source3.b <- source2.b
+source3.b <- source1.b
+
 
 writeRaster(source1.b, filename = "PointSource365.nc", overwrite=TRUE)
+writeRaster(source1.baseline.b, filename = "PointSource365baseline.nc", overwrite=TRUE)
 writeRaster(source2.b, filename = "SmallPointSource365.nc", overwrite=TRUE)
 writeRaster(source3.b, filename = "HouseholdSource365.nc", overwrite=TRUE)
 writeRaster(source3.b, filename = "AllSources365.nc", overwrite=TRUE)
 
 source1.b <- brick("PointSource365.nc")
+source1.baseline.b <- brinck("PointSource365baseline.nc")
 source2.b <- brick("SmallPointSource365.nc")
 source3.b <- brick("HouseholdSource365.nc")
 source.all.b <- brick("AllSources365.nc")
@@ -112,8 +116,11 @@ sapply(ls(pattern = "source[[:digit:]]+\\.b"), function(x) do.call("inMemory", l
 # daaglikse windrigting en sterkte
 kk = rnorm(365, 5)
 pp = pi/rnorm(365, mean = 4)
+point.current.emission = 50
+point.baseline.emssion = 40
 # simuleer pluime
-x <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  a = 50, b = 15, k = get("kk")[x], phi = get("pp")[x]))
+a <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  a = point.baseline.emission, b = 15, k = get("kk")[x], phi = get("pp")[x]))
+x <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  a = point.current.emission, b = 15, k = get("kk")[x], phi = get("pp")[x]))
 y <- sapply(1:365, function(x) plume(src = buitepunt, dst = SpatialPoints(ref), a = 40, b = 50, k = get("kk")[x], phi = get("pp")[x]))
 z <- sapply(1:365, function(x){
   res <- colSums(do.call("rbind",lapply(1:nrow(households),
@@ -127,16 +134,18 @@ z <- sapply(1:365, function(x){
 })
 
 # Skryf die waardes in
-source1.b <- setValues(x = source1.b, x) # hierdie moet met 'n meer komplekse (block) funksie gedoen word vir groter rasters
+source1.baseline.b <- setValues(x = source1.b, a) # hierdie moet met 'n meer komplekse (block) funksie gedoen word vir groter rasters
+source1.b <- setValues(x = source1.b, x) 
 source2.b <- setValues(x = source2.b, y)
 source3.b <- setValues(x = source3.b, z)
 source.all.b <- setValues(x = source.all.b, getValues(source1.b) + getValues(source2.b) + getValues(source3.b))
 
 # inspekteer
-animate(source1.b, n=1, pause = 0.1)
-animate(source2.b, n=1, pause = 0.1)
-animate(source3.b, n=1, pause = 0.1)
-animate(source.all.b, n=1, pause = 0.1)
+animate(source1.baseline.b, n=1, pause = 0.05)
+animate(source1.b, n=1, pause = 0.05)
+animate(source2.b, n=1, pause = 0.05)
+animate(source3.b, n=1, pause = 0.05)
+animate(source.all.b, n=1, pause = 0.05)
 
 # die regte manier is iets soos hierdie: 
 # source1.b <- writeStart(source1.b, filename = "PointSource365.nc", overwrite=TRUE)
@@ -150,6 +159,7 @@ animate(source.all.b, n=1, pause = 0.1)
 # source1.b <- writeStop(source1.b)
 
 ################### aggregasie ###################
+source1.baseline.year <- stackApply(source1.baseline.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE )
 source1.year <- stackApply(source1.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
 source2.year <- stackApply(source2.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
 source3.year <- stackApply(source3.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
@@ -172,8 +182,13 @@ bf$men <- sexify(people) # mens wil eintlik 'n funskie maak wat 'n hele stack ma
 bf$women <- people - bf$men
 
 exposed.year <- brick(ext, nl=365, nrows = rye, ncols = kolomme)
-writeRaster(exposed.year, filename = "ExposureSource1.nc")
 exposed.year <- brick("ExposureSource1.nc")
-exposed.year <- setValues(exposed.soure1, people * year.brick, na.rm=TRUE)
+exposed.year <- setValues(x = exposed.year, people * year.brick, na.rm=TRUE)
+writeRaster(exposed.year, filename = "ExposureSource1.nc")
+
+# Transformasie funksie
+# Skuld/potensiaal op elke punt vir elke bron: Dit hang af van die transformasie funskie en afstand. Dis dus 'n staafdiagram met bydraes tot elke stof of tot PM (rebecca) or tot oorskryding AQI (S+R) of tot impact (ek)
+# Skuld is die impack van die bron wat afgesit word: Potensiaal is die impack van die ander bronne
+#  
 
 
