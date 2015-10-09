@@ -16,6 +16,11 @@ pfunc = function(d2, ang, a, b, k, phi) {
   a * exp(-(d2 * exp(-k * cos(ang - phi))^2/b^2))
 }
 
+pfunc.v = function(d2, ang, a, b, k, phi) {
+  ## plume value for distance-squared d2
+  lapply(a, function(x) x * exp(-(d2 * exp(-k * cos(ang - phi))^2/b^2)))
+}
+
 plume <- function(src, dst, a, b, k, phi) {
   ## plume value for src at dst
   src = coordinates(src)
@@ -23,6 +28,16 @@ plume <- function(src, dst, a, b, k, phi) {
   d2 = (dst[, 1] - src[, 1])^2 + (dst[, 2] - src[, 2])^2
   ang = atan2(dst[, 2] - src[, 2], dst[, 1] - src[, 1])
   pfunc(d2, ang, a, b, k, phi)
+}
+
+plume.v <- function(src, dst, a, b, k, phi, verbose = FALSE) {
+  ## plume value for src at dst
+  src = coordinates(src)
+  dst = coordinates(dst)
+  d2 = (dst[, 1] - src[, 1])^2 + (dst[, 2] - src[, 2])^2
+  ang = atan2(dst[, 2] - src[, 2], dst[, 1] - src[, 1])
+  if (verbose == TRUE) assign("ang", ang, envir = .GlobalEnv)
+  pfunc.v(d2, ang, a, b, k, phi)
 }
 
 toOSGB = function(s) {
