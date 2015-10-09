@@ -39,10 +39,46 @@ bf$men <- sexify(people) # mens wil eintlik 'n funskie maak wat 'n hele stack ma
 bf$women <- people - bf$men
 
 # blootstelling
-bf$ex <- people * (bf$small.point + bf$large.point + bf$hh)
+bf$poltot <- bf$small.point + bf$large.point + bf$hh
+bf$prop.large.point <- (bf$large.point / bf$poltot) 
+bf$prop.hh <- (bf$hh / bf$poltot) 
+bf$ex <- people * bf$poltot
+
+# laat irrelevant uit
+bf <- dropLayer(x = bf, i = c(6:9))
+
 plot(bf)
+
+par(mfcol = c(2,1))
+col = terrain.colors(n = 1000)
+image(bf$prop.large.point, col = col,
+      main="Large point source: absolute and relative contribution")
+contour(bf$prop.large.point, add=T)
+contour(bf$large.point, col="red", lwd=2, vfont = c("sans serif", "bold"), add=T)
+image(bf$prop.hh, col = col,useRaster = TRUE,
+      main="Household: absolute and relative contribution")
+contour(bf$prop.hh, add=T, lwd = 0.7)
+contour(bf$hh, col="blue", lwd=1, vfont = c("sans serif", "bold"),add=T)
+par(mfcol=c(1,1))
+
 # maak besoedelings totale
 
-# blootstrellings funksie totaal * konsentrasie
+
+
+
+# steekpreof van punte waar monitors gaan staan
+spoints <- sample(1:ncell(bf), size = 10)
+ssp <- raster(extent(bf))
+ncol(ssp) <- ncol(bf)
+nrow(ssp) <- nrow(bf)
+ssp[] <- NA
+ssp[spoints] <- (bf$small.point[spoints] + bf$large.point[spoints] + bf$hh[spoints])
+plot(ssp)
+
+ssp.spdf <- rasterToPoints(ssp, spatial = TRUE)
+ssp.spdf[spoints] <- (bf$small.point[spoints] + bf$large.point[spoints] + bf$hh[spoints])
+plot(ssp.spdf)
+# concentrations at sample points
+
 
 
