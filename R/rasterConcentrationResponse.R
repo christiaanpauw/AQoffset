@@ -34,6 +34,7 @@ rasterConcentrationResponse <- function(conc, popr, base.conc,
                                         est = c("low estimate","cental estimate","high estimate"),
                                         outcomename = NULL, pollutantname = NULL,
                                         unit.cost = NULL, costing.var = NULL, risk.only = FALSE,
+                                        out = c("all", "popr", "d", "conc", "RR", "AF", "AM")[1]
                                         verbose = FALSE, debug = TRUE){
   #if (verbose == TRUE) message("beta =", beta)
   
@@ -127,9 +128,18 @@ rasterConcentrationResponse <- function(conc, popr, base.conc,
   names(conc) <- paste("Concentration", names(conc), sep="_")
   names(RR) <- paste("RR", names(RR), sep="_")
   
+  #Gee 'n enkele laag uit as die gebruiker so verkies
+  if (out =="popr") return(popr)
+  if (out =="conc") return(conc)
+  if (out =="d") return(d)
+  if (out =="AF") return(AF)
+  if (out =="AM") return(AM)
+  
   #Stapel hulle op mekaar
+  if (out == "all"){
   out <- stack(popr, d, conc, RR, AF, AM)
   out
+  }
 }
 
 # werk baie presiese name en kategorië by ¡¡¡¡¡
