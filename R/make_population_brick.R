@@ -1,4 +1,4 @@
-#' make_population_brick make a raster brick that is the equavalent of a population pyramid
+#' make_population_brick Make a raster brick that is the equavalent of a population pyramid
 #' @details Every layer represents an age sex-group e.g. men-42 represents men aged 
 #' older or equal to 42 and less than 43. The use of this is to apply an CRF to each 
 #' layer depending on whether that layer qualifies. E.g. If the function is defined for 
