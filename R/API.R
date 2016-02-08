@@ -91,9 +91,11 @@ rasterAPI <- function(s,
                       polpos = 2, 
                       aveperiodpos = 3, 
                       cyclepos = 5, 
-                      sep = "_", 
-                      aggregate = FALSE, per_source = FALSE){
-  patt = paste('([[:print:]]+)', sep,'{1}', '([[:print:]]+)', sep,'{1}','([[:alnum:]]+)([[:punct:]])*([[:digit:]]*)', sep="")
+                      sep = "_",
+                      aggregate = FALSE, per_source = FALSE, 
+                      verbose = FALSE, 
+                      return.full = FALSE){
+  patt = paste('([[:print:]]+)', sep,'{1}', '([[:print:]]+)', sep,'{1}','([[:alnum:]]+)([[:punct:]]*)([[:digit:]]*)', sep="")
   id = gsub(patt, paste('\\', idpos, sep=""), names(s))
   pols = gsub(patt, paste('\\', polpos, sep=""), names(s))
   per = gsub(patt, paste('\\', aveperiodpos, sep=""), names(s))
@@ -101,17 +103,26 @@ rasterAPI <- function(s,
   patt2 = '([[:digit:]]*)([[:alpha:]]*)'
   per.d = gsub(patt2, "\\1", per)
   per.l = gsub(patt2, "\\2", per)
+  if (verbose == TRUE) message("patt: ", unique(patt))
+  if (verbose == TRUE) message("id: ",  unique(id))
+  if (verbose == TRUE) message("pols: ", unique(pols))
+  if (verbose == TRUE) message("per: ", unique(per))
+  if (verbose == TRUE) message("per.d: ", unique(per.d))
+  if (verbose == TRUE) message("per.l: ", unique(per.l))
   
   tab = data.frame(orig = names(s), id = id, pols = pols, per = per, per.d = per.d, per.l = per.l, cycle = cyc)
-  
+  if (verbose == TRUE) message(str(tab))
   # get the coefs and subset the stack
   rownames(reftab) <- tolower(rownames(reftab))
+  if (verbose == TRUE){message("rownames reftab: ", paste(rownames(reftab), " ") , "\npols: ", paste(unique(tab$pols), " "))}
   idx <- na.omit(match(tab$pols, rownames(reftab)))
   if (length(idx) > 0){
   coefs <- reftab[idx, "coef"]
   
   # make pollution sub-index
   psi <- s * coefs
+  names(psi) <- paste("PSI-", names(psi), sep="")
+  if (verbose == TRUE) message("dim psi: ", paste(dim(psi), collapse = " by "))
   
   # aggregate to one score per id
   id.s <- stackApply(s, indices = match(tab$id, unique(tab$id)), fun = mean)
@@ -119,11 +130,17 @@ rasterAPI <- function(s,
   if (aggregate == TRUE & per_source == TRUE) return(id.s)
   
   # aggregate to one score per day
-  api <- stackApply(s, indices = match(tab$cycle, unique(tab$cycle)), fun = sum)
-  names(api) <- paste("cycle", unique(tab$cycle))
+  if (verbose == TRUE) message("tab$cycle ", tab$cycle)
+  api <- stackApply(psi, indices = match(tab$cycle, unique(tab$cycle)), fun = sum)
+  
   if (aggregate == TRUE){
+    if (verbose == TRUE) message("Ons aggregeer")
     api <- calc(api, mean)
   } 
-    api
+  
+  names(api) <- paste("API_cycle", unique(tab$cycle))
+  if (verbose == TRUE) message("names api: ", head(names(api), 1))
+  if (return.full == TRUE) api <- stack(s,psi, api)
+  api
   } else {message("nothing to do!")}
 }
