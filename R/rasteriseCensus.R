@@ -20,12 +20,34 @@
 #' make sex distribution make age distribution
 #' @param x A SpatialPolygonsDataFrame
 #' @param drpnames A character vector of column names that should not be included
+#' @param ref An extent object
+#' @param refres Numeric vector of length 2 (x,y): A reference resolution
+#' @param verbose Print messages or not
 
-rasteriseCensus <- function(x, 
-                            drpnames=c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", 
-                                       "SP_Code", "MP_Code", "fakeData", "GAVPrimary", "Total")){
-  res = pointifyCensus(spdf = x, dropnames = drpnames)
-  rl = lapply(split(res, res$category), 
-              function(x) rasterize(coordinates(x), ref))
-  brick(rl)
+rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres, 
+                            drpnames=c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", 
+                                       "SP_CODE", "SP_Code", "MP_CODE", "MP_Code", "MN_CODE", "MN_MDB_C", 
+                                       "DC_MN_C", "Shape_Leng", "Shape_Area", "fakeData", "GAVPrimary", 
+                                       "Total")){
+  res = pointifyCensus(spdf = x, dropnames = drpnames, verbose = TRUE)
+  rm(x)
+  srl = split(res, res$category)
+  cts = as.character(sapply(srl, function(x) unique(x@data$category)))
+  rm(res)
+  b = brick(ref, nl = length(srl))
+  res(b) <- refres
+  for (i in 1:length(srl)){
+    ct = unique(srl[[i]]@data$category)
+    if (verbose == TRUE) message(i," " , ct)
+    vls = rasterize(matrix(lapply(srl, coordinates)[[i]], ncol =2), fun = "count", b)
+    b = setValues(b, getValues(vls), layer = i)
+  }
+  names(b) <- cts
+  return(b)
 }
+
+sexify <- function(x, prop = 0.5){
+  res = x * prop
+  res
+}
+
