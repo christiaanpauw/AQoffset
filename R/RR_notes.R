@@ -1,13 +1,40 @@
+library(rasterVis)
+
 setwd("~/Documents/Rpakette/AQoffset/")
 source('/Users/christiaanpauw/Dropbox/NovaSuid/EHEO BRONNE/QOL and HEALTH/BOD_CALC/R-scripts/End.Point.Info.European.R')
 source("~/Dropbox/Rfunctions/summarise.sicklist.R")
 source('~/Documents/Rpakette/AQoffset/R/rasterConcentrationResponse.R')
 source('~/Documents/Rpakette/AQoffset/R/knipNA.R')
+source('~/Documents/Rpakette/AQoffset/R/API.R')
 
-year.brick <- raster("yearAll.nc")
+THRESHOLD <- 0
+
 people <- raster("MDC_People.nc")
 exposed.year <- raster("ExposureSource1.nc")
+point <- brick("PointSource365.nc")
+
+# BASELINE SCENARIO
+baselineS <- brick("baseline365.nc")
+yearBase <- brick("yearBaselineAll.nc")
+baselineAPI = rasterAPI(s = baseline365)
+
+# PROJECT SCENARIO
+projectS <- brick("project365.nc")
+projectAPI = rasterAPI(s = project365)
+# Implementeer drempelwaarde
+projectAPI[projectAPI < THRESHOLD] <- NA
+
+# IMPACT
+impactAPI <- baselineAPI - projectAPI
+
+year.brick <- raster("yearAll.nc")
+year.brick[year.brick==0] <- NA
+year.brick <- knipNA(r = year.brick, out = "raster")
+
 load("/Users/christiaanpauw/Documents/Rpakette/AQoffset/MDB.Rda")
+
+
+
 
 # skep gewigte en ouderdomme in endlist
 weights <- c(1, 0.01, 0.001, 0.005, 1, 0.1, 0.1, 0.1, 0.02, 0.01, 0.02, 0.01)
