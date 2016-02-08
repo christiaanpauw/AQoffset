@@ -1,3 +1,4 @@
+# Not run
 # Bou baksteen
 
 # voorbeeld vanaf http://www.maths.lancs.ac.uk/~rowlings/Teaching/UseR2012/plume.html
@@ -7,6 +8,9 @@
 source('~/Documents/Rpakette/AQoffset/R/plume_funs.R')
 source('~/Documents/Rpakette/AQoffset/R/pointifyCensus.R')
 source('~/Documents/Rpakette/AQoffset/R/rasteriseCensus.R')
+source('~/Documents/Rpakette/AQoffset/R/knipNA.R')
+
+maal <- function(x, y) return(x * y)
 
 library("sp")
 library("raster")
@@ -18,7 +22,7 @@ groene <- colorRampPalette(brewer.pal(7,"Greens")[])(50)
 bloue <- colorRampPalette(brewer.pal(7,"Blues")[])(50)
 sp.theme(set = TRUE, regions = list(col = colours))
 
-Datadir = "Data"
+Datadir = "Data/"
 Datafile = function(f) {
   file.path(Datadir, f)
 }
@@ -50,32 +54,25 @@ proj.eff <- 0.5
 households.project <- households[sample(1:length(households), size = proj.eff * length(households), replace = FALSE), ]
 
 # verwysings raster
-rye <- kolomme <- 100
+rye <- kolomme <- 40
 ref = raster(ext = extent(MDB)*3, nrows = rye, ncols = kolomme, )
 projection(ref) = proj4string(MDB)
 writeRaster(ref, filename = "base.nc", overwrite=TRUE)
 ref[] <- 0
 
 # raster die poligoon
-require(raster)
 r <- raster(nrow = rye, ncol=kolomme)
 extent(r) <- extent(ref)
-households <- rasteriseCensus(MDB)
+household.pts <- pointifyCensus(MDB)
+households <- rasteriseCensus(MDB, ref = ref, refres = res(ref))
 total_households <- calc(households, sum, na.rm=TRUE)
-#MDBr <- rasterize(households, ref, field = "name", 
-#                  fun='count')
-
-# maak dit alles punte in een funksie wat die waarskynlikhede uit die @data waardes neem
-
-# of maak 'n raster stapel met al die inligting
-# rl <- lapply(17:25, function(i) rasterize(MDB, ref, field = names(MDB@data[i]), 
-#                                           fun=function(x, ...) sum(x, na.rm = TRUE)/(rye*kolomme)))
-# s <- do.call("stack", rl)
-# names(s@layers) <- names(MDB@data[17:25])
-# writeRaster(s, filename = "Subplace2.nc")
-
-# sommasie raster 
-totaal.hh <- sum(s, na.rm = TRUE)
+names(total_households) <- "Total_households"
+total_households[total_households == 0] <- NA
+hh_s <- stack(households, total_households)
+new.ext <- knipNA(total_households, out = "extent")
+hh_s <- crop(hh_s, new.ext)
+#writeRaster(hh_s, file = "hh_s.nc", format="CDF", overwrite = TRUE)
+save(hh_s, file = paste(Datadir, "hh_s.Rda", sep=""))
 
 # !!! jy kan die hele stack of brick as 'n enkele inset in in formule gebruik bv. sum(s), s + x , s*x
 # met ander woorde jy moet die exp funksie en die impak funskie definisser om te werk met stacks
@@ -121,7 +118,7 @@ sapply(ls(pattern = "source[[:digit:]]+\\.b"), function(x) do.call("inMemory", l
 kk = rnorm(365, 5)
 pp = pi/rnorm(365, mean = 4)
 point.current.emission = 50
-point.baseline.emission = 40
+point.baseline.emission = point.current.emission * 0.2
 hh.base = 1.0
 hh.project = 0.8
 proportion.stop = 0.5
@@ -139,35 +136,40 @@ y <- sapply(1:365, function(x) plume(src = buitepunt,
                                      k = get("kk")[x], 
                                      phi = get("pp")[x]))
 z.base <- sapply(1:365, function(x){
-  res <- colSums(do.call("rbind",lapply(1:nrow(households),
-                                        function(j){ message("k is ",get("kk"), "\np is ",get("pp"), "\nGet something in the fridge, this takes a while")
-                                          plume(src = households[j,], 
+  message("\nGp get something in the fridge, this takes a while")
+  res <- colSums(do.call("rbind",lapply(1:length(household.pts),
+                                        function(j){
+                                          message(j)
+                                          plume(src = household.pts[j,], 
                                                 dst = SpatialPoints(ref), 
                                                 a = hh.base, 
                                                 b = 15, 
                                                 k = get("kk")[x], 
                                                 phi = get("pp")[x])  
                                         })))
-  message(x)
+  message("\nKlaar met ", x)
   return(res)
 })
 
 # simuleer pluime: PROJEK SCENARIO
+# Groot bron
 xp <- sapply(1:365, function(x) plume(src = minpunt, dst = SpatialPoints(ref),  
                                       a = point.current.emission, 
                                       b = 15, 
                                       k = get("kk")[x], 
                                       phi = get("pp")[x]))
+# Huishoudings
 z.current <- sapply(1:365, function(x){
-  res <- colSums(do.call("rbind",lapply(1:nrow(households.project),
-                                        function(j){ message("k is ",get("kk"), "\np is ",get("pp"), "\nGo make coffee, this takes a while")
-                                          plume(src = households[j,], dst = SpatialPoints(ref), 
+  message("\nGo make coffee, this takes a while")
+  res <- colSums(do.call("rbind",lapply(1:length(household.pts),
+                                        function(j){
+                                          plume(src = household.pts[j,], dst = SpatialPoints(ref), 
                                                 a = hh.project, 
                                                 b = 15, 
                                                 k = get("kk")[x], 
                                                 phi = get("pp")[x])  
                                         })))
-  message(x)
+  message("\nKlaar ", x)
   return(res)
 })
 
@@ -178,8 +180,26 @@ source2.b <- setValues(x = source2.b, y)
 source3.b <- setValues(x = source3.b, z.current)
 source3.baseline.b <- setValues(x = source3.b, z.base)
 
+names(source1.b) <- gsub("X", "IndustryX_so2_24h.", names(source1.b))
+names(source2.b) <- gsub("X", "IndustryY_pm10_24h.", names(source2.b))
+names(source3.b) <- gsub("X", "Households_pm10_24h.", names(source3.b))
+names(source1.baseline.b) <- gsub("X", "IndustryX_so2_24h.", names(source1.baseline.b))
+names(source3.baseline.b) <- gsub("X", "Households_pm10_24h.", names(source3.baseline.b))
+
 source.all.b <- setValues(x = source.all.b, getValues(source1.b) + getValues(source2.b) + getValues(source3.b))
 source.all.baseline.b <- setValues(x = source.all.b, getValues(source1.baseline.b) + getValues(source2.b) + getValues(source3.baseline.b))
+
+project365 <- stack(source1.b, source2.b, source3.b)
+save(project365, point.current.emission, point.baseline.emission, file = paste(Datadir, "project365.Rda", sep=""))
+writeRaster(project365, filename = "project365.nc", overwrite=TRUE)
+
+baseline365 <- stack(source1.baseline.b, source2.b, source3.baseline.b)
+save(baseline365, file = paste(Datadir, "baseline365.Rda", sep=""))
+writeRaster(baseline365, filename = "baseline365.nc", overwrite=TRUE)
+
+writeRaster(source.all.b, filename = "source.all.b.nc", overwrite=TRUE)
+writeRaster(source.all.baseline.b, filename = "source.all.baseline.b.nc", overwrite=TRUE)
+save(source.all.b, source.all.baseline.b, file = paste(Datadir, "source.all.baseline.b.Rda", sep = ""))
 
 # inspekteer
 # animate(source1.baseline.b, n=1, pause = 0.05)
@@ -207,6 +227,8 @@ source3.baseline.year <- stackApply(source3.baseline.b, indices=rep(1, nlayers(s
 all.year <- stackApply(source.all.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
 year.baseline.brick <- brick(source1.baseline.year, source2.year, source3.baseline.year, all.year)
 plot(year.baseline.brick)
+save(all.year, source1.baseline.year, source2.year, source3.baseline.year, year.baseline.brick, file = paste(Datadir, "year.baseline.Rda", sep = ""))
+
 writeRaster(year.baseline.brick, filename = "yearBaselineAll.nc", overwrite = TRUE)
 
 # PROJECT
@@ -216,11 +238,16 @@ source3.year <- stackApply(source3.b, indices=rep(1, nlayers(source.all.b)), mea
 all.year <- stackApply(source.all.b, indices=rep(1, nlayers(source.all.b)), mean, na.rm = TRUE ) 
 year.brick <- brick(source1.year, source2.year, source3.year, all.year)
 plot(year.brick)
-writeRaster(year.brick, filename = "yearAll.nc", overwrite=TRUE)
-writeRaster(year.diff, filename = "yearDiffAll.nc", overwrite=TRUE )
-
 # DIFF
 year.diff <- year.brick - year.baseline.brick
+writeRaster(year.brick, filename = "yearAll.nc", overwrite=TRUE)
+writeRaster(year.diff, filename = "yearDiffAll.nc", overwrite=TRUE )
+save(year.brick, year.baseline.brick, year.diff, file = paste(Datadir, "yearDiffAll.Rda", sep = ""))
+
+################### health risk ###################
+
+API_hh <- rasterAPI(s = hh)
+raster_dist_plot(API_hh)
 
 ################### blootgestelde populasie ###################
 # populasie
@@ -238,10 +265,11 @@ sexify <- function(x, prop = 0.5){
 people$men <- sexify(people) # mens wil eintlik 'n funskie maak wat 'n hele stack maak met die regte geslag en ouderdomsgroepe
 people$women <- people$total - people$men
 writeRaster(people, "MDC_People.nc", overwrite = TRUE)
+exposed.year <- overlay(people$total, source.all.b, fun = maal)
 
-exposed.year <- brick(ext, nl=365, nrows = rye, ncols = kolomme)
-exposed.year <- setValues(x = exposed.year, values(people$total * source.all.b), na.rm=TRUE)
 exposed.baseline.year <- setValues(x = exposed.year, values(people$total * year.baseline.brick), na.rm=TRUE)
+save(API_hh, households, total_households, people, exposed.year, exposed.baseline.year, file = paste(Datadir, "/people.exposed.year.Rda", sep =""))
+
 writeRaster(exposed.year, filename = "ExposureSource1.nc", overwrite=TRUE)
 writeRaster(exposed.baseline.year, filename = "ExposureSource1Baseline.nc", overwrite=TRUE)
 
