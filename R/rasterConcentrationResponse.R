@@ -34,7 +34,7 @@ rasterConcentrationResponse <- function(conc, popr, base.conc,
                                         est = c("low estimate","cental estimate","high estimate"),
                                         outcomename = NULL, pollutantname = NULL,
                                         unit.cost = NULL, costing.var = NULL, risk.only = FALSE,
-                                        out = c("all", "popr", "d", "conc", "RR", "AF", "AM")[1]
+                                        out = c("all", "popr", "d", "conc", "RR", "AF", "AM")[1],
                                         verbose = FALSE, debug = TRUE){
   #if (verbose == TRUE) message("beta =", beta)
   
