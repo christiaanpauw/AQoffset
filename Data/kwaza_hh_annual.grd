@@ -1,0 +1,25 @@
+[general] 
+creator=R package 'raster' 
+created= 2015-11-27 10:51:09 
+[georeference] 
+nrows= 41 
+ncols= 36 
+xmin= 767.831 
+ymin= 7100.383 
+xmax= 778.631 
+ymax= 7112.683 
+projection= +proj=utm +ellps=WGS84 
+[data] 
+datatype= FLT8S 
+byteorder= little 
+nbands= 2 
+bandorder= BIL 
+minvalue= 0.127394614673686:0.0977907320870223 
+maxvalue= 54.7838423759728:42.0546405279451 
+nodatavalue= -1.7e+308 
+[legend] 
+legendtype=  
+values=  
+color=  
+[description] 
+layername= mean_pm10:mean_so2 
