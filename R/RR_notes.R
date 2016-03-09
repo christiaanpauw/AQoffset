@@ -34,8 +34,6 @@ year.brick <- knipNA(r = year.brick, out = "raster")
 load("/Users/christiaanpauw/Documents/Rpakette/AQoffset/MDB.Rda")
 
 
-
-
 # skep gewigte en ouderdomme in endlist
 weights <- c(1, 0.01, 0.001, 0.005, 1, 0.1, 0.1, 0.1, 0.02, 0.01, 0.02, 0.01)
 minage <- c( 30, 15, 16, 15, 0,  18,   0,   0,  5,  20,  5, 15)

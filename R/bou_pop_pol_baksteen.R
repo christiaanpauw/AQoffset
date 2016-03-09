@@ -136,7 +136,7 @@ y <- sapply(1:365, function(x) plume(src = buitepunt,
                                      k = get("kk")[x], 
                                      phi = get("pp")[x]))
 z.base <- sapply(1:365, function(x){
-  message("\nGp get something in the fridge, this takes a while")
+  message("\nGo get something in the fridge, this takes a while")
   res <- colSums(do.call("rbind",lapply(1:length(household.pts),
                                         function(j){
                                           message(j)
