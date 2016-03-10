@@ -35,16 +35,15 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
   srl = split(res, res$category)
   cts = as.character(sapply(srl, function(x) unique(x@data$category)))
   rm(res)
-  b = brick(ref, nl = length(srl))
-  res(b) <- refres
+  b = brick(ref, nl = length(srl), nrow = refres[1], ncol = refres[2])
   for (i in 1:length(srl)){
     ct = unique(srl[[i]]@data$category)
-    if (verbose == TRUE) message(i," " , ct)
-    vls = rasterize(matrix(lapply(srl, coordinates)[[i]], ncol =2), fun = "count", b)
+    if (verbose == TRUE) message(i," " , ct, "\nrefres is ", paste(refres, " "))
+    vls = rasterize(SpatialPoints(srl[[i]]), fun = "count", raster(extent(b), nrow = refres[1], ncol = refres[2]))
     b = setValues(b, getValues(vls), layer = i)
   }
   names(b) <- cts
-  b
+  return(b)
 }
 
 sexify <- function(x, prop = 0.5){
