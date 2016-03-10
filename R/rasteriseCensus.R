@@ -44,7 +44,7 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
     b = setValues(b, getValues(vls), layer = i)
   }
   names(b) <- cts
-  return(b)
+  b
 }
 
 sexify <- function(x, prop = 0.5){
