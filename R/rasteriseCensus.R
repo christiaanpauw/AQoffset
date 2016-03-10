@@ -23,6 +23,7 @@
 #' @param ref An extent object
 #' @param refres Numeric vector of length 2 (x,y): A reference resolution
 #' @param verbose Print messages or not
+#' todo: change to be able to use with a weight vector (example struture density from remote snesing image)
 
 rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres, 
                             drpnames=c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", 
