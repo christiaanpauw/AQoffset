@@ -22,6 +22,7 @@ pfunc.v = function(d2, ang, a, b, k, phi) {
 }
 
 plume <- function(src, dst, a, b, k, phi) {
+  require(sp)
   ## plume value for src at dst
   src = coordinates(src)
   dst = coordinates(dst)
@@ -32,6 +33,7 @@ plume <- function(src, dst, a, b, k, phi) {
 
 plume.v <- function(src, dst, a, b, k, phi, verbose = FALSE) {
   ## plume value for src at dst
+  require(sp)
   src = coordinates(src)
   dst = coordinates(dst)
   d2 = (dst[, 1] - src[, 1])^2 + (dst[, 2] - src[, 2])^2
@@ -51,6 +53,7 @@ invpfunc <- function(ang, a, b, k, phi, f) {
 }
 
 contourPlume <- function(src, a, b, k, phi, f) {
+  require(sp)
   ### return a SpatialPolygon of a plume function at value f
   ### by sweeping round 360 degrees and computing the distance
   ang = seq(0, 2 * pi, len = 360)
