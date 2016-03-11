@@ -14,7 +14,7 @@ pointifyCensus <- function(spdf,
                            dropnames=c("ID", "OBJECTID", "Geometry_s", "GAVPrimar0", "Geometry_1", 
                                        "SP_CODE","SP_Code", "MP_CODE", "MP_Code" ,"MN_CODE", "MN_MDB_C", "DC_MN_C",
                                        "Shape_Leng", "Shape_Area", "fakeData", "GAVPrimary", "Total"),
-                           verbose = TRUE){
+                           verbose = TRUE, ...){
   dropidx <- na.omit(match(dropnames, names(spdf)))
   if (verbose == TRUE) message(paste(dim(spdf@data), collapse = " by "))
   if (verbose == TRUE) message("names : ", paste(names(spdf), " "))
@@ -30,7 +30,10 @@ pointifyCensus <- function(spdf,
   if (verbose == TRUE) message(paste(dim(spdf@data), collapse = " by "))
   if (verbose == TRUE) message(paste(sapply(spdf@data, max, na.rm = TRUE), " "))
   res.list <- lapply(1:length(spdf), function(i){
-    SpatialPointsDataFrame(coords = spsample(x = spdf[i, ], n = sum(spdf@data[i,], na.rm = TRUE), type = "random"),
+    if (verbose == TRUE) message(i)
+    if (verbose  == TRUE) assign("spdf", spdf, .GlobalEnv)
+    koord = spsample(x = spdf[i, ], n = sum(spdf@data[i,], na.rm = TRUE), type = "random")
+    SpatialPointsDataFrame(coords = koord,
                            data = data.frame(category = sample(x = rep(names(spdf@data), times = spdf@data[i, ]), size = sum(spdf@data[i,]), replace = FALSE),
                                              n = 1),
                            proj4string = CRS(proj4string(spdf)),

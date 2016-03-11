@@ -23,23 +23,23 @@
 #' @param ref An extent object
 #' @param refres Numeric vector of length 2 (x,y): A reference resolution
 #' @param verbose Print messages or not
+#' todo: change to be able to use with a weight vector (example struture density from remote snesing image)
 
 rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres, 
                             drpnames=c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", 
                                        "SP_CODE", "SP_Code", "MP_CODE", "MP_Code", "MN_CODE", "MN_MDB_C", 
                                        "DC_MN_C", "Shape_Leng", "Shape_Area", "fakeData", "GAVPrimary", 
-                                       "Total")){
+                                       "Total"), ...){
   res = pointifyCensus(spdf = x, dropnames = drpnames, verbose = TRUE)
   rm(x)
   srl = split(res, res$category)
   cts = as.character(sapply(srl, function(x) unique(x@data$category)))
   rm(res)
-  b = brick(ref, nl = length(srl))
-  res(b) <- refres
+  b = brick(ref, nl = length(srl), nrow = refres[1], ncol = refres[2])
   for (i in 1:length(srl)){
     ct = unique(srl[[i]]@data$category)
-    if (verbose == TRUE) message(i," " , ct)
-    vls = rasterize(matrix(lapply(srl, coordinates)[[i]], ncol =2), fun = "count", b)
+    if (verbose == TRUE) message(i," " , ct, "\nrefres is ", paste(refres, " "))
+    vls = rasterize(SpatialPoints(srl[[i]]), fun = "count", raster(extent(b), nrow = refres[1], ncol = refres[2]))
     b = setValues(b, getValues(vls), layer = i)
   }
   names(b) <- cts

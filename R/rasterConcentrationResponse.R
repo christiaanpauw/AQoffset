@@ -25,7 +25,6 @@
 
 #' @examples 
 #' cases = people$total * rnorm(n = ncell(people), mean = 0.01, sd = 0.003)
-library(roxygen2)
 
 rasterConcentrationResponse <- function(conc, popr, base.conc, 
                                         fun.form = c("linear","log-linear")[1],
