@@ -29,7 +29,7 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
                             drpnames=c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", 
                                        "SP_CODE", "SP_Code", "MP_CODE", "MP_Code", "MN_CODE", "MN_MDB_C", 
                                        "DC_MN_C", "Shape_Leng", "Shape_Area", "fakeData", "GAVPrimary", 
-                                       "Total")){
+                                       "Total"), ...){
   res = pointifyCensus(spdf = x, dropnames = drpnames, verbose = TRUE)
   rm(x)
   srl = split(res, res$category)
