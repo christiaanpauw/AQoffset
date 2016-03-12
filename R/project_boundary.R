@@ -30,7 +30,8 @@ project_boundary <- function(r,
                              thresh_chronic = 2.5,
                              period_chronic = 365/365,
                              chronic_cutoff = 0.9,
-                             vebose = FALSE){
+                             vebose = FALSE, 
+                             return.mask = FALSE, maskname = "masker"){
   if (target_period == "acute" | target_period == "both"){
     # maak seker die vergemiddeldingsperiod is reg
     # jy kan opsom maar nie afsom nie. i.e. jy kan ure dae maak maar nie andersom nie
@@ -68,6 +69,7 @@ project_boundary <- function(r,
   # gebruik nou res om r te crop en te masker
   r <- crop(r, extent(res))
   r <- mask(r, mask = res)
+  if (return.mask) {assign(maskname, res, envir = .GlobalEnv)}
   r
 }
 
