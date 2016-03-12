@@ -1,7 +1,9 @@
 
 
 
-pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA, var = "SP_NAME" , raster = FALSE, refres = c(40, 40), plot = FALSE, ... ){
+pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA, 
+                   var = "SP_NAME" , raster = FALSE, refres = c(40, 40), 
+                   plot = FALSE, debug = FALSE, ... ){
 	
   require(reshape2)
   require(dplyr)
@@ -34,6 +36,8 @@ pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA, var = "SP_NAME" 
 		if (raster == FALSE) return(SPDF)
 		
 		r = rasteriseCensus(SPDF, ref = extent(SPDF), refres = refres)
+		
+		if (debug == TRUE) assign("r", r, envir = .GlobalEnv)
 		
 		if (plot == TRUE){
 		  levelplot(r, ...) 
