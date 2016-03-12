@@ -1,0 +1,155 @@
+---
+title: "Notes on air quality offset calculations"
+author: "Christiaan Pauw, Nova Instituut"
+date: "3 December 2015"
+output: pdf_document
+---
+```{r echo=FALSE, message=FALSE}
+library(raster)
+library(rasterVis)
+library(knitr)
+library(rgdal)
+
+wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
+setwd("/Users/christiaanpauw/Documents/Rpakette/AQoffset/")
+rdir <-  file.path(paste(wd, "R/", sep=""))
+datadir <- file.path(paste(wd, "../../AQ_DATA/Data/", sep = ""))
+
+source(paste(rdir,'/count_exceed.R', sep=""))
+source(paste(rdir, '/raster_dist_sum.R', sep=""))
+source(paste(rdir, '/API.R', sep=""))
+source(paste(rdir, 'knipNA.R', sep =""))
+source(paste(rdir, 'raster_dist_plot.R', sep =""))
+
+new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
+
+load(paste(datadir, "kwaza_household_census.Rda", sep=""))
+kwaN <- as.character(KWA@data$SP_NAME)
+kwaCoor <- coordinates(KWA)
+addkwa <- function(){layer(sp::sp.polygons(KWA, lwd = 0.25))}
+txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
+```
+
+# Method applied to Kwazamokuhle with availible data 
+```{r echo=FALSE}
+#remove the other datasets here to save memory
+load(paste(datadir, "kwaza_eskom_24h_camx.Rda", sep = ""))
+load(paste(datadir, "kwaza_eskom_year_camx.Rda", sep = ""))
+load(paste(datadir, "kwaza_household_energyRaster.Rda", sep=""))
+load(paste(datadir, "kwaza_API_hh.Rda", sep=""))
+load(paste(datadir, "hh_24.Rda", sep=""))
+kpext <- extent(KWA)
+```
+
+## Project boundary
+The spatial extent of the project boundary is the extent of the ambient contribution of the managed facility above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2. 
+
+## Baseline scenario
+### Baseline emissions
+Baseline emission are calculated from the results of a domestic fuel use survey. 
+
+### Baseline states
+
+The modeled baseline PM10 and SO2 resulting from household emissions in Kwazamokuhle is shown below. 
+```{r echo = FALSE}
+raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+```
+
+The modeled baseline PM2.5, PM10 and SO2 from the industrial point source is shown below.
+
+```{r echo=FALSE}
+raster_dist_plot(crop(kwaza_eskom_24h_simple, kpext), multi = c("pm10","pm2.5", "so2")) + addkwa()
+```
+
+The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source are modeled to exceed a specified level and the is shown below for the baseline scenario. 
+
+```{r echo = FALSE}
+hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 25, max = 200, by = 25, knip = TRUE)
+levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexceeded specified concentarion", sub = "182 days", par.settings=BuRdTheme) + addkwa()
+```
+
+```{r echo=FALSE}
+#xl = expression(paste(mu,plain(g/m)^3))
+bar_exceed(hh_pm10_exceed, ttl = "Aggregated of days when PM10 from households \nexceeded specified concentarion")
+```
+
+```{r echo = FALSE}
+eskom_pm10_exceed = count_exceed(kwaza_eskom_24h_PM_SO2, pol = "pm10", min = 25, max = 200, by = 25, knip = TRUE)
+levelplot(crop(eskom_pm10_exceed, kpext), main = "Count of days when PM10 from Eskom \nexceeded specified concentration", sub = "365 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
+```
+
+
+```{r echo=FALSE}
+bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentarion")
+```
+
+The count of days where SO2 concentration that resulted from household emissions is modeled to exceed a specified level is shown below for the baseline scenario. 
+
+```{r echo=FALSE}
+hh_so2_exceed = count_exceed(hh_24, pol = "so2", min = 25, max = 200, by = 25, knip = TRUE)
+levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa()
+```
+
+```{r echo=FALSE}
+bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")
+```
+
+The count of days where SO2 from the industrial point source exceeded specified level for the baseline scenario is shown not in the same because all values are below the minimum level in the previous plot. 
+
+### Baseline impact
+
+The baseline impact represents the combined impact of all pollutants. A summary of the daily API resulting from households are given below.  
+
+```{r echo=FALSE}
+raster_dist_plot(kwaza_API, multi = NULL, mn = "Kwazamokuhle baseline API from households", sb = "182 days") + addkwa()
+```
+
+The baseline impact of the industrial point source for the full year is shown below.
+```{r echo=FALSE}
+raster_dist_plot(rasterAPI(crop(kwaza_eskom_24h_PM_SO2, kpext)), multi = NULL, mn = "Kwazamokuhle baseline API from households", sb = "182 days") + addkwa()
+```
+
+The count of days where the API that resulted from household emissions is modeled to exceed a specified level is shown below for the baseline scenario. 
+
+```{r echo=FALSE}
+levelplot(count_exceed(kwaza_API, min = 2, max = 10, by = 1, knip = TRUE) , par = BuRdTheme, scales=list(draw=FALSE), main = "Days in Kwazamokuhle where API \nfrom households exceeded specified level", sub = "182 days") + addkwa() 
+```
+
+## Project scenario
+
+The project scanrio is the implementation on a stove exchage for full retrofit and LPG for all RDP houses who use coal. 
+
+The estimates for fuel users per house type are shown below.
+
+```{r echo = FALSE}
+kable(fuel_house[!is.na(fuel_house$`fuel house`), ])
+fh = fuel_house[which(fuel_house[,2] == "Fuel_RDP"), ]
+fh$place = unique(fuel_house[,1])[c(1,3:6)]
+```
+
+The target for the project activity is therefore between `r colSums(fh[,3:5])["Lower"]`  and `r colSums(fh[,3:5])["Upper"] ` with a point estimate of `r colSums(fh[,3:5])["PointEst"] `
+
+```{r echo=FALSE}
+kable(fh, caption = "Implementation targets per sub-place")
+```
+
+### Project emissions
+
+#### Improvement per household
+
+LPG 100%
+
+Kitchen King = 0.018 * Union * 1.4    * 2 to be conservatve ~ 5%
+
+#### Proportion of solid fuel using households reachable by the project
+
+
+
+### Project states
+
+### Project impacts
+
+
+
+
+
