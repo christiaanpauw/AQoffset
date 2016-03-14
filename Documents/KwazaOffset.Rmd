@@ -1,5 +1,5 @@
 ---
-title: "Notes on air quality offset calculations"
+title: "Air quality offset calculations for Kwazamokuhle"
 author: "Christiaan Pauw, Nova Instituut"
 date: "3 December 2015"
 output: pdf_document
@@ -35,7 +35,6 @@ addkwa <- function(){layer(sp::sp.polygons(KWA, lwd = 0.25))}
 txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
 ```
 
-# Method applied to Kwazamokuhle
 ```{r echo=FALSE, message=FALSE}
 #remove the other datasets here to save memory
 load(paste(datadir, "kwaza_eskom_24h_camx.Rda", sep = ""))
@@ -51,77 +50,9 @@ kpext <- extent(KWA)
 
 # Baseline scenario
 ## Baseline emissions
-Baseline emission are calculated from the results of a domestic fuel use survey. The results are shown below.
-
-```{r echo=FALSE, message=FALSE}
-names(dta) <- gsub("suburb", "", names(dta))
-names(dta) <- gsub("households", "#HH", names(dta))
-names(dta) <- gsub("month.kg", "kg/m", names(dta))
-names(dta) <- gsub("perc", "%", names(dta))
-names(dta) <- gsub("winter.ave", "ave(W)", names(dta))
-names(dta) <- gsub("summer.ave", "ave(S)", names(dta))
-names(dta) <- gsub("\\.", " ", names(dta))
-row.names(dta) <- NULL
-pander(dta, split.cells = 40, split.table = Inf, rownames = NULL, caption = "Baseline coal use by Suburb")
-```
-
-## Baseline states
-
-The modelled baseline PM10 and SO2 resulting from household emissions in Kwazamokuhle is shown below. 
-```{r echo = FALSE}
-raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
-```
-
-The modelled baseline PM2.5, PM10 and SO2 from the industrial point source is shown below.
-
-```{r echo=FALSE}
-raster_dist_plot(crop(kwaza_eskom_24h_simple, kpext), multi = c("pm10","pm2.5", "so2")) + addkwa()
-```
-
-The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source are modelled to exceed a specified level and the is shown below for the baseline scenario. 
-
-```{r echo = FALSE}
-hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 25, max = 200, by = 25, knip = TRUE)
-levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexceeded specified concentarion", sub = "182 days", par.settings=BuRdTheme) + addkwa()
-```
-
-```{r echo=FALSE}
-#xl = expression(paste(mu,plain(g/m)^3))
-bar_exceed(hh_pm10_exceed, ttl = "Aggregated # of days when PM10 from households \nexceeded specified concentarion")
-```
-
-```{r echo = FALSE}
-eskom_pm10_exceed = count_exceed(kwaza_eskom_24h_PM_SO2, pol = "pm10", min = 25, max = 200, by = 25, knip = TRUE)
-levelplot(crop(eskom_pm10_exceed, kpext), main = "Count of days when PM10 from Eskom \nexceeded specified concentration", sub = "365 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
-```
-
-
-```{r echo=FALSE}
-bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentarion")
-```
-
-The count of days where SO2 concentration that resulted from household emissions is modelled to exceed a specified level is shown below for the baseline scenario. 
-
-```{r echo=FALSE}
-hh_so2_exceed = count_exceed(hh_24, pol = "so2", min = 25, max = 200, by = 25, knip = TRUE)
-levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa()
-```
-
-```{r echo=FALSE}
-bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")
-```
-
-The count of days where SO2 from the industrial point source exceeded specified level for the baseline scenario is shown not in the same because all values are below the minimum level in the previous plot. 
-
-
-# Project boundary
-The spatial extent of the project boundary is the overlapping extent of the ambient contribution of the baseline emissions above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2 and the same for project emissions from the managed activity. Project emissions from the managed activity are the emissions from Eskom in the business-as-usual scenario. Baseline emissions from households are the emissions from households before implementation of the intervention. 
-
-## Extent of the impact of household emissions
-
 ### Household emission sources
 
-The results for main energy carrier for heating from the 2011 Census are give in the table 1 below.
+Kwazamokuhle is characterised by a high proportion of household who use coal for domestic cooking and heating. The importance of coal is visible in the results on the question on the main energy carrier for heating from the 2011 Census are shown in the Table 1. 
 
 ```{r echo = FALSE, message=FALSE}
 kwa_census_df <- KWA@data[, c("SP_Name", "Electricity", "Gas", "Paraffin", "Wood", "Coal", "Animal.dung", "None")]
@@ -142,7 +73,7 @@ It is clear that there are far fewer users of wood and dung than of coal. Becaus
 kable(kwa_census_fuel_df, row.names = FALSE, caption = "Solid fuel use for heating from the 2011 Census")
 ```
 
-It is known however that because the Census asks only a question about the *main* energy carrier, the number of solid fuel users are underestimated. The results of the survey leads to a substantially higher estimate compared to the census. The estimates of coal using households per sub-place derived from the household survey is shown in Table 3. It is clear that the nuber of coal using housholds derived from the survey resutls are substantially higher. 
+It is known however that because the Census asks only a question about the *main* energy carrier, the number of solid fuel users are underestimated. The results of the survey leads to a substantially higher estimate compared to the census. The estimates of coal using households per sub-place derived from the household survey is shown in Table 3. It is clear that the number of coal using households derived from the survey results are substantially higher. 
 
 ```{r echo=FALSE, message=FALSE}
 kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption = "Estimated number of coal using households per subplace with upper and lower bound of the 95% confidence interval")
@@ -151,12 +82,85 @@ kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption 
 The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of Kwazamokuhle is clear.  
 
 ```{r echo = FALSE, message=FALSE}
+cat("\n")
 pop2sp(coal.heat, raster = TRUE, refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, main = "Number of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa()
+cat("\n")
 ```
+
+Baseline emission are calculated from the results of a domestic fuel use survey. The estimates for fuel consumption based on the household survey are shown in Table 4. Winter coal consumption is understandably highest that summer consumption. Once again Kwazamokuhle SP has the highest consumption. 
+
+```{r echo=FALSE, message=FALSE}
+names(dta) <- gsub("suburb", "", names(dta))
+names(dta) <- gsub("households", "#HH", names(dta))
+names(dta) <- gsub("month.kg", "kg/m", names(dta))
+names(dta) <- gsub("perc", "%", names(dta))
+names(dta) <- gsub("winter.ave", "ave(W)", names(dta))
+names(dta) <- gsub("summer.ave", "ave(S)", names(dta))
+names(dta) <- gsub("\\.", " ", names(dta))
+row.names(dta) <- NULL
+pander(dta, split.cells = 40, split.table = Inf, rownames = NULL, caption = "Baseline coal use by Suburb")
+```
+
+## Baseline states
+
+The modelled baseline PM10 and SO2 resulting from household emissions in Kwazamokuhle is shown below. The baseline emission from household coal use is summarised below. The tiles represent the 25%, 50% percentiles, the mean and the 75% and 99% percentile. The last tile in each row represent the standard deviation. 
+
+```{r echo = FALSE, message=FALSE}
+raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+```
+
+The distribution of the PM10 and SO2 is fairly similar but the concentration of PM10 is modelled to be higher. It is also clear that the concentration of both PM10 and SO2 decreases rapidly with distance from the household sources. 
+
+The modelled baseline PM2.5, PM10 and SO2 from the industrial point source is shown below.
+
+```{r echo=FALSE}
+raster_dist_plot(crop(kwaza_eskom_24h_simple, kpext), multi = c("pm10","pm2.5", "so2")) + addkwa()
+```
+
+The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source are modelled to exceed a specified level and the is shown below for the baseline scenario. 
+
+```{r echo = FALSE}
+hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 75, max = 300, by = 50, knip = FALSE)
+levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexceeded specified concentarion", sub = "182 days", par.settings=BuRdTheme) + addkwa()
+```
+
+The exceedances of daily PM10 standard related to household emissions occur over the southern and eastern side of Kwazamokuhle with the highest exceedance count at every level occurring in Kwazamokuhle SP.
+
+```{r echo=FALSE}
+#xl = expression(paste(mu,plain(g/m)^3))
+bar_exceed(hh_pm10_exceed, ttl = "Aggregated # of days when PM10 from households \nexceeded specified concentarion")
+```
+
+```{r echo = FALSE}
+eskom_pm10_exceed = count_exceed(kwaza_eskom_24h_PM_SO2, pol = "pm10", min = 75, max = 300, by = 50, knip = TRUE)
+levelplot(crop(eskom_pm10_exceed, kpext), main = "Count of days when PM10 from Eskom \nexceeded specified concentration", sub = "365 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
+```
+
+```{r echo=FALSE}
+bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentarion")
+```
+
+The count of days where SO2 concentration that resulted from household emissions is modelled to exceed a specified level is shown below for the baseline scenario. 
+
+```{r echo=FALSE}
+hh_so2_exceed = count_exceed(hh_24, pol = "so2", min = 75, max = 300, by = 50, knip = F)
+levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
+```
+
+Occurrences of exceedances of the daily SO2 standard related to coal combustion from households are less common than that for PM10. The area over which such occurrences are smaller than that of PM10 for every level and the count of exceedances for each level is also less. Once again most exceedances occur in Kwazamokuhle SP. 
+
+```{r echo=FALSE}
+bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")
+```
+
+The count of days where SO2 from the industrial point source exceeded specified level for the baseline scenario is shown not in the same because all values are below the minimum level in the previous plot. 
+
+# Project boundary
+The spatial extent of the project boundary is the overlapping extent of the ambient contribution of the baseline emissions above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2 and the same for project emissions from the managed activity. Project emissions from the managed activity are the emissions from Eskom in the business-as-usual scenario. Baseline emissions from households are the emissions from households before implementation of the intervention. 
 
 ## Application of thresholds to determine project boundary
 
-The baseline emission from household coal use is summarised below. The tiles represent the 1%, 25%, 50% percentiles, the mean and the 75% and 99% percentile. The last thee tiles represent the standard deviation, inter-quartile range and 99% range of the data.  
+The baseline emission from household coal use is summarised below. The tiles represent the 1%, 25%, 50% percentiles, the mean and the 75% and 99% percentile. The last thee tiles represent the standard deviation, inter-quartile range and 99% range of the data. 
 
 ```{r echo=FALSE, message=FALSE}
 raster_dist_plot(hh_24, mn = "Summary of modelled PM10 concentrations from household \ncoal burning in Kwazamokuhle", sb = "Daily averages over one year") + addkwa()
@@ -168,34 +172,53 @@ The extent of the impact of household emissions in the baseline scenario above a
 ```{r echo = FALSE, message=FALSE}
 hh_24 <- project_boundary(r = hh_24, return.mask = TRUE) 
 cat("\n")
-raster_dist_plot(hh_24, mn = "Definition of the project boundary\nAreas where daily or annual PM10 exceed the threshold") + addkwa()
+raster_dist_plot(hh_24, mn = "Definition of the project boundary", sb = "Non-blank areas are where daily or \n annual PM10 exceed the threshold (182 days)") + addkwa() + txtkwa()
 ```
 
-It is clear from the application of the threshold that if the modelling is correct, the impact of domestic burning is localised in close proximity to the emissions. The project boundary includes the whole of the main place Kwazamokuhle. Of all the sub-places that make up the main place Kwazamokuhle, the highest mean and maximum concentrations are found in Kwazamokuhle SP. 
-
-
+It is clear from the application of the threshold that, if the modelling is correct, the impact of domestic burning is localised in close proximity to the emissions. The project boundary includes the whole of the main place Kwazamokuhle. Of all the sub-places that make up the main place Kwazamokuhle, the highest mean and maximum concentrations are found in Kwazamokuhle SP. 
 
 ## Baseline impact
 
-The baseline impact represents the combined impact of all pollutants. A summary of the daily API resulting from households are given below.  
+Baseline impact can be determined using different calculation approaches. Four approached will be demontrated. These are: 
+1.  Health risk approach
+2.  Particle equivalence approach
+3.  Standards weighted intake
+4.  Burden of disease approach
+
+### Health risk approach
+
+The health risk approach uses an air quality index based on the relative risk of short term mortality of every pollutant. Here the pollutants are PM10 and SO2 but O3 and NO2 can potentially be added. The baseline impact represents the combined impact of all pollutants. A summary of the daily API resulting from households are given below.  
 
 ```{r echo=FALSE}
 kwaza_API <- crop(kwaza_API, extent(masker))
 kwaza_API <- mask(kwaza_API, masker)
-raster_dist_plot(kwaza_API, multi = NULL, mn = "Distribution of baseline API \nfrom households in Kwazamokuhle", sb = "182 days") + addkwa()
+raster_dist_plot(kwaza_API, multi = NULL, mn = "Distribution of baseline API \nfrom households in Kwazamokuhle", sb = "182 days") + addkwa() + txtkwa()
 ```
 
 The baseline impact of the industrial point source for the full year is shown below.
 
 ```{r echo=FALSE}
-raster_dist_plot(rasterAPI(crop(kwaza_eskom_24h_PM_SO2, kpext)), multi = NULL, mn = "Kwazamokuhle baseline API from households", sb = "182 days") + addkwa()
+raster_dist_plot(rasterAPI(crop(kwaza_eskom_24h_PM_SO2, kpext)), multi = NULL, mn = "Kwazamokuhle baseline API from households", sb = "182 days") + addkwa() + txtkwa()
 ```
 
 The count of days where the API that resulted from household emissions is modelled to exceed a specified level is shown below for the baseline scenario. 
 
 ```{r echo=FALSE}
-levelplot(count_exceed(kwaza_API, min = 2, max = 10, by = 1, knip = TRUE) , par = BuRdTheme, scales=list(draw=FALSE), main = "Days in Kwazamokuhle where API \nfrom households exceeded specified level", sub = "182 days") + addkwa() 
+levelplot(count_exceed(kwaza_API, min = 3, max = 10, by = 1, knip = TRUE) , par = BuRdTheme, scales=list(draw=FALSE), main = "Days in Kwazamokuhle where API \nfrom households exceeded specified level", sub = "182 days") + addkwa() + txtkwa()
 ```
+
+Kwazamokuhle SP has the highest health risk related to short term exposure 
+
+### Particle equivalence approach
+
+With sources that have a very localised dispersion, the particle equavalent impact (as PM10 equavalent) of that source is simply the concentration of the PM10 emitted by that source at every receptor. Therefore, for household emissions, the baseline impact is the same as the baseline state of PM10 shown above. 
+
+### Standards weighted intake
+
+The standards weighted intake approach roughly equivalent to a population weighted air pollution index with the index weights determined by the standard. In this way it is related to the health risk approach that also requires population data. 
+
+### Burden of disease approach
+
 
 # Project scenario
 
