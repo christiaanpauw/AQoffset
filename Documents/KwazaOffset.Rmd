@@ -35,7 +35,7 @@ addkwa <- function(){layer(sp::sp.polygons(KWA, lwd = 0.25))}
 txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
 ```
 
-# Method applied to Kwazamokuhle with availible data 
+# Method applied to Kwazamokuhle
 ```{r echo=FALSE, message=FALSE}
 #remove the other datasets here to save memory
 load(paste(datadir, "kwaza_eskom_24h_camx.Rda", sep = ""))
@@ -48,13 +48,13 @@ kpext <- extent(KWA)
 ```
 
 # Project boundary
-The spatial extent of the project boundary is the extent of the ambient contribution of the managed facility above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2. 
+The spatial extent of the project boundary is the overlapping extent of the ambient contribution of the baseline emissions above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2 and the same for project emissions from the managed activity. Project emissions from the managed activity are the emissions from Eskom in the business-as-usual scenario. Baseline emissions from households are the emissions from households before implementation of the intervention. 
 
 ## Extent of the impact of household emissions
 
 ### Household emission sources
 
-The results for main energy carrier for heating from the 2011 Census are give in the table and figure below.
+The results for main energy carrier for heating from the 2011 Census are give in the table 1 below.
 
 ```{r echo = FALSE, message=FALSE}
 kwa_census_df <- KWA@data[, c("SP_Name", "Electricity", "Gas", "Paraffin", "Wood", "Coal", "Animal.dung", "None")]
@@ -65,12 +65,11 @@ kable(kwa_census_df, row.names = FALSE, caption = "Main energy carrier for heati
 cat("\n")
 ```
 
-
 ```{r echo=FALSE}
-levelplot(households[[-c(7:8)]], pretty = TRUE, par.settings=BuRdTheme, main = "Number of households by energy carrier \nused for heating: Census 2011", scales=list(draw=FALSE)) + addkwa()
+#levelplot(households[[-c(7:8)]], pretty = TRUE, par.settings=BuRdTheme, main = "Number of households by energy carrier \nused for heating: Census 2011", scales=list(draw=FALSE)) + addkwa()
 ```
 
-It is clear that there are far fewer users of wood and dung than of coal. Because there are very few households who use wood that do not on occasion use coal as well, the responses for coal on the question "Mark ALL the energy carriers that you use for heating?" are used as an estimate for domestic solid fuel use. 
+It is clear that there are far fewer users of wood and dung than of coal. Because there are very few households who use wood that do not on occasion use coal as well, the responses for coal on the question "Mark ALL the energy carriers that you use for heating?" are used as an estimate for domestic solid fuel use. A summary is provided in Table 2. 
  
 ```{r echo = FALSE, message=FALSE}
 kable(kwa_census_fuel_df, row.names = FALSE, caption = "Solid fuel use for heating from the 2011 Census")
@@ -79,7 +78,7 @@ kable(kwa_census_fuel_df, row.names = FALSE, caption = "Solid fuel use for heati
 It is known however that because the Census asks only a question about the *main* energy carrier, the number of solid fuel users are underestimated. The results of the survey leads to a substantially higher estimate compared to the census. This is shown in the table below. The approximate spatial distribution of the households are also shown.  
 
 ```{r echo=FALSE, message=FALSE}
-kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL))
+kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption = "Estimated number of coal using households per subplace with upper and lower bound of the 95% confidence interval")
 ```
 
 ```{r echo = FALSE, message=FALSE}
@@ -118,18 +117,18 @@ pander(dta, split.cells = 40, split.table = Inf, rownames = NULL, caption = "Bas
 
 ## Baseline states
 
-The modeled baseline PM10 and SO2 resulting from household emissions in Kwazamokuhle is shown below. 
+The modelled baseline PM10 and SO2 resulting from household emissions in Kwazamokuhle is shown below. 
 ```{r echo = FALSE}
 raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
 ```
 
-The modeled baseline PM2.5, PM10 and SO2 from the industrial point source is shown below.
+The modelled baseline PM2.5, PM10 and SO2 from the industrial point source is shown below.
 
 ```{r echo=FALSE}
 raster_dist_plot(crop(kwaza_eskom_24h_simple, kpext), multi = c("pm10","pm2.5", "so2")) + addkwa()
 ```
 
-The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source are modeled to exceed a specified level and the is shown below for the baseline scenario. 
+The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source are modelled to exceed a specified level and the is shown below for the baseline scenario. 
 
 ```{r echo = FALSE}
 hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 25, max = 200, by = 25, knip = TRUE)
@@ -151,7 +150,7 @@ levelplot(crop(eskom_pm10_exceed, kpext), main = "Count of days when PM10 from E
 bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentarion")
 ```
 
-The count of days where SO2 concentration that resulted from household emissions is modeled to exceed a specified level is shown below for the baseline scenario. 
+The count of days where SO2 concentration that resulted from household emissions is modelled to exceed a specified level is shown below for the baseline scenario. 
 
 ```{r echo=FALSE}
 hh_so2_exceed = count_exceed(hh_24, pol = "so2", min = 25, max = 200, by = 25, knip = TRUE)
@@ -180,7 +179,7 @@ The baseline impact of the industrial point source for the full year is shown be
 raster_dist_plot(rasterAPI(crop(kwaza_eskom_24h_PM_SO2, kpext)), multi = NULL, mn = "Kwazamokuhle baseline API from households", sb = "182 days") + addkwa()
 ```
 
-The count of days where the API that resulted from household emissions is modeled to exceed a specified level is shown below for the baseline scenario. 
+The count of days where the API that resulted from household emissions is modelled to exceed a specified level is shown below for the baseline scenario. 
 
 ```{r echo=FALSE}
 levelplot(count_exceed(kwaza_API, min = 2, max = 10, by = 1, knip = TRUE) , par = BuRdTheme, scales=list(draw=FALSE), main = "Days in Kwazamokuhle where API \nfrom households exceeded specified level", sub = "182 days") + addkwa() 
@@ -188,7 +187,7 @@ levelplot(count_exceed(kwaza_API, min = 2, max = 10, by = 1, knip = TRUE) , par 
 
 # Project scenario
 
-The project scanrio is the implementation on a stove exchage for full retrofit and LPG for all RDP houses who use coal. 
+The project scenario is the implementation on a stove exchange for full retrofit and LPG for all RDP houses who use coal. 
 
 The estimates for fuel users per house type are shown below.
 
@@ -210,7 +209,7 @@ kable(fh, caption = "Implementation targets per sub-place")
 
 LPG 100%
 
-Kitchen King = 0.018 * Union * 1.4    * 2 to be conservatve ~ 5%
+Kitchen King = 0.018 * Union * 1.4    * 2 to be conservative ~ 5%
 
 #### Proportion of solid fuel using households reachable by the project
 
