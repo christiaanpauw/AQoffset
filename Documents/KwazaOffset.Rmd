@@ -47,56 +47,6 @@ load(paste(datadir, "EOP-fuel_users.Rda", sep=""))
 kpext <- extent(KWA)
 ```
 
-# Project boundary
-The spatial extent of the project boundary is the overlapping extent of the ambient contribution of the baseline emissions above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2 and the same for project emissions from the managed activity. Project emissions from the managed activity are the emissions from Eskom in the business-as-usual scenario. Baseline emissions from households are the emissions from households before implementation of the intervention. 
-
-## Extent of the impact of household emissions
-
-### Household emission sources
-
-The results for main energy carrier for heating from the 2011 Census are give in the table 1 below.
-
-```{r echo = FALSE, message=FALSE}
-kwa_census_df <- KWA@data[, c("SP_Name", "Electricity", "Gas", "Paraffin", "Wood", "Coal", "Animal.dung", "None")]
-kwa_census_fuel_df <- data.frame(SP_NAME = KWA@data$SP_NAME, 
-                                 Fuel = rowSums(kwa_census_df[,5:7], na.rm = T),
-                                 No_fuel = rowSums(kwa_census_df[,c(2:4,8)], na.rm = T))
-kable(kwa_census_df, row.names = FALSE, caption = "Main energy carrier for heating from the 2011 Census")
-cat("\n")
-```
-
-```{r echo=FALSE}
-#levelplot(households[[-c(7:8)]], pretty = TRUE, par.settings=BuRdTheme, main = "Number of households by energy carrier \nused for heating: Census 2011", scales=list(draw=FALSE)) + addkwa()
-```
-
-It is clear that there are far fewer users of wood and dung than of coal. Because there are very few households who use wood that do not on occasion use coal as well, the responses for coal on the question "Mark ALL the energy carriers that you use for heating?" are used as an estimate for domestic solid fuel use. A summary is provided in Table 2. 
- 
-```{r echo = FALSE, message=FALSE}
-kable(kwa_census_fuel_df, row.names = FALSE, caption = "Solid fuel use for heating from the 2011 Census")
-```
-
-It is known however that because the Census asks only a question about the *main* energy carrier, the number of solid fuel users are underestimated. The results of the survey leads to a substantially higher estimate compared to the census. This is shown in the table below. The approximate spatial distribution of the households are also shown.  
-
-```{r echo=FALSE, message=FALSE}
-kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption = "Estimated number of coal using households per subplace with upper and lower bound of the 95% confidence interval")
-```
-
-```{r echo = FALSE, message=FALSE}
-pop2sp(coal.heat, raster = TRUE, refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, main = "Number of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa()
-```
-
-### Application of thresholds to determine project boundary
-The extent of the impact of household emissions in the baseline scenario above an annual average of 2ug/m3 or an daily average of 19ug/m3 is given below. Blank cells are outside of the project boundary
-
-```{r echo = FALSE, message=FALSE}
-raster_dist_plot(hh_24, mn = "Summary of modelled PM10 concentrations from household \ncoal burning in Kwazamokuhle", sb = "Daily averages over one year") + addkwa()
-hh_24 <- project_boundary(r = hh_24, return.mask = TRUE) 
-cat("\n")
-raster_dist_plot(hh_24, mn = "Definition of the project boundary\nAreas where daily or annual PM10 exceed the threshold") + addkwa()
-```
-
-It is clear from the application of the threshold that if the modelling is correct, the impact of domestic burning is localised in close proximity to the emissions. The project boundary includes the whole of the main place Kwazamokuhle. Of all the sub-places that make up the main place Kwazamokuhle, the highest mean and maximum concentrations are found in Kwazamokuhle SP. 
-
 
 
 # Baseline scenario
@@ -162,6 +112,68 @@ bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseh
 ```
 
 The count of days where SO2 from the industrial point source exceeded specified level for the baseline scenario is shown not in the same because all values are below the minimum level in the previous plot. 
+
+
+# Project boundary
+The spatial extent of the project boundary is the overlapping extent of the ambient contribution of the baseline emissions above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2 and the same for project emissions from the managed activity. Project emissions from the managed activity are the emissions from Eskom in the business-as-usual scenario. Baseline emissions from households are the emissions from households before implementation of the intervention. 
+
+## Extent of the impact of household emissions
+
+### Household emission sources
+
+The results for main energy carrier for heating from the 2011 Census are give in the table 1 below.
+
+```{r echo = FALSE, message=FALSE}
+kwa_census_df <- KWA@data[, c("SP_Name", "Electricity", "Gas", "Paraffin", "Wood", "Coal", "Animal.dung", "None")]
+kwa_census_fuel_df <- data.frame(SP_NAME = KWA@data$SP_NAME, 
+                                 Fuel = rowSums(kwa_census_df[,5:7], na.rm = T),
+                                 No_fuel = rowSums(kwa_census_df[,c(2:4,8)], na.rm = T))
+kable(kwa_census_df, row.names = FALSE, caption = "Main energy carrier for heating from the 2011 Census")
+cat("\n")
+```
+
+```{r echo=FALSE}
+#levelplot(households[[-c(7:8)]], pretty = TRUE, par.settings=BuRdTheme, main = "Number of households by energy carrier \nused for heating: Census 2011", scales=list(draw=FALSE)) + addkwa()
+```
+
+It is clear that there are far fewer users of wood and dung than of coal. Because there are very few households who use wood that do not on occasion use coal as well, the responses for coal on the question "Mark ALL the energy carriers that you use for heating?" are used as an estimate for domestic solid fuel use. A summary is provided in Table 2. 
+ 
+```{r echo = FALSE, message=FALSE}
+kable(kwa_census_fuel_df, row.names = FALSE, caption = "Solid fuel use for heating from the 2011 Census")
+```
+
+It is known however that because the Census asks only a question about the *main* energy carrier, the number of solid fuel users are underestimated. The results of the survey leads to a substantially higher estimate compared to the census. The estimates of coal using households per sub-place derived from the household survey is shown in Table 3. It is clear that the nuber of coal using housholds derived from the survey resutls are substantially higher. 
+
+```{r echo=FALSE, message=FALSE}
+kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption = "Estimated number of coal using households per subplace with upper and lower bound of the 95% confidence interval")
+```
+
+The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of Kwazamokuhle is clear.  
+
+```{r echo = FALSE, message=FALSE}
+pop2sp(coal.heat, raster = TRUE, refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, main = "Number of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa()
+```
+
+## Application of thresholds to determine project boundary
+
+The baseline emission from household coal use is summarised below. The tiles represent the 1%, 25%, 50% percentiles, the mean and the 75% and 99% percentile. The last thee tiles represent the standard deviation, inter-quartile range and 99% range of the data.  
+
+```{r echo=FALSE, message=FALSE}
+raster_dist_plot(hh_24, mn = "Summary of modelled PM10 concentrations from household \ncoal burning in Kwazamokuhle", sb = "Daily averages over one year") + addkwa()
+```
+
+
+The extent of the impact of household emissions in the baseline scenario above an annual average of 2ug/m3 or an daily average of 19ug/m3 is shown below. Blank cells are outside of the project boundary
+
+```{r echo = FALSE, message=FALSE}
+hh_24 <- project_boundary(r = hh_24, return.mask = TRUE) 
+cat("\n")
+raster_dist_plot(hh_24, mn = "Definition of the project boundary\nAreas where daily or annual PM10 exceed the threshold") + addkwa()
+```
+
+It is clear from the application of the threshold that if the modelling is correct, the impact of domestic burning is localised in close proximity to the emissions. The project boundary includes the whole of the main place Kwazamokuhle. Of all the sub-places that make up the main place Kwazamokuhle, the highest mean and maximum concentrations are found in Kwazamokuhle SP. 
+
+
 
 ## Baseline impact
 
