@@ -9,6 +9,7 @@ library(raster)
 library(rasterVis)
 library(knitr)
 library(rgdal)
+library(pander)
 
 wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
 setwd("/Users/christiaanpauw/Documents/Rpakette/AQoffset/")
@@ -46,12 +47,12 @@ load(paste(datadir, "EOP-fuel_users.Rda", sep=""))
 kpext <- extent(KWA)
 ```
 
-## Project boundary
+# Project boundary
 The spatial extent of the project boundary is the extent of the ambient contribution of the managed facility above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO2. 
 
-### Extent of the impact of household emissions
+## Extent of the impact of household emissions
 
-#### Household emission sources
+### Household emission sources
 
 The results for main energy carrier for heating from the 2011 Census are give in the table and figure below.
 
@@ -81,11 +82,11 @@ It is known however that because the Census asks only a question about the *main
 kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL))
 ```
 
-```{r echo = FALSE}
+```{r echo = FALSE, message=FALSE}
 pop2sp(coal.heat, raster = TRUE, refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, main = "Number of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa()
 ```
 
-#### Application of thresholds to determine project boundary
+### Application of thresholds to determine project boundary
 The extent of the impact of household emissions in the baseline scenario above an annual average of 2ug/m3 or an daily average of 19ug/m3 is given below. Blank cells are outside of the project boundary
 
 ```{r echo = FALSE, message=FALSE}
@@ -99,11 +100,23 @@ It is clear from the application of the threshold that if the modelling is corre
 
 
 
-## Baseline scenario
-### Baseline emissions
-Baseline emission are calculated from the results of a domestic fuel use survey. 
+# Baseline scenario
+## Baseline emissions
+Baseline emission are calculated from the results of a domestic fuel use survey. The results are shown below.
 
-### Baseline states
+```{r echo=FALSE, message=FALSE}
+names(dta) <- gsub("suburb", "", names(dta))
+names(dta) <- gsub("households", "#HH", names(dta))
+names(dta) <- gsub("month.kg", "kg/m", names(dta))
+names(dta) <- gsub("perc", "%", names(dta))
+names(dta) <- gsub("winter.ave", "ave(W)", names(dta))
+names(dta) <- gsub("summer.ave", "ave(S)", names(dta))
+names(dta) <- gsub("\\.", " ", names(dta))
+row.names(dta) <- NULL
+pander(dta, split.cells = 40, split.table = Inf, rownames = NULL, caption = "Baseline coal use by Suburb")
+```
+
+## Baseline states
 
 The modeled baseline PM10 and SO2 resulting from household emissions in Kwazamokuhle is shown below. 
 ```{r echo = FALSE}
@@ -125,7 +138,7 @@ levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexcee
 
 ```{r echo=FALSE}
 #xl = expression(paste(mu,plain(g/m)^3))
-bar_exceed(hh_pm10_exceed, ttl = "Aggregated of days when PM10 from households \nexceeded specified concentarion")
+bar_exceed(hh_pm10_exceed, ttl = "Aggregated # of days when PM10 from households \nexceeded specified concentarion")
 ```
 
 ```{r echo = FALSE}
@@ -151,7 +164,7 @@ bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseh
 
 The count of days where SO2 from the industrial point source exceeded specified level for the baseline scenario is shown not in the same because all values are below the minimum level in the previous plot. 
 
-### Baseline impact
+## Baseline impact
 
 The baseline impact represents the combined impact of all pollutants. A summary of the daily API resulting from households are given below.  
 
@@ -162,6 +175,7 @@ raster_dist_plot(kwaza_API, multi = NULL, mn = "Distribution of baseline API \nf
 ```
 
 The baseline impact of the industrial point source for the full year is shown below.
+
 ```{r echo=FALSE}
 raster_dist_plot(rasterAPI(crop(kwaza_eskom_24h_PM_SO2, kpext)), multi = NULL, mn = "Kwazamokuhle baseline API from households", sb = "182 days") + addkwa()
 ```
@@ -172,7 +186,7 @@ The count of days where the API that resulted from household emissions is modele
 levelplot(count_exceed(kwaza_API, min = 2, max = 10, by = 1, knip = TRUE) , par = BuRdTheme, scales=list(draw=FALSE), main = "Days in Kwazamokuhle where API \nfrom households exceeded specified level", sub = "182 days") + addkwa() 
 ```
 
-## Project scenario
+# Project scenario
 
 The project scanrio is the implementation on a stove exchage for full retrofit and LPG for all RDP houses who use coal. 
 
@@ -190,9 +204,9 @@ The target for the project activity is therefore between `r colSums(fh[,3:5])["L
 kable(fh, caption = "Implementation targets per sub-place")
 ```
 
-### Project emissions
+## Project emissions
 
-#### Improvement per household
+### Improvement per household
 
 LPG 100%
 
