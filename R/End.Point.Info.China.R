@@ -1,5 +1,9 @@
 ### Health end-point info for use in dose-repsponse functions - China 
-source("R/rebase.rr.R")
+
+rebase <- function(RR, base.orig = 10) {
+  res <- 1 + (RR-1) / base.orig
+  return(res)
+}
 
 mortality.all.cause = list(end.point = "All cause mortality",
                           pollutant = "PM10",
