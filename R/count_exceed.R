@@ -7,17 +7,20 @@
 #' @return A raster
 
 count_exceed <- function(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALSE){
+  
   if (!is.null(pol)){
-    idx = grep(pol, names(s))
-    if (length(idx) ==0) stop("pol does not match the names of s. Use a valid character string or NULL for everything")
+    idx = grep(pattern = pol, x = names(s))
+    if (length(idx) == 0) {
+      stop("pol does not match the names of s. Use a valid character string or NULL for everything")}
     s = s[[grep(pol, names(s))]]
   } 
   
   ct <- seq(from = min, to = max, by = by)
   b <- brick(extent(s), nl = length(ct))
   res(b) <- res(s)
+  
   for (i in 1:length(ct)){
-    if (i == 0) ctv = 0 else ctv = ct[i]
+    if (i == 0) {ctv = 0} else {ctv = ct[i]}
     fun <- function(x) {z <- x > ctv ; return(z)}
     v <- sum(calc(s, fun = fun))
     v[is.na(v)] <- 0
@@ -38,14 +41,28 @@ count_exceed <- function(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALS
 }
 
 # make a barplot of an exceedance object
-bar_exceed <- function(z, cap = "", ttl = "", axn = TRUE, ces.ax = 0.9, yl = "Events: days x cell", xl = expression(paste(mu,plain(g/m)^3)), ...){
+bar_exceed <- function(z, 
+                       cap = "", 
+                       ttl = "", 
+                       axn = TRUE, 
+                       ces.ax = 0.9, 
+                       yl = "Events: days x cell", 
+                       xl = expression(paste(mu,plain(g/m)^3)), 
+                       plot = TRUE,
+                       ...) {
   dm = dim(z)
-  mp <- barplot(height = matrix(cellStats(z, sum)), 
-          beside = TRUE, 
-          las = 1, 
-          main = ttl, ylab = yl, xlab = xl,
-          axisnames = axn, ...)
-  axis(1, at = mp, labels = gsub("greater_than_|more.than.", ">", names(z)), cex.axis = ces.ax, las = 2)
+  mxStats <- matrix(cellStats(z, sum))
+  
+  if (plot) {
+    mp <- barplot(height = mxStats, 
+            beside = TRUE, 
+            las = 1, 
+            main = ttl, ylab = yl, xlab = xl,
+            axisnames = axn, ...)
+    axis(1, at = mp, labels = gsub("greater_than_|more.than.", ">", names(z)), cex.axis = ces.ax, las = 2)
+  } else {
+    return(mxStats)
+  }
 }
 
 print_exceed <- function(z, type = c("k", "l")[1], ttl = "Count of exceedences"){
