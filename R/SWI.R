@@ -7,8 +7,8 @@
 #' @papam reftab A dataframe with the standards. Colnames are the averaging periods. Rownames are the pollutants
 
 NAQS <- t(data.frame(
-  PM10  = c(60, 120),
-  PM2.5 = c(25, 75),
+  PM10  = c(40, 75),
+  PM2.5 = c(20, 40),
   SO2   = c(50, 100),
   O3 =    c(40, 80),
   O3 =    c(50, 70),
@@ -75,7 +75,10 @@ rasterSWI <- function(s,
   if (verbose == TRUE){message("rownames reftab: ", paste(rownames(reftab), " ") , "\npols: ", paste(unique(tab$pols), " "))}
   idx <- na.omit(match(tab$pols, rownames(reftab)))
   if (length(idx) > 0){
-    coefs <- reftab[idx, "coef"]
+    # make population weighted exposur
+    pwe <- s * pop
+   
+     coefs <- reftab[idx, "coef"]
     
     # make pollution sub-index
     psi <- s * coefs
