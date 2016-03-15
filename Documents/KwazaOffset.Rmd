@@ -173,14 +173,22 @@ The count of days where the PM10 concentrations that resulted from household emi
 
 ```{r echo = FALSE}
 hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 75, max = 300, by = 50, knip = FALSE)
-levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexceeded specified concentarion", sub = "182 days", par.settings=BuRdTheme) + addkwa()
+levelplot(crop(hh_pm10_exceed, kpext), main = "Count of days when PM10 from households \nexceeded specified concentration", sub = "182 days", par.settings=BuRdTheme) + addkwa()
 ```
 
 The exceedances of the daily PM10 standard related to household emissions occur over the southern and eastern side of KwaZamokuhle with the highest exceedance count at every level occurring in KwaZamokuhle SP.
 
 ```{r echo=FALSE}
 #xl = expression(paste(mu,plain(g/m)^3))
-bar_exceed(hh_pm10_exceed, ttl = "Aggregated # of days when PM10 from households \nexceeded specified concentarion")
+# bar_exceed(hh_pm10_exceed, ttl = "Aggregated number of days when PM10 from households \nexceeded specified concentration", plot = FALSE)
+concLevels <- names(hh_pm10_exceed)
+df <- data.frame((cellStats(hh_pm10_exceed, sum) / (nrow(hh_pm10_exceed) * ncol(hh_pm10_exceed) * nlayers(hh_pm10_exceed))), stringsAsFactors = FALSE)
+df$concentration <- concLevels
+df[[3]] <- df[[1]]
+df <- df[,2:3]
+names(df) <- c("concentration", "%_days_in_exceedance")
+rownames(df) <- NULL
+kable(df)
 ```
 
 ```{r echo = FALSE}
@@ -189,7 +197,15 @@ levelplot(crop(eskom_pm10_exceed, kpext), main = "Count of days when PM10 from E
 ```
 
 ```{r echo=FALSE}
-bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentarion")
+#bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentration")
+concLevels <- names(eskom_pm10_exceed)
+df <- data.frame(cellStats(eskom_pm10_exceed, sum) / (nrow(eskom_pm10_exceed) * ncol(eskom_pm10_exceed) * nlayers(eskom_pm10_exceed)), stringsAsFactors = FALSE)
+df$concentration <- concLevels
+df[[3]] <- df[[1]]
+df <- df[,2:3]
+names(df) <- c("concentration", "%_days_in_exceedance")
+rownames(df) <- NULL
+kable(df)
 ```
 
 \pagebreak
@@ -197,13 +213,21 @@ The count of days where SO~2~ concentration that resulted from household emissio
 
 ```{r echo=FALSE}
 hh_so2_exceed = count_exceed(hh_24, pol = "so2", min = 75, max = 300, by = 50, knip = F)
-levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
+levelplot(crop(hh_so2_exceed, kpext), main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
 ```
 
 Occurrences of exceedances of the daily SO~2~ standard related to coal combustion from households are less common than that for PM10. The area over which such occurrences are smaller than that of PM10 for every level and the count of exceedances for each level is also less. Once again most exceedances occur in KwaZamokuhle SP. 
 
 ```{r echo=FALSE}
-bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")
+#bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")
+concLevels <- names(hh_so2_exceed)
+df <- data.frame(cellStats(hh_so2_exceed, sum) / (nrow(hh_so2_exceed) * ncol(hh_so2_exceed) * nlayers(hh_so2_exceed)), stringsAsFactors = FALSE)
+df$concentration <- concLevels
+df[[3]] <- df[[1]]
+df <- df[,2:3]
+names(df) <- c("concentration", "%_days_in_exceedance")
+rownames(df) <- NULL
+kable(df)
 ```
 
 The count of days where SO~2~ from the industrial point source exceeded the specified level for the baseline scenario is not shown in the previous plot because all values are below the minimum level. 
