@@ -1,6 +1,6 @@
 #' API Apply the 
 #' @references Air Quality Index from Cairncross, John and Zunckel Atm.Envir 41 (2007)
-#' 
+#'
 
 # define RRs
 RR.accut.mort <- as.data.frame(t(data.frame(
