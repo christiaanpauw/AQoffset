@@ -1,6 +1,6 @@
 ### Health end-point info for use in dose-repsponse functions - China 
 
-rebase <- function(RR, base.orig = 10) {
+rebase.rr <- function(RR, base.orig = 10) {
   res <- 1 + (RR-1) / base.orig
   return(res)
 }
