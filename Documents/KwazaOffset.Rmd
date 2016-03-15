@@ -3,32 +3,36 @@ title: "Air quality offset calculations for Kwazamokuhle"
 author: "Christiaan Pauw, Nova Instituut"
 date: "3 December 2015"
 output: pdf_document
+tables: yes
 ---
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
 library(raster)
 library(rasterVis)
 library(knitr)
 library(rgdal)
 library(pander)
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+wd <- "C:/Users/Willem/Desktop/AQOffset/AQoffset"
 
-wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
-setwd("/Users/christiaanpauw/Documents/Rpakette/AQoffset/")
-rdir <-  file.path(paste(wd, "R/", sep=""))
-datadir <- file.path(paste(wd, "../../AQ_DATA/Data/", sep = ""))
+#rdir <-  file.path(paste(wd, "/R", sep=""))
+#datadir <- file.path(paste(wd, "/Data/", sep = ""))
+
+rdir <- normalizePath(paste(wd, "/R/", sep=""))
+datadir <- normalizePath(paste(wd, "/Data/", sep = ""))
 
 source(paste(rdir,'/count_exceed.R', sep=""))
 source(paste(rdir, '/raster_dist_sum.R', sep=""))
 source(paste(rdir, '/API.R', sep=""))
-source(paste(rdir, 'knipNA.R', sep =""))
-source(paste(rdir, 'raster_dist_plot.R', sep =""))
-source(paste(rdir, 'pop2sp.R', sep =""))
-source(paste(rdir, 'rasteriseCensus.R', sep =""))
-source(paste(rdir, 'pointifyCensus.R', sep =""))
-source(paste(rdir, 'project_boundary.R', sep =""))
+source(paste(rdir, '/knipNA.R', sep =""))
+source(paste(rdir, '/raster_dist_plot.R', sep =""))
+source(paste(rdir, '/pop2sp.R', sep =""))
+source(paste(rdir, '/rasteriseCensus.R', sep =""))
+source(paste(rdir, '/pointifyCensus.R', sep =""))
+source(paste(rdir, '/project_boundary.R', sep =""))
 
 new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
 
-load(paste(datadir, "kwaza_household_census.Rda", sep=""))
+load(paste(datadir, "/kwaza_household_census.Rda", sep=""))
 kwaN <- as.character(KWA@data$SP_NAME)
 kwaCoor <- coordinates(KWA)
 addkwa <- function(){layer(sp::sp.polygons(KWA, lwd = 0.25))}
@@ -36,13 +40,12 @@ txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(
 ```
 
 ```{r echo=FALSE, message=FALSE}
-#remove the other datasets here to save memory
-load(paste(datadir, "kwaza_eskom_24h_camx.Rda", sep = ""))
-load(paste(datadir, "kwaza_eskom_year_camx.Rda", sep = ""))
-load(paste(datadir, "kwaza_household_energyRaster.Rda", sep=""))
-load(paste(datadir, "kwaza_API_hh.Rda", sep=""))
-load(paste(datadir, "hh_24.Rda", sep=""))
-load(paste(datadir, "EOP-fuel_users.Rda", sep=""))
+load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
+#load(paste(datadir, "/kwaza_eskom_year_camx.Rda", sep = ""))
+load(paste(datadir, "/kwaza_household_energyRaster.Rda", sep=""))
+load(paste(datadir, "/kwaza_API_hh.Rda", sep=""))
+load(paste(datadir, "/hh_24.Rda", sep=""))
+load(paste(datadir, "/EOP-fuel_users.Rda", sep=""))
 kpext <- extent(KWA)
 ```
 
@@ -81,7 +84,7 @@ kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption 
 
 The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of Kwazamokuhle is clear.  
 
-```{r echo = FALSE, message=FALSE}
+```{r , echo = FALSE, message=FALSE}
 cat("\n")
 pop2sp(coal.heat, raster = TRUE, refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, main = "Number of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa()
 cat("\n")

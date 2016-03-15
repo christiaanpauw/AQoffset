@@ -1,12 +1,19 @@
-#' SWI Calculate Standards weighted intake of pollutant
+#' Standards Weighted Intake
+#' 
+#' Calculates the standars weighter intake of a pollutant
+#' 
 #' @param conc raster The concentration of every pollutant
 #' @param pop raster The # of people in each grid cell
-#' @param ap Character "Annual" of "Daily"
+#' @param ap Character "Annual" or "Daily"
 #' @param Q numeric Breathing rate. Default 8 m3 per day
-#' @param refpol one of c("PM10", "PM2.5", "SO2", "O3", "O3.1", "NO2"). Default
-#' @papam reftab A dataframe with the standards. Colnames are the averaging periods. Rownames are the pollutants
+#' @param refpol one of c("PM10", "PM2.5", "SO2", "O3", "O3.1", "NO2"). Default is "PM10"
+#' @param reftab A data frame with the standards. Colnames are the averaging periods. Rownames are the pollutants
+#' @export
 
-NAQS <- t(data.frame(
+SWI <- function(conc, NAQS = NULL, pop = pop, ap = "Annual", Q = 8, refpol = c("PM10", "PM2.5", "SO2", "O3", "O3.1", "NO2")[1]){
+
+  if (is.null(NAQS)){
+  NAQS <- t(data.frame(
   PM10  = c(40, 75),
   PM2.5 = c(20, 40),
   SO2   = c(50, 100),
@@ -15,12 +22,16 @@ NAQS <- t(data.frame(
   NO2 =   c(60, 100), 
   row.names = c("Annual", "Daily"))
   )
+assign("NAQS", NAQS, envir = .GlobalEnv)
+}else assign("NAQS", NAQS, envir = .GlobalEnv)
+#conc = data.frame(PM10 = 100, SO2 = 200)
+#ap = "Annual"
+#Q = 8
+#refpol = "PM10"
 
-conc = data.frame(PM10 = 100, SO2 = 200)
-ap = "Annual"
-NAQS.rel = NAQS[ap,names(conc)]
-Q = 8
-refpol = "PM10"
+#select relevant NAQS
+  
+NAQS.rel = NAQS[names(conc), ap]
 
 # Intake 
 if (ap == "Annual") {
@@ -32,19 +43,34 @@ I = conc * Q * pop
 SI = NAQS.rel * Q * pop 
 
 # weeg my manier
-#standard.relative.conc <- conc / NAQS.rel
-#standard.relative.conc
-#PM10.eq <- standard.relative.conc * NAQS.rel[,"PM10"] # PM10 moet wees wat dit was
-#PM10.eq
+standard.relative.conc <- conc / NAQS.rel
+standard.relative.conc
+con.eq <- standard.relative.conc * NAQS.rel[,refpol] # PM10 moet wees wat dit was
+con.eq
 
 # PM10 equivalent intake 
-PM10.eq * Q * pop
+con.eq * Q * pop
 
 EI = unlist(SI[,refpol]) * I/SI
 
 # Total effective intake
 TEI <- sum(EI)
+}
 
+#' Raster SWI
+#' 
+#' Creates a raster for the standars weighted intake
+#' 
+#' @param s A raster or raster stack
+#' @param reftab A data frame with the standards. 
+#' Colnames are the averaging periods. Rownames are the pollutants.
+#' @param idpos Numeric. Position of the ID column
+#' @param polpos Numeric. Position of the pollutant column
+#' @param aveperiodpos Numeric. Position of the column containing everage periods
+#' @param cyclepos Numeric. Position of the cycle
+#' @param sep Character vector containing the seperator to be used.
+#' @param verbose Logical that displays function messages if TRUE.
+#' @export
 
 rasterSWI <- function(s, 
                       reftab = NAQS, 
