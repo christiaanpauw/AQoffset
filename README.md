@@ -1,2 +1,3 @@
 # AQoffset
-R package to calculate air quality offsets
+R package for the calculation of air quality offsets.
+Developed by Nova Institute.
