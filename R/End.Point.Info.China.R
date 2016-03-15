@@ -64,7 +64,7 @@ mortality.respiratory.diseases = list(end.point = "Mortality due to respiratory 
                                          Xpop = c("Xinfants","Xbabies","Xkids","Xteens","Xadults","Xaged")[2:6],
                                          Unit.Cost = 17113501,
                                          Effect = "Acute",
-                                         Incidence.rate =  (17.23/1000/365)*0.127,
+                                         Incidence.rate = (17.23/1000/365)*0.127,
                                          Incidence.rate.source = "CIA World fact book and STATS SA"
                                          )
 

@@ -81,11 +81,11 @@ rasterConcentrationResponse <- function(conc,
   if (verbose==TRUE) message("fun.form = ", fun.form)
   if (verbose==TRUE) message("beta = ", paste(beta, " "))
   # stel besoedelstof naam
-  if (is.null(pollutantname)){
-    names(conc) <- "pollutant"
-  } else {
-    names(conc) <- pollutantname
-  }
+  # if (is.null(pollutantname)){
+  #   names(conc) <- "pollutant"
+  # } else {
+  #   names(conc) <- pollutantname
+  # }
   if (verbose==TRUE) message("names conc = ", paste(names(conc), " "))
   # stel geval name
   if (is.null(outcomename)){
@@ -161,7 +161,9 @@ rasterCREP <- function(sl = endlist,
                        ppopr = people, 
                        bbase.conc = 10, 
                        iincidence.rate = NULL, 
-                       rrisk.only = TRUE, ...){
+                       rrisk.only = TRUE, 
+                       verbose = FALSE,
+                       ...){
   
   polidx = which(tolower(summarise.sicklist(sl)$pollutant) == tolower(pollutant))
   if (length(polidx) < 1) stop("There is no pollutant ", pollutant, " in sl")
@@ -191,15 +193,15 @@ rasterCREP <- function(sl = endlist,
                                     RR = sl[[i]]$RR, 
                                     delta = 10,
                                     cases = NULL, 
-                                    incidence.rate = sl[[i]]["Incidence.rate"],
+                                    incidence.rate = sl[[i]][["Incidence.rate"]],
                                     est = c("low estimate","cental estimate","high estimate"),
                                     pollutantname = pollutant, 
                                     outcomename = sl[[i]]$end.point,
                                     unit.cost = NULL, 
                                     costing.var = NULL, 
                                     risk.only = rrisk.only,
-                                    verbose = get("verbose"), 
-                                    debug = TRUE)
+                                    debug = TRUE,
+                                    ...)
     message("names x: ", names(x))
     assign(paste("x",as.character(i), sep="_"), x, envir = ParkEnv)
     if (verbose == TRUE) {message("Jy verlaat sl lus nommer ", i)}
