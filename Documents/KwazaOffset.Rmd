@@ -2,7 +2,7 @@
 title: "Air quality offset calculations for KwaZamokuhle"
 author: "Christiaan Pauw, Nova Instituut"
 date: "3 December 2015"
-output: pdf_document
+output: word_document
 ---
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(raster)
@@ -11,14 +11,13 @@ library(knitr)
 library(rgdal)
 library(pander)
 
-USER <- c("CJP", "AH")[2]
+USER <- c("CJP", "AH")[1]
 
 if (USER == "CJP") {
   wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
   setwd("/Users/christiaanpauw/Documents/Rpakette/AQoffset/")
   rdir <-  file.path(paste(wd, "R/", sep=""))
-  datadir <- file.path(paste(wd, "../../AQ_DATA/Data/", sep = ""))
-} 
+  datadir <- normalizePath(paste("Data/", sep = ""))
 
 if (USER == "AH") {
   projdir <- "C:/Users/Alex H/Documents/R/AQoffset/"
@@ -45,18 +44,22 @@ load(paste(datadir, "/kwaza_household_census.Rda", sep=""))
 kwaN <- as.character(KWA@data$SP_NAME)
 kwaCoor <- coordinates(KWA)
 addkwa <- function(){layer(sp::sp.polygons(KWA, lwd = 0.25))}
+addkwa2 <- function(){layer(sp::sp.polygons(KWA, lwd = 10))}
 txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
+}
 ```
 
 ```{r echo=FALSE, message=FALSE}
 #remove the other datasets here to save memory
 load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
+load(paste(datadir, "/eskom.Rda", sep = ""))
 #load(paste(datadir, "/kwaza_eskom_year_camx.Rda", sep = ""))
 load(paste(datadir, "/kwaza_household_energyRaster.Rda", sep=""))
 load(paste(datadir, "/kwaza_API_hh.Rda", sep=""))
 load(paste(datadir, "/hh_24.Rda", sep=""))
 load(paste(datadir, "/EOP-fuel_users.Rda", sep=""))
 kpext <- extent(KWA)
+eskom.base <- eskom * 0.15
 ```
 
 ```{r echo=FALSE}
@@ -88,7 +91,6 @@ sumIncidences <- function(outcomesStack) {
   return(dfIncidences)
 }
 ```
-
 
 # Baseline scenario
 ## Baseline emissions
@@ -163,16 +165,16 @@ raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
 The distributions of the PM10 and SO~2~ are fairly similar but the concentration of PM10 is modelled to be higher. It is also clear that the concentration of both PM10 and SO~2~ decreases rapidly with distance from the household sources. 
 
 \pagebreak
-The modelled baseline PM2.5, PM10 and SO~2~ resulting from the industrial point source is shown below.
+The modelled baseline secondary PM2.5 resulting from the eskom source is shown below.
 
 ```{r echo=FALSE}
-raster_dist_plot(crop(kwaza_eskom_24h_simple, kpext), multi = c("pm10","pm2.5", "so2")) + addkwa()
+raster_dist_plot(eskom.base) + addkwa2()
 ```
 
 The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source is modelled to exceed a specified level, is shown below for the baseline scenario. 
 
 ```{r echo = FALSE}
-hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 75, max = 300, by = 50, knip = FALSE)
+hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 75, max = 300, by = 50, knip = TRUE)
 levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexceeded specified concentarion", sub = "182 days", par.settings=BuRdTheme) + addkwa()
 ```
 
@@ -184,8 +186,16 @@ bar_exceed(hh_pm10_exceed, ttl = "Aggregated # of days when PM10 from households
 ```
 
 ```{r echo = FALSE}
-eskom_pm10_exceed = count_exceed(kwaza_eskom_24h_PM_SO2, pol = "pm10", min = 75, max = 300, by = 50, knip = TRUE)
-levelplot(crop(eskom_pm10_exceed, kpext), main = "Count of days when PM10 from Eskom \nexceeded specified concentration", sub = "365 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
+eskom_kwa <- crop(eskom, extent(hh_24))
+eskom_kwa <- disaggregate(eskom_kwa, c(36,41))
+eskom_kwa <- resample(eskom_kwa, hh_24, method='bilinear')
+
+eskom_kwa_base <- crop(eskom.base, extent(hh_24))
+eskom_kwa_base <- disaggregate(eskom_kwa_base, c(36,41))
+eskom_kwa_base <- resample(eskom_kwa_base, hh_24, method='bilinear')
+
+eskom_pm10_exceed = count_exceed(crop(eskom_kwa_base, kpext), pol = NULL, min = 0, max = 10, by = 0.1, knip = TRUE)
+levelplot(eskom_pm10_exceed, main = "Count of days when PM2.5 from Eskom \nexceeded specified concentration", sub = "365 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
 ```
 
 ```{r echo=FALSE}
@@ -196,7 +206,7 @@ bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \ne
 The count of days where SO~2~ concentration that resulted from household emissions is modelled to exceed a specified level, is shown below for the baseline scenario. 
 
 ```{r echo=FALSE}
-hh_so2_exceed = count_exceed(hh_24, pol = "so2", min = 75, max = 300, by = 50, knip = F)
+hh_so2_exceed = count_exceed(crop(hh_24, kpext), pol = "so2", min = 100, max = 300, by = 25, knip = FALSE)
 levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
 ```
 
@@ -216,7 +226,7 @@ The spatial extent of the project boundary is the overlapping extent of the ambi
 The baseline emissions from household coal use are summarised below. The tiles represent the 1st, 25th and 50th percentiles, the mean and the 75th and 99th percentiles. The last three tiles represent the standard deviation, inter-quartile range and 99% range of the data. 
 
 ```{r echo=FALSE, message=FALSE}
-raster_dist_plot(hh_24, mn = "Summary of modelled PM10 concentrations from household \ncoal burning in KwaZamokuhle", sb = "Daily averages over one year") + addkwa()
+raster_dist_plot(hh_24, mn = "Summary of modelled PM10 concentrations from household \ncoal burning in KwaZamokuhle", sb = "Daily averages over 182 days") + addkwa()
 ```
 
 \pagebreak
@@ -320,17 +330,23 @@ rBoDPM10_hhE <- rasterCREP(sl = endlist,
                        verbose = FALSE, 
                        out = "d")
 
-# plot incidences
-levelplot(crop(rBoDPM10_hhE, kpext),
-          main = "Burden of disease for PM10 
-resulting from hh emissions,
-given as number of cases per health outcome", 
-          sub = "182 days",
-          par = BuRdTheme) + addkwa() + txtkwa()
-
 # tabulate total incidences per health outcome
 kable(sumIncidences(rBoDPM10_hhE), digits = 2)
 
+names(rBoDPM10_hhE) <- gsub("among.", "", names(rBoDPM10_hhE))
+names(rBoDPM10_hhE) <- gsub("espiratory", "esp.", names(rBoDPM10_hhE))
+names(rBoDPM10_hhE) <- gsub("hospital.admissions", "hosp.admin", names(rBoDPM10_hhE))
+names(rBoDPM10_hhE) <- gsub("Cases_", "", names(rBoDPM10_hhE))
+names(rBoDPM10_hhE) <- gsub("due.to.", "", names(rBoDPM10_hhE))
+names(rBoDPM10_hhE) <- gsub("Cardiovascular", "CV", names(rBoDPM10_hhE))
+names(rBoDPM10_hhE) <- gsub("all.ages", "all", names(rBoDPM10_hhE))
+
+# plot incidences
+levelplot(crop(rBoDPM10_hhE, kpext),
+          main = "Burden of disease for PM10 resulting from hh emissions,
+given as number of cases per health outcome", 
+          sub = "182 days",
+          par = BuRdTheme) + addkwa() + txtkwa()
 ```
 
 \pagebreak
@@ -346,15 +362,24 @@ rBoDSO2_hhE <- rasterCREP(sl = endlist,
                       rrisk.only = FALSE,
                       out = "d",
                       verbose = FALSE)
+
+# tabulate total incidences per health outcome
+kable(sumIncidences(rBoDSO2_hhE), digits = 2)
+
+names(rBoDSO2_hhE) <- gsub("among.", "", names(rBoDSO2_hhE))
+names(rBoDSO2_hhE) <- gsub("espiratory", "esp.", names(rBoDSO2_hhE))
+names(rBoDSO2_hhE) <- gsub("hospital.admissions", "hosp.admin", names(rBoDSO2_hhE))
+names(rBoDSO2_hhE) <- gsub("Cases_", "", names(rBoDSO2_hhE))
+names(rBoDSO2_hhE) <- gsub("due.to.", "", names(rBoDSO2_hhE))
+names(rBoDSO2_hhE) <- gsub("Cardiovascular", "CV", names(rBoDSO2_hhE))
+names(rBoDSO2_hhE) <- gsub("all.ages", "all", names(rBoDSO2_hhE))
+
 levelplot(crop(rBoDSO2_hhE, kpext),
           main = "Burden of disease for SO2 
 resulting from hh emissions,
 given as number of cases per health outcome",
           sub = "182 days",
           par = BuRdTheme) + addkwa() + txtkwa()
-
-# tabulate total incidences per health outcome
-kable(sumIncidences(rBoDSO2_hhE), digits = 2)
 ```
 
 \pagebreak
@@ -422,8 +447,6 @@ kable(sumIncidences(rBoDSO2_Ee), digits = 2)
 ```
 
 
-
-
 # Project scenario
 
 The project scenario is the implementation of a stove exchange for all RDP houses who use coal, where the households exchange their old coal stoves for a full retrofit and LPG.
@@ -455,6 +478,13 @@ Kitchen King = 0.018 * Union * 1.4 * 2 to be conservative ~ 5%
 
 
 ### Project states
+
+#### Project states from households
+
+```{r echo = FALSE}
+raster_dist_plot(hh_24 * 0.49, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+```
+
 
 ### Project impacts
 
