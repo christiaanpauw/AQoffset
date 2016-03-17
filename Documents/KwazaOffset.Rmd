@@ -495,18 +495,15 @@ par = BuRdTheme) + addkwa() + txtkwa()
 kable(sumIncidences(rBoDPM10_proj), digits = 2)
 ```
 
-
 ## Impact reduction
 
 #### Particle precursor approach
-
 
 ```{r echo=FALSE, message=FALSE}
 PM_impact <- all_base[[grep("pm10", names(all_base))]] - all_proj[[grep("pm10", names(all_proj))]]
 raster_dist_plot(PM_impact, mn = "Impact of the project activtiy on PM10 concentrations", sb = "182 days")
 
 ```
-
 
 #### Health risk approach
 
@@ -525,5 +522,10 @@ swi_impact <- swi_base - swi_proj
 levelplot(swi_impact, main = "Impact in terms of reduction in standards weighted intake", sub = "Difference between baseline and project scenarion over 182 days", margin = FALSE, par.settings = BuRdTheme) + addkwa() + txtkwa()
 ```
 
+#### Burden of disease approach 
 
+```{r echo=FALSE, message=FALSE}
+rBoDPM10_impact <- rBoDPM10 - rBoDPM10_proj
+levelplot(rBoDPM10_impact, main = "Impact in terms of disease burden due to the \n implementation of the project activity", sub = "number of cases")
+```
 
