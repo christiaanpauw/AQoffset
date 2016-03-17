@@ -1,11 +1,15 @@
-#' raster_dist_sum Summarise a many layered raster stack into a 7 point summary 
+#' Raster Distribution Summary
+#' 
+#' Summarise a many layered raster stack into a 7 point summary 
 #' stack. It gives the the followng percentiles: 1%, 25%, median, 75% and 99%
 #' and mean, standard deviation, and inter quartile range and arbitrary user specified 
 #' range. Optionally provides minimum and maximum
+#' 
 #' @param s A raster stack
 #' @param minmax Logical. Do you want minimum and maximum
 #' @param trim Proportion of data excluded from range 
 #' @return A raster
+#' @export
 
 raster_dist_sum <- function(s, minmax = FALSE, trim = 1/100){
   if (nlayers(s) < 10) stop("Not much use making a 7 point summary with so few layers, is it?\n Yours has ", nlayers(s) )
@@ -32,6 +36,15 @@ raster_dist_sum <- function(s, minmax = FALSE, trim = 1/100){
   s2
 }
 
+#' Raster Average Type
+#' 
+#' Calculates the averages of unique names within a raster stack
+#' 
+#' @param s A raster stack
+#' @param patt Character vector used to isolate unique values within s
+#' @param func The function to be applied on subsets of the raster stack
+#' @return Raster with function applied to subsets
+#' @export
 
 raster_ave_type <- function(s, patt = "_24h\\.[[:digit:]]+", func = "mean"){
   if (class(s) != "RasterStack") stop("s must be of class RasterStack")

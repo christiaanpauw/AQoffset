@@ -2,8 +2,7 @@
 % Please edit documentation in R/particle_ratio_target.R
 \name{particle_ratio_offset}
 \alias{particle_ratio_offset}
-\title{particle_ratio_target Calculates the target of an offset intervention according to the 
-particle equavalence approach (using the particle_ratio function)}
+\title{Particle Ratio Target}
 \usage{
 particle_ratio_offset(result = c("target", "effect boundary")[1],
   int.eff = 0.5, effect = c("acute", "chronic")[1], units = NULL,
@@ -14,28 +13,28 @@ particle_ratio_offset(result = c("target", "effect boundary")[1],
   names(baseline365))]])
 }
 \arguments{
+\item{result}{What result to return. result ="target" returns the proportion of the offset source 
+to be reduced to offset the managed activity at every receptor. result = "effect boundary" 
+returns a one-layer raster with 1 in all the cells where an offset can take place and NA in all 
+others. This can be used to select (mask) from other rasters}
+
 \item{int.eff}{Proportion of source 2 that can be addressed by intervention}
 
 \item{effect}{Do the calculation in terms of an acute effect (effect = "acute"). This approach 
 give the result as exceedance counts (standard must not be NULL). effect = "chronic" aggregates
 the concentrations}
 
-\item{minrat}{the minimum source ratio for which an offset cn be done}
+\item{units}{Numeric of how many units is source 2 made up. If NULL report proportion default NULL}
 
-\item{source1}{numeric vector of the same length as nlayers(conc1). Total emissions}
+\item{minrat}{The minimum source ratio for which an offset cn be done}
+
+\item{source1}{Numeric vector of the same length as nlayers(conc1). Total emissions}
 
 \item{conc1}{A Raster object with concentrations resulting from source1. Average emissions}
 
 \item{source2}{numeric vector of the same length as nlayers(conc2)}
 
 \item{conc2}{A Raster object with concentrations resulting from source2}
-
-\item{What}{result to return. result ="target" returns the proportion of the offset source 
-to be reduced to offset the managed activity at every receptor. result = "effect boundary" 
-return a one-layer raster with 1 in all the cells where an offset can take place and NA in all 
-others. This can be used to select (mask) from other rasters}
-
-\item{numeric}{Of how many units is source 2 made up. If NULL report proportion default NULL}
 }
 \value{
 A raster with the target expressed as proportion of the offset source
@@ -44,7 +43,7 @@ or the boudary of the area that can be offset using the particle equavalence app
 efficiency of the intervention is eff
 }
 \description{
-particle_ratio_target Calculates the target of an offset intervention according to the 
+Calculates the target of an offset intervention according to the 
 particle equavalence approach (using the particle_ratio function)
 }
 \author{

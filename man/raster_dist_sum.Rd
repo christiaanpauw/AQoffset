@@ -2,10 +2,7 @@
 % Please edit documentation in R/raster_dist_sum.R
 \name{raster_dist_sum}
 \alias{raster_dist_sum}
-\title{raster_dist_sum Summarise a many layered raster stack into a 7 point summary 
-stack. It gives the the followng percentiles: 1%, 25%, median, 75% and 99%
-and mean, standard deviation, and inter quartile range and arbitrary user specified 
-range. Optionally provides minimum and maximum}
+\title{Raster Distribution Summary}
 \usage{
 raster_dist_sum(s, minmax = FALSE, trim = 1/100)
 }
@@ -20,7 +17,7 @@ raster_dist_sum(s, minmax = FALSE, trim = 1/100)
 A raster
 }
 \description{
-raster_dist_sum Summarise a many layered raster stack into a 7 point summary 
+Summarise a many layered raster stack into a 7 point summary 
 stack. It gives the the followng percentiles: 1%, 25%, median, 75% and 99%
 and mean, standard deviation, and inter quartile range and arbitrary user specified 
 range. Optionally provides minimum and maximum

@@ -2,8 +2,7 @@
 % Please edit documentation in R/particle_ratio.R
 \name{particle_ratio}
 \alias{particle_ratio}
-\title{particle_ratio Calculate the equavalence of sources in terms of the 
-resultant concentrations at each receptor}
+\title{Particle Ratio}
 \usage{
 particle_ratio(source1 = rep(400, 365),
   conc1 = baseline365[[grep("Indus[[:print:]]*_pm10[[:print:]]",
@@ -26,8 +25,8 @@ A raster or raster stack with the source equavalence ratios (source impact ratio
 much larger impact than the source to be offset (source1)
 }
 \description{
-particle_ratio Calculate the equavalence of sources in terms of the 
-resultant concentrations at each receptor
+Calculate the equavalence of sources in terms of the resultant
+concentrations at each receptor.
 }
 \author{
 Rebecca Garland, Mogesh Naidoo, Christiaan Pauw

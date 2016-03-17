@@ -2,7 +2,7 @@
 % Please edit documentation in R/rasteriseCensus.R
 \name{rasteriseCensus}
 \alias{rasteriseCensus}
-\title{Rasterise a census polygon SPDF possibly containing summary data.}
+\title{Rasterise Census Subplace}
 \usage{
 rasteriseCensus(x, ref = ext, verbose = FALSE, refres, drpnames = c("ID",
   "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", "SP_CODE", "SP_Code",
@@ -14,17 +14,16 @@ rasteriseCensus(x, ref = ext, verbose = FALSE, refres, drpnames = c("ID",
 
 \item{ref}{An extent object}
 
-\item{verbose}{Print messages or not
-todo: change to be able to use with a weight vector (example struture density from remote snesing image)}
+\item{verbose}{Print messages or not}
 
 \item{refres}{Numeric vector of length 2 (x,y): A reference resolution}
 
 \item{drpnames}{A character vector of column names that should not be included}
+
+\item{...}{Arguments to be passed to/from other methods}
 }
 \description{
 Rasterise a census polygon SPDF possibly containing summary data.
-}
-\details{
 The function randomly assign the correct number of sample units
 in each of a number of categories e.g. energy carrier for heating:
 as summarised in each row of the SPDF as points to a polygon   

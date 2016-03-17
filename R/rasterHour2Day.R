@@ -2,6 +2,14 @@
 # assumes: names in the format
 # slnames <- paste("day_",(as.numeric(gsub("X.001.11.30.", "", names(cppm10), 20)) %/%24)+1,"_hour_", as.numeric(gsub("X.001.11.30.", "", names(cppm10), 20)) %%24, sep="")
 
+#' Hour to day
+#' 
+#' Converts an hour raster to a day raster
+#' 
+#' @param s A raster
+#' @param knip Logical. Create a new extent with NA-only columns cut out if TRUE
+#' @export
+
 rasterH2D <- function(s, knip = FALSE){
   
   if (knip == TRUE){

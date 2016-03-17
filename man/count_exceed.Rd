@@ -2,23 +2,28 @@
 % Please edit documentation in R/count_exceed.R
 \name{count_exceed}
 \alias{count_exceed}
-\title{count_exceed}
+\title{Count Exceed}
 \usage{
 count_exceed(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALSE)
 }
 \arguments{
-\item{s}{A raster or raster stack}
+\item{s}{A raster or raster stack.}
 
-\item{pol}{A pollutant name as a character string that matches a layer in the raster stack s}
+\item{pol}{A pollutant name as a character string that matches a layer 
+in the raster stack s.}
 
-\item{min}{Numeric. Value of the first cut point}
+\item{min}{Numeric. Value of the first cut point.}
 
-\item{max}{Numeric. Value of the maximum cut point}
+\item{max}{Numeric. Value of the maximum cut point.}
+
+\item{by}{Numeric. Value that specifies the increment of the sequence.}
+
+\item{knip}{Logical. Create a new extent with NA-only columns cut out if TRUE.}
 }
 \value{
 A raster
 }
 \description{
-count excedences of user- provided values in raster
+Count excedences of user- provided values in raster
 }
 

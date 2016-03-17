@@ -2,11 +2,12 @@
 % Please edit documentation in R/project_boundary.R
 \name{project_boundary}
 \alias{project_boundary}
-\title{project boundary}
+\title{Project Boundary}
 \usage{
 project_boundary(r, period = 1/365, target_period = "both",
   thresh_acute = 19, period_acute = 1/365, thresh_chronic = 2.5,
-  period_chronic = 365/365, chronic_cutoff = 0.9, vebose = FALSE)
+  period_chronic = 365/365, chronic_cutoff = 0.9, vebose = FALSE,
+  return.mask = FALSE, maskname = "masker")
 }
 \arguments{
 \item{r}{Raster* object with concentrations resulting from an activity}
@@ -23,10 +24,15 @@ options are "chronic", "acute", "both". Defaults to "both"}
 
 \item{thresh_chronic}{Numeric The threshold for the 1 year averaging period}
 
+\item{period_chronic}{The period for which the chronic threshold is valid. Default 365/365}
+
 \item{chronic_cutoff}{Numeric Proportion data needed to construct a valid chronic estimate. 
 Default 0.9}
 
-\item{period_chrinic}{The period for which the chronic threshold is valid. Default 365/365}
+\item{return.mask}{Logical that assigns the masked resolution to the global environment
+when TRUE}
+
+\item{maskname}{Character vector. The name attributed to the masked resolution}
 
 \item{verbose}{Logical Messages or not}
 }

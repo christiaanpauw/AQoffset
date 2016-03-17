@@ -1,7 +1,3 @@
-#' API Apply the 
-#' @references Air Quality Index from Cairncross, John and Zunckel Atm.Envir 41 (2007)
-#'
-
 # define RRs
 RR.accut.mort <- as.data.frame(t(data.frame(
                             PM10  = c(1.0062, 1.0074,  1.0086,  0.048, 24, 10),
@@ -16,7 +12,15 @@ RR.accut.mort[, "stat"] <- c("mean", "mean", "mean", "max", "max", "max")
 
 total.RR <- function(rr){sum((rr-1))}
 
-# Pollutant sub-index PSI
+#' Pollutant Sub Index
+#' 
+#' Function that calculates and returns the PSI
+#' 
+#' @param x A raster
+#' @param Exp.met Coefficients to be considered
+#' @param verbose Logical to display function messages if TRUE
+#' @export
+
 PSI <- function(x, Exp.met, verbose=FALSE){
   psi = x * Exp.met
   if(verbose==TRUE) message("x= ", x)
@@ -25,7 +29,25 @@ PSI <- function(x, Exp.met, verbose=FALSE){
   psi
 }
 
-API <- function(conc = conc, verbose=FALSE, cast.df =TRUE, out = "out", TZ = "Africa/Johannesburg"){
+#' Air Pollutin Index
+#' 
+#' Function that calculates the API by making use of the PSI function
+#' 
+#' @param conc Raster that contains the concentrations.
+#' @param verbose Logical that displays function messages if TRUE.
+#' @param cast.df Logical that will cast the data frame if TRUE.
+#' @param out Character vector that contains the name of the casted
+#' data frame to be assigned to the global environment.
+#' @param TZ Character vector that contains a location
+#' @references Air Quality Index from Cairncross, John and Zunckel Atm.Envir 41 (2007)
+#' @export
+
+API <- function(conc = conc, 
+                verbose=FALSE, 
+                cast.df =TRUE, 
+                out = "out", 
+                TZ = "Africa/Johannesburg"){
+  
   if (require(openair) == FALSE){
     install.packages("openair", dependencies = TRUE)
     require(openair)
@@ -34,6 +56,7 @@ API <- function(conc = conc, verbose=FALSE, cast.df =TRUE, out = "out", TZ = "Af
     install.packages("reshape2", dependencies = TRUE)
     require(reshape2)
   }
+  
   conc = timeAverage(conc, avg.timex="day", data.thresh=0.1, statistic="mean")
   coefs <- data.frame(pm10  = c(0.048),
                       pm2.5 = c(0.1),
@@ -86,6 +109,22 @@ API.color <- data.frame(API.value=0:10, stringsAsFactors = FALSE,
 # plot(s)
 # s2 <- stack(s,s, s,s)
 
+#' Raster Air Pollution Index
+#' 
+#' Creates a raster for the API
+#' 
+#' @param s Raster or a raster stack
+#' @param reftab Data frame containing information relating to accute mortality
+#' @param idpos Numeric referring to the ID position
+#' @param polpos Numeric referring to the position of the pollutant.
+#' @param aveperiodpos Numeric referring to the average period position.
+#' @param cyclepos Numeric referring to the cycle position.
+#' @param sep Character vector containing the seperator to be used.
+#' @param aggregate Logical that initializes aggregation when TRUE.
+#' @param per_source Logical that returns the source ID.
+#' @param verbose Logical that displays function messages if TRUE.
+#' @param return.full Logical that stacks the raster objects and returns it when TRUE.
+#' @export
 
 rasterAPI <- function(s, 
                       reftab = RR.accut.mort, 
