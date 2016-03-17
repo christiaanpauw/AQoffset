@@ -1,10 +1,19 @@
-#' raster_dist_plot Convenience function to summarise a raster stack and plot the result
-#' @return A trellis plot
+#' Raster Distribution plot
+#' 
+#' Convenience function to summarise a raster stack and plot the result as a 
+#' trellis plot
+#' 
 #' @param ss A raster stack
-#' @param multi A character vector of layer name components or NULL
+#' @param multi A list containing a character vector of layer name components or NULL
 #' @param mn The main title of the resulting plot as a character string. Defaults to empty string
 #' @param sb The plot subtitle as a character string
-#' 
+#' @param th The theme to be applied temporarily to the plotting procedure
+#' @param scales A list with components x (columns) and     y (rows). Each of 
+#' these components must be a numeric vector of length 2 defining the range for each marginal plot.
+#' Default contains a logical that prevents drawing marginal graphics
+#' @param ... Arguments to be passed to/from other methods 
+#' @export
+
 raster_dist_plot <- function(ss, 
                              multi = list(NULL, 
                                           c("IndustryY_pm10", "IndustryX_so2"))[[1]], 

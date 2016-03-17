@@ -58,6 +58,7 @@ EI = SI * I/SI
 
 # Total effective intake
 TEI <- calc(EI, sum)
+return(TEI)
 }
 
 #' Raster SWI

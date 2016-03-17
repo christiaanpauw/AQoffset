@@ -1,4 +1,3 @@
-# maak 'n 4km raster van 'n middelpunt van 'n extent objek
 #' Extent Middel
 #' 
 #' Makes a 4km raster of a midpoint of an extent object
