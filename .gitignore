@@ -15,7 +15,6 @@ yearAll.nc
 yearDiffAll.nc
 test.gri
 test.grd
-.Rbuildignore
 MDB.Rda
 MDC_People.nc
 PointSource365.grd
