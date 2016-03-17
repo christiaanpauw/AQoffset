@@ -44,7 +44,7 @@ count_exceed <- function(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALS
 
 #' Bar Exceed
 #'
-#' Makes a barplot of n exceedance object
+#' Makes a barplot of an exceedance object
 #'
 #' @param z A raster or raster brick
 #' @param cap Character vector. Contains the caption

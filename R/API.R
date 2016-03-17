@@ -1,9 +1,3 @@
-#' Air Pollution Index
-#' 
-#' 
-#' @references Air Quality Index from Cairncross, John and Zunckel Atm.Envir 41 (2007)
-#'
-
 # define RRs
 RR.accut.mort <- as.data.frame(t(data.frame(
                             PM10  = c(1.0062, 1.0074,  1.0086,  0.048, 24, 10),
@@ -22,7 +16,10 @@ total.RR <- function(rr){sum((rr-1))}
 #' 
 #' Function that calculates and returns the PSI
 #' 
-#' @param x 
+#' @param x A raster
+#' @param Exp.met Vector of coefficients
+#' @param verbose Logical to display function messages
+#' @export
 
 PSI <- function(x, Exp.met, verbose=FALSE){
   psi = x * Exp.met
@@ -34,7 +31,7 @@ PSI <- function(x, Exp.met, verbose=FALSE){
 
 #' Air Pollutin Index
 #' 
-#' Function 
+#' Function that calculates the API by making use of the PSI function
 #' 
 #' @param conc Raster that contains the concentrations.
 #' @param verbose Logical that displays function messages if TRUE.
@@ -42,6 +39,7 @@ PSI <- function(x, Exp.met, verbose=FALSE){
 #' @param out Character vector that contains the name of the casted
 #' data frame to be assigned to the global environment.
 #' @param TZ Character vector that contains the city
+#' @references Air Quality Index from Cairncross, John and Zunckel Atm.Envir 41 (2007)
 #' @export
 
 API <- function(conc = conc, verbose=FALSE, cast.df =TRUE, out = "out", TZ = "Africa/Johannesburg"){
@@ -110,9 +108,9 @@ API.color <- data.frame(API.value=0:10, stringsAsFactors = FALSE,
 #' Creates a raster for the API
 #' 
 #' @param s Raster or a raster stack
-#' @param reftab Data frame containing information relating to different compounds
-#' @param Numeric referring to the ID position
-#' @param polpos Numeric referring to the position of the pollutants.
+#' @param reftab Data frame containing information relating to accute mortality
+#' @param idpos Numeric referring to the ID position
+#' @param polpos Numeric referring to the position of the pollutant.
 #' @param aveperiodpos Numeric referring to the average period position.
 #' @param cyclepos Numeric referring to the cycle position.
 #' @param sep Character vector containing the seperator to be used.

@@ -1,14 +1,16 @@
-#' Pointify census polygon
-#' @description
+#' Pointify Census Polygon
+#' 
 #' Takes a SpatialPolygonsDataFrame with summary information and generates the 
-#' appropriate number of random points and return a SpatialPointsDataFrame
+#' appropriate number of random points and returns a SpatialPointsDataFrame
+#' 
 #' @param spdf A SpatialPolygonsDataFrame
 #' @param dropnames A character vector of column names that should not be included
-#' @param verbose Logical. Do you want messages?
+#' @param verbose Logical. Displays function messages if TRUE
+#' @param ... Arguments to be passed to/from other methods
 #' @details The numeric columns are counts of responses to categorical questions in the census
 #' e.g. Which energy carrier do you use for heating.
-#' 
-#' 
+#' @export
+
 
 pointifyCensus <- function(spdf, 
                            dropnames=c("ID", "OBJECTID", "Geometry_s", "GAVPrimar0", "Geometry_1", 
