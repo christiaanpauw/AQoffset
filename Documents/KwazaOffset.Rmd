@@ -4,14 +4,24 @@ author: "Christiaan Pauw, Nova Instituut"
 date: "3 December 2015"
 output: word_document
 ---
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
 library(raster)
 library(rasterVis)
 library(knitr)
 library(rgdal)
 library(pander)
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+wd <- "C:/Users/Willem/Desktop/AQOffset/AQoffset"
 
+<<<<<<< HEAD
 USER <- c("CJP", "AH")[1]
+=======
+#rdir <-  file.path(paste(wd, "/R", sep=""))
+#datadir <- file.path(paste(wd, "/Data/", sep = ""))
+
+rdir <- normalizePath(paste(wd, "/R/", sep=""))
+datadir <- normalizePath(paste(wd, "/Data/", sep = ""))
+>>>>>>> 184c96776cf4e44334ac260afbf00b2984e1d295
 
 if (USER == "CJP") {
   wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
@@ -34,9 +44,12 @@ source(paste(rdir, '/pop2sp.R', sep =""))
 source(paste(rdir, '/rasteriseCensus.R', sep =""))
 source(paste(rdir, '/pointifyCensus.R', sep =""))
 source(paste(rdir, '/project_boundary.R', sep =""))
+<<<<<<< HEAD
 source(paste(rdir, '/End.Point.Info.China.R', sep = ""))
 source(paste(rdir, '/summarise.sicklist.R', sep = ""))
 source(paste(rdir, '/rasterConcentrationResponse.R', sep = ""))
+=======
+>>>>>>> 184c96776cf4e44334ac260afbf00b2984e1d295
 
 new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
 
@@ -50,9 +63,13 @@ txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(
 ```
 
 ```{r echo=FALSE, message=FALSE}
+<<<<<<< HEAD
 #remove the other datasets here to save memory
 load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
 load(paste(datadir, "/eskom.Rda", sep = ""))
+=======
+load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
+>>>>>>> 184c96776cf4e44334ac260afbf00b2984e1d295
 #load(paste(datadir, "/kwaza_eskom_year_camx.Rda", sep = ""))
 load(paste(datadir, "/kwaza_household_energyRaster.Rda", sep=""))
 load(paste(datadir, "/kwaza_API_hh.Rda", sep=""))
@@ -125,7 +142,7 @@ kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption 
 
 The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of KwaZamokuhle is clear.  
 
-```{r echo = FALSE, message=FALSE}
+```{r , echo = FALSE, message=FALSE}
 cat("\n")
 pop2sp(coal.heat, 
        raster = TRUE, 

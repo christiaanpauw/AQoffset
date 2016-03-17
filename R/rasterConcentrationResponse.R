@@ -1,5 +1,7 @@
-#' rasterConcentrationResponse
-#' @description Excecute a concentration response function on rasterised input data 
+#' Raster Concentration Response
+#' 
+#' Excecute a concentration response function on rasterised input data 
+#' 
 #' @param conc A raster of concentration values
 #' @param popr A raster of population numbers
 #' @param base.conc A scalar giving the base concentration of the pollutant
@@ -17,6 +19,8 @@
 #' @param pollutantname User specified name of the pollutant. Defaults to NULL.
 #' @param unit.cost The cost of the outcome per case
 #' @param costing.var The name of the varible containing the unit cost
+#' @param risk.only Logical. Returns the RR raster if TRUE
+#' @param out Character vector. The desired output. Defaults to "all"
 #' @param verbose Do you want to be annoyed with a lot of messages, or not?
 #' @param debug Set to TRUE if the function misbehaves so you can see what's going on
 
@@ -153,7 +157,20 @@ rasterConcentrationResponse <- function(conc,
   }
 }
 
-# werk baie presiese name en kategorieë by ¡¡¡¡¡
+#' Raster Concentration Response Enhanced Program
+#' 
+#' Function uses rasterConcentrationResponse, but adds specific names and categories
+#' 
+#' @param sl Sicklist
+#' @param pollutant Character vector. The reference pollutant
+#' @param cconc A ranster of concentration values
+#' @param ppopr A raster of population numbers
+#' @param bbase.conc A scalar giving the base concentration of the pollutant
+#' @param iincidence.rate The incidence rate of the outcome of concern.
+#' @param rrisk.only Logical. Returns the RR raster if TRUE
+#' @param verbose Logical. Display messages or not.
+#' @param ... Arguments to be passed to/from other methods
+#' @export
 
 rasterCREP <- function(sl = endlist, 
                        pollutant = "PM10", 
