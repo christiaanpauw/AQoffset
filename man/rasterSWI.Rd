@@ -26,6 +26,6 @@ Colnames are the averaging periods. Rownames are the pollutants.}
 \item{verbose}{Logical that displays function messages if TRUE.}
 }
 \description{
-Creates a raster for the standars weighted intake
+Creates a raster for the standards weighted intake
 }
 

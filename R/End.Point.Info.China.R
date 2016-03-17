@@ -1,6 +1,5 @@
 ### Health end-point info for use in dose-repsponse functions - China 
 
-
 #' Rebase RR
 #' 
 #' Modifies the base concentrtion of a raster

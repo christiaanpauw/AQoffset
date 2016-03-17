@@ -31,19 +31,19 @@ SWI <- function(conc,
 
 #isolate present compounds and find their indices
 patt = "([[:alpha:]]+_)([[:alnum:]]+_)([[:print:]]+$)"
-nms = unique(gsub("_", "", gsub(patt, "\\2", names(hh_24))))
-idx = match(gsub("_", "", gsub(patt, "\\2", names(hh_24))), nms)
-ss = stackApply(hh_24, indices = idx, fun = mean)
+nms = unique(gsub("_", "", gsub(patt, "\\2", names(conc))))
+idx = match(gsub("_", "", gsub(patt, "\\2", names(conc))), nms)
+ss = stackApply(conc, indices = idx, fun = mean)
 
+#ss = crop(ss, extent(people))
+#ss = mask(ss, people) # this is only for populated areas
 concpop = overlay(ss, people, fun=function(x,y){return(x*y)})
 
 #select relevant NAQS
+#print(NAQS)
 NAQS.rel = NAQS[nms, ap]
-
 # Intake 
 I = concpop * Q 
-
-
 # Standard intake for each pollutant
 SIL = list()
 for (i in 1:length(nms)) {
@@ -82,7 +82,7 @@ rasterSWI <- function(s,
                       polpos = 2, 
                       aveperiodpos = 3, 
                       cyclepos = 5, 
-                      sep = "_", verbose = TRUE){
+                      sep = "_", verbose = FALSE){
   patt = paste('([[:print:]]+)', sep,'{1}', '([[:print:]]+)', sep,'{1}','([[:alnum:]]+)([[:punct:]]*)([[:digit:]]*)', sep="")
   id = gsub(patt, paste('\\', idpos, sep=""), names(s))
   pols = gsub(patt, paste('\\', polpos, sep=""), names(s))
