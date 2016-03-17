@@ -20,6 +20,7 @@
 #' @param period_chrinic The period for which the chronic threshold is valid. Default 365/365
 #' @param chronic_cutoff Numeric Proportion data needed to construct a valid chronic estimate. 
 #' Default 0.9
+#' @param only.mask Logical If TRUE the function only returns a mask and not the raster
 #' @param verbose Logical Messages or not
 
 project_boundary <- function(r, 
@@ -31,7 +32,7 @@ project_boundary <- function(r,
                              period_chronic = 365/365,
                              chronic_cutoff = 0.9,
                              vebose = FALSE, 
-                             return.mask = FALSE, maskname = "masker"){
+                             return.mask = FALSE, maskname = "masker", only.mask = FALSE){
   if (target_period == "acute" | target_period == "both"){
     # maak seker die vergemiddeldingsperiod is reg
     # jy kan opsom maar nie afsom nie. i.e. jy kan ure dae maak maar nie andersom nie
@@ -39,6 +40,8 @@ project_boundary <- function(r,
     # toets teen die drempelwaarde en som op tot een laag
     ACC <- r > thresh_acute
     ACC <- calc(ACC, toets_enige)
+    #assign("ACC", ACC, envir = .GlobalEnv)
+    res = ACC
   }
   
   if (target_period == "chronic" | target_period == "both"){
@@ -61,7 +64,8 @@ project_boundary <- function(r,
   }
   
   # knip die kante af
-  res[res == 0] = NA
+  #assign("res", res, envir = .GlobalEnv)
+  if (any(getValues(res) == 0)) res[which(getValues(res) == 0)] = NA
   res = knipNA(res, out = "raster")
   
   # oorweeg dit op die bestek as 'n blok op google earth te druk
@@ -70,7 +74,7 @@ project_boundary <- function(r,
   r <- crop(r, extent(res))
   r <- mask(r, mask = res)
   if (return.mask) {assign(maskname, res, envir = .GlobalEnv)}
-  r
+  if (!only.mask) {return(r)} else {res}
 }
 
 # hulpfunksie 

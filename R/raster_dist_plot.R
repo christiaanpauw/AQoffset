@@ -28,7 +28,8 @@ raster_dist_plot <- function(ss,
       assign(multi[i], x, envir = ev)
     }
     rm(ss)
-    res2 <- lapply(do.call(function(x) mget(x, envir = ev), list(ls(ev))), raster_dist_sum)
+    l <- do.call(function(x) mget(x, envir = ev), list(ls(ev)))
+    res2 <- lapply(l, raster_dist_sum)
     res2 <- lapply(res2, function(x) x[[2:7]])
     for (i in 1:length(multi)){
       names(res2[[i]]) <- paste(names(res2[i]), c("25th",  "median", "mean", "75th%", "99th", "std.dev"))
