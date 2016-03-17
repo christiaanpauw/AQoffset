@@ -43,7 +43,7 @@ new.proj <- "+proj=utm + south + zone=35 ellps=WGS84"
 load(paste(datadir, "/kwaza_household_census.Rda", sep=""))
 kwaN <- as.character(KWA@data$SP_NAME)
 kwaCoor <- coordinates(KWA)
-addkwa <- function(){layer(sp::sp.polygons(KWA, lwd = 0.25))}
+addkwa <- function(){latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
 addkwa2 <- function(){layer(sp::sp.polygons(KWA, lwd = 10))}
 txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
 }
@@ -132,7 +132,7 @@ pop2sp(coal.heat,
        refres = c(10,10), 
        plot = TRUE, 
        par.settings=BuRdTheme, 
-       main = "Number of coal users for heating: \nPoint estimate with 95% CI ", 
+       main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", 
        sub="'Yes' is coal use, 'No' is no coal use") + addkwa()
 cat("\n")
 ```
@@ -165,16 +165,16 @@ raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
 The distributions of the PM10 and SO~2~ are fairly similar but the concentration of PM10 is modelled to be higher. It is also clear that the concentration of both PM10 and SO~2~ decreases rapidly with distance from the household sources. 
 
 \pagebreak
-The modelled baseline secondary PM2.5 resulting from the eskom source is shown below.
+The modelled baseline secondary PM2.5 resulting from the Hendrina power station is shown below. The black dot indicates the position Kwazamokuhle.
 
 ```{r echo=FALSE}
-raster_dist_plot(eskom.base) + addkwa2()
+raster_dist_plot(eskom.base, mn = "Secondary PM2.5 from Hendrina power station", sb = "364 days") + addkwa2()
 ```
 
 The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source is modelled to exceed a specified level, is shown below for the baseline scenario. 
 
 ```{r echo = FALSE}
-hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 75, max = 300, by = 50, knip = TRUE)
+hh_pm10_exceed = count_exceed(crop(hh_24, kpext), pol = "pm10", min = 75, max = 300, by = 50, knip = FALSE)
 levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexceeded specified concentarion", sub = "182 days", par.settings=BuRdTheme) + addkwa()
 ```
 
@@ -182,13 +182,23 @@ The exceedances of the daily PM10 standard related to household emissions occur 
 
 ```{r echo=FALSE}
 #xl = expression(paste(mu,plain(g/m)^3))
-bar_exceed(hh_pm10_exceed, ttl = "Aggregated # of days when PM10 from households \nexceeded specified concentarion")
+# bar_exceed(hh_pm10_exceed, ttl = "Aggregated number of days when PM10 from households \nexceeded specified concentration", plot = FALSE)
+concLevels <- names(hh_pm10_exceed)
+df <- data.frame((cellStats(hh_pm10_exceed, sum) / (nrow(hh_pm10_exceed) * ncol(hh_pm10_exceed) * nlayers(hh_pm10_exceed)) ) , stringsAsFactors = FALSE)
+df$concentration <- concLevels
+df[[3]] <- df[[1]]
+df <- df[,2:3]
+names(df) <- c("concentration", "%_days_in_exceedance")
+rownames(df) <- NULL
+kable(df)
 ```
 
 ```{r echo = FALSE}
 eskom_kwa <- crop(eskom, extent(hh_24))
 eskom_kwa <- disaggregate(eskom_kwa, c(36,41))
-eskom_kwa <- resample(eskom_kwa, hh_24, method='bilinear')
+ref = raster(extent(hh_24), nrow = 36, ncol = 41)
+
+eskom_kwa <- resample(eskom_kwa, ref, method='bilinear')
 
 eskom_kwa_base <- crop(eskom.base, extent(hh_24))
 eskom_kwa_base <- disaggregate(eskom_kwa_base, c(36,41))
@@ -199,7 +209,15 @@ levelplot(eskom_pm10_exceed, main = "Count of days when PM2.5 from Eskom \nexcee
 ```
 
 ```{r echo=FALSE}
-bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentarion")
+#bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentration")
+concLevels <- names(eskom_pm10_exceed)
+df <- data.frame(cellStats(eskom_pm10_exceed, sum) / (nrow(eskom_pm10_exceed) * ncol(eskom_pm10_exceed) * nlayers(eskom_pm10_exceed)), stringsAsFactors = FALSE)
+df$concentration <- concLevels
+df[[3]] <- df[[1]]
+df <- df[,2:3]
+names(df) <- c("concentration", "%_days_in_exceedance")
+rownames(df) <- NULL
+kable(df)
 ```
 
 \pagebreak
@@ -213,7 +231,15 @@ levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceed
 Occurrences of exceedances of the daily SO~2~ standard related to coal combustion from households are less common than that for PM10. The area over which such occurrences are smaller than that of PM10 for every level and the count of exceedances for each level is also less. Once again most exceedances occur in KwaZamokuhle SP. 
 
 ```{r echo=FALSE}
-bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")
+#bar_exceed(hh_so2_exceed, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")
+concLevels <- names(hh_so2_exceed)
+df <- data.frame(cellStats(hh_so2_exceed, sum) / (nrow(hh_so2_exceed) * ncol(hh_so2_exceed) * nlayers(hh_so2_exceed)), stringsAsFactors = FALSE)
+df$concentration <- concLevels
+df[[3]] <- df[[1]]
+df <- df[,2:3]
+names(df) <- c("concentration", "%_days_in_exceedance")
+rownames(df) <- NULL
+kable(df)
 ```
 
 The count of days where SO~2~ from the industrial point source exceeded the specified level for the baseline scenario is not shown in the previous plot because all values are below the minimum level. 
@@ -234,6 +260,7 @@ The extent of the impact of household emissions in the baseline scenario above a
 
 ```{r echo = FALSE, message=FALSE}
 hh_24 <- project_boundary(r = hh_24, return.mask = TRUE) 
+eskom_kwa_base <- project_boundary(r = eskom_kwa_base, return.mask = TRUE)
 cat("\n")
 raster_dist_plot(hh_24, 
                  mn = "Definition of the project boundary", 
