@@ -8,14 +8,14 @@ ext_middel(r, grdsize = 4, diam = 12,
   crs = "+proj=utm + south + zone=35 ellps=WGS84")
 }
 \arguments{
+\item{r}{Raster or extent objectt}
+
 \item{grdsize}{Numeric. The grid size.}
 
 \item{diam}{Numeric. The diameter.}
 
 \item{crs}{Character or object of class CRS.PROJ.4 type description of a Coordinate 
 Reference System (map projection).}
-
-\item{ex}{Extent object}
 }
 \description{
 Makes a 4km raster of a midpoint of an extent object

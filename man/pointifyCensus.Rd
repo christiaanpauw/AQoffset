@@ -2,7 +2,7 @@
 % Please edit documentation in R/pointifyCensus.R
 \name{pointifyCensus}
 \alias{pointifyCensus}
-\title{Pointify census polygon}
+\title{Pointify Census Polygon}
 \usage{
 pointifyCensus(spdf, dropnames = c("ID", "OBJECTID", "Geometry_s",
   "GAVPrimar0", "Geometry_1", "SP_CODE", "SP_Code", "MP_CODE", "MP_Code",
@@ -14,11 +14,13 @@ pointifyCensus(spdf, dropnames = c("ID", "OBJECTID", "Geometry_s",
 
 \item{dropnames}{A character vector of column names that should not be included}
 
-\item{verbose}{Logical. Do you want messages?}
+\item{verbose}{Logical. Displays function messages if TRUE}
+
+\item{...}{Arguments to be passed to/from other methods}
 }
 \description{
-Takes a SpatialPolygonsDataFrame with summary information and generates the 
-appropriate number of random points and return a SpatialPointsDataFrame
+Takes a SpatialPolygonsDataFrame with summary information, generates the 
+appropriate number of random points and returns a SpatialPointsDataFrame
 }
 \details{
 The numeric columns are counts of responses to categorical questions in the census

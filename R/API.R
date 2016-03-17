@@ -17,8 +17,8 @@ total.RR <- function(rr){sum((rr-1))}
 #' Function that calculates and returns the PSI
 #' 
 #' @param x A raster
-#' @param Exp.met Vector of coefficients
-#' @param verbose Logical to display function messages
+#' @param Exp.met Coefficients to be considered
+#' @param verbose Logical to display function messages if TRUE
 #' @export
 
 PSI <- function(x, Exp.met, verbose=FALSE){
@@ -35,14 +35,19 @@ PSI <- function(x, Exp.met, verbose=FALSE){
 #' 
 #' @param conc Raster that contains the concentrations.
 #' @param verbose Logical that displays function messages if TRUE.
-#' @param cast.df Logical that will cast the data frame if true.
+#' @param cast.df Logical that will cast the data frame if TRUE.
 #' @param out Character vector that contains the name of the casted
 #' data frame to be assigned to the global environment.
-#' @param TZ Character vector that contains the city
+#' @param TZ Character vector that contains a location
 #' @references Air Quality Index from Cairncross, John and Zunckel Atm.Envir 41 (2007)
 #' @export
 
-API <- function(conc = conc, verbose=FALSE, cast.df =TRUE, out = "out", TZ = "Africa/Johannesburg"){
+API <- function(conc = conc, 
+                verbose=FALSE, 
+                cast.df =TRUE, 
+                out = "out", 
+                TZ = "Africa/Johannesburg"){
+  
   if (require(openair) == FALSE){
     install.packages("openair", dependencies = TRUE)
     require(openair)
@@ -51,6 +56,7 @@ API <- function(conc = conc, verbose=FALSE, cast.df =TRUE, out = "out", TZ = "Af
     install.packages("reshape2", dependencies = TRUE)
     require(reshape2)
   }
+  
   conc = timeAverage(conc, avg.timex="day", data.thresh=0.1, statistic="mean")
   coefs <- data.frame(pm10  = c(0.048),
                       pm2.5 = c(0.1),

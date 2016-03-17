@@ -12,14 +12,17 @@ API(conc = conc, verbose = FALSE, cast.df = TRUE, out = "out",
 
 \item{verbose}{Logical that displays function messages if TRUE.}
 
-\item{cast.df}{Logical that will cast the data frame if true.}
+\item{cast.df}{Logical that will cast the data frame if TRUE.}
 
 \item{out}{Character vector that contains the name of the casted
 data frame to be assigned to the global environment.}
 
-\item{TZ}{Character vector that contains the city}
+\item{TZ}{Character vector that contains a location}
 }
 \description{
-Function
+Function that calculates the API by making use of the PSI function
+}
+\references{
+Air Quality Index from Cairncross, John and Zunckel Atm.Envir 41 (2007)
 }
 

@@ -4,23 +4,21 @@
 \alias{SWI}
 \title{Standards Weighted Intake}
 \usage{
-SWI(conc, NAQS = NULL, pop = pop, ap = "Annual", Q = 8,
-  refpol = c("PM10", "PM2.5", "SO2", "O3", "O3.1", "NO2")[1])
+SWI(conc, NAQS = NULL, pop = people, ap = "Annual", Q = 8)
 }
 \arguments{
-\item{conc}{raster The concentration of every pollutant}
+\item{conc}{Raster. The concentration of every pollutant}
 
-\item{pop}{raster The # of people in each grid cell}
+\item{NAQS}{Data frame of the National Air Quality Standards}
 
-\item{ap}{Character "Annual" or "Daily"}
+\item{pop}{Raster. The number of people in each grid cell}
 
-\item{Q}{numeric Breathing rate. Default 8 m3 per day}
+\item{ap}{Character verctor. "Annual" or "Daily"}
 
-\item{refpol}{one of c("PM10", "PM2.5", "SO2", "O3", "O3.1", "NO2"). Default is "PM10"}
-
-\item{reftab}{A data frame with the standards. Colnames are the averaging periods. Rownames are the pollutants}
+\item{Q}{Numeric. Breathing rate in m3 per person per day}
 }
 \description{
-Calculates the standars weighter intake of a pollutant
+Calculates the total effective intake of pollutants by using
+standardisation
 }
 

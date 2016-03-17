@@ -2,22 +2,22 @@
 % Please edit documentation in R/read.select.cdf.R
 \name{read.select.cdf}
 \alias{read.select.cdf}
-\title{read.select.cdf Convenience function to read cdf file and select layers}
+\title{Read Select .cdf}
 \usage{
 read.select.cdf(fn = file.choose(), select = NULL, verbose = FALSE)
 }
 \arguments{
-\item{verbose}{Do you want additional messages. Defaults to FALSE}
+\item{fn}{Character vector. The name of the raster file. Defaults to file.choose()}
 
-\item{fn.}{Character. The name of the raster file. Defaults to file.choose()}
-
-\item{select.}{Regular expression. A part of the name that you want to use to select layers. 
+\item{select}{Regular expression. A part of the name that you want to use to select layers. 
 NULL to select all layers. Defaults to NULL}
+
+\item{verbose}{Do you want additional messages.}
 }
 \value{
 A Raster* object
 }
 \description{
-read.select.cdf Convenience function to read cdf file and select layers
+Convenience function to read cdf file and select layers
 }
 

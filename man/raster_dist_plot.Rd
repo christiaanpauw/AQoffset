@@ -2,7 +2,7 @@
 % Please edit documentation in R/raster_dist_plot.R
 \name{raster_dist_plot}
 \alias{raster_dist_plot}
-\title{raster_dist_plot Convenience function to summarise a raster stack and plot the result}
+\title{Raster Distribution plot}
 \usage{
 raster_dist_plot(ss, multi = list(NULL, c("IndustryY_pm10",
   "IndustryX_so2"))[[1]], mn = "", sb = "", th = BuRdTheme,
@@ -11,16 +11,22 @@ raster_dist_plot(ss, multi = list(NULL, c("IndustryY_pm10",
 \arguments{
 \item{ss}{A raster stack}
 
-\item{multi}{A character vector of layer name components or NULL}
+\item{multi}{A list containing a character vector of layer name components or NULL}
 
 \item{mn}{The main title of the resulting plot as a character string. Defaults to empty string}
 
 \item{sb}{The plot subtitle as a character string}
-}
-\value{
-A trellis plot
+
+\item{th}{The theme to be applied temporarily to the plotting procedure}
+
+\item{scales}{A list with components x (columns) and     y (rows). Each of 
+these components must be a numeric vector of length 2 defining the range for each marginal plot.
+Default contains a logical that prevents drawing marginal graphics}
+
+\item{...}{Arguments to be passed to/from other methods}
 }
 \description{
-raster_dist_plot Convenience function to summarise a raster stack and plot the result
+Convenience function to summarise a raster stack and plot the result as a 
+trellis plot
 }
 

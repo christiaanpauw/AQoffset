@@ -17,6 +17,8 @@ in the raster stack s.}
 \item{max}{Numeric. Value of the maximum cut point.}
 
 \item{by}{Numeric. Value that specifies the increment of the sequence.}
+
+\item{knip}{Logical. Create a new extent with NA-only columns cut out if TRUE.}
 }
 \value{
 A raster

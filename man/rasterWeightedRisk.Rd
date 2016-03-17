@@ -2,12 +2,12 @@
 % Please edit documentation in R/rasterWeightedRisk.R
 \name{rasterWeightedRisk}
 \alias{rasterWeightedRisk}
-\title{rasterWeightedRisk Calculate the total weighted risk of an exposure}
+\title{Raster Weighted Risk}
 \usage{
 rasterWeightedRisk()
 }
 \description{
-rasterWeightedRisk Calculate the total weighted risk of an exposure
+Calculate the total weighted risk of an exposure
 }
 \details{
 Outcome weights (like disability weights) are used to express different outcomes in 
@@ -15,6 +15,6 @@ units of one common outcome. In health this is typically death (i.e. morbidity e
 mortality terms). What is needed is to have more than one outcome and a weight for each in terms of a 
 common health outcome. the function works in rasterised fromst. 
 
-The results of rasterCREP is in the right from
+The results of rasterCREP is in the right form
 }
 

@@ -1,16 +1,6 @@
-# rasterise census subplace
-
-# randomly assign the right number of households as points to a polygon
-# randomly assign the right proportion to each of a number of categories
-# e.g. energy carrier for heating: coal, wood, elec
-# make a total
-# make number of people
-# make sex distribution
-# make age distribution
-
+#' Rasterise Census Subplace
+#'
 #' Rasterise a census polygon SPDF possibly containing summary data.
-#' 
-#' @details
 #' The function randomly assign the correct number of sample units
 #' in each of a number of categories e.g. energy carrier for heating:
 #' as summarised in each row of the SPDF as points to a polygon   
@@ -18,12 +8,16 @@
 #' make a total 
 #' make number of people 
 #' make sex distribution make age distribution
+#' 
 #' @param x A SpatialPolygonsDataFrame
-#' @param drpnames A character vector of column names that should not be included
 #' @param ref An extent object
-#' @param refres Numeric vector of length 2 (x,y): A reference resolution
 #' @param verbose Print messages or not
-#' todo: change to be able to use with a weight vector (example struture density from remote snesing image)
+#' @param refres Numeric vector of length 2 (x,y): A reference resolution
+#' @param drpnames A character vector of column names that should not be included
+#' @param ... Arguments to be passed to/from other methods
+#' @export
+
+# todo: change to be able to use with a weight vector (example struture density from remote snesing image)
 
 rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres, 
                             drpnames=c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", 
@@ -45,6 +39,14 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
   names(b) <- cts
   return(b)
 }
+
+#' Sexify
+#' 
+#' Change  SPDF to match a se proportion
+#' 
+#' @param x A SpatialPolygonsDataFrame
+#' @param prop Numeric that contains the sex proportion
+#' @export
 
 sexify <- function(x, prop = 0.5){
   res = x * prop

@@ -3,11 +3,11 @@
 #' Calculates the total effective intake of pollutants by using
 #' standardisation
 #' 
-#' @param conc raster. The concentration of every pollutant
+#' @param conc Raster. The concentration of every pollutant
 #' @param NAQS Data frame of the National Air Quality Standards
-#' @param pop raster. The number of people in each grid cell
+#' @param pop Raster. The number of people in each grid cell
 #' @param ap Character verctor. "Annual" or "Daily"
-#' @param Q numeric. Breathing rate in m3 per person per day
+#' @param Q Numeric. Breathing rate in m3 per person per day
 #' @export
 
 SWI <- function(conc, 
@@ -68,9 +68,9 @@ return(TEI)
 #' @param s A raster or raster stack
 #' @param reftab A data frame with the standards. 
 #' Colnames are the averaging periods. Rownames are the pollutants.
-#' @param idpos Numeric. Position of the ID column
-#' @param polpos Numeric. Position of the pollutant column
-#' @param aveperiodpos Numeric. Position of the column containing everage periods
+#' @param idpos Numeric. Position of the ID 
+#' @param polpos Numeric. Position of the pollutant 
+#' @param aveperiodpos Numeric. Position of the average period
 #' @param cyclepos Numeric. Position of the cycle
 #' @param sep Character vector containing the seperator to be used.
 #' @param verbose Logical that displays function messages if TRUE.

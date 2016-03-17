@@ -11,9 +11,11 @@ rasterAPI(s, reftab = RR.accut.mort, idpos = 1, polpos = 2,
 \arguments{
 \item{s}{Raster or a raster stack}
 
-\item{reftab}{Data frame containing information relating to different compounds}
+\item{reftab}{Data frame containing information relating to accute mortality}
 
-\item{polpos}{Numeric referring to the position of the pollutants.}
+\item{idpos}{Numeric referring to the ID position}
+
+\item{polpos}{Numeric referring to the position of the pollutant.}
 
 \item{aveperiodpos}{Numeric referring to the average period position.}
 
@@ -28,8 +30,6 @@ rasterAPI(s, reftab = RR.accut.mort, idpos = 1, polpos = 2,
 \item{verbose}{Logical that displays function messages if TRUE.}
 
 \item{return.full}{Logical that stacks the raster objects and returns it when TRUE.}
-
-\item{Numeric}{referring to the ID position}
 }
 \description{
 Creates a raster for the API

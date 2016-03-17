@@ -7,7 +7,11 @@
 PSI(x, Exp.met, verbose = FALSE)
 }
 \arguments{
-\item{x}{}
+\item{x}{A raster}
+
+\item{Exp.met}{Coefficients to be considered}
+
+\item{verbose}{Logical to display function messages if TRUE}
 }
 \description{
 Function that calculates and returns the PSI

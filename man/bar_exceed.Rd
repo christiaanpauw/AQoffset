@@ -5,7 +5,8 @@
 \title{Bar Exceed}
 \usage{
 bar_exceed(z, cap = "", ttl = "", axn = TRUE, ces.ax = 0.9,
-  yl = "Events: days x cell", xl = expression(paste(mu, plain(g/m)^3)), ...)
+  yl = "Events: days x cell", xl = expression(paste(mu, plain(g/m)^3)),
+  plot = TRUE, ...)
 }
 \arguments{
 \item{z}{A raster or raster brick}
@@ -22,9 +23,11 @@ bar_exceed(z, cap = "", ttl = "", axn = TRUE, ces.ax = 0.9,
 
 \item{xl}{A label for the x axis}
 
+\item{plot}{Logical that plots the raster if TRUE}
+
 \item{...}{Arguments to be passed to/from other methods}
 }
 \description{
-Makes a barplot of n exceedance object
+Makes a barplot of an exceedance object
 }
 

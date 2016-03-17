@@ -1,6 +1,6 @@
 #' Pointify Census Polygon
 #' 
-#' Takes a SpatialPolygonsDataFrame with summary information and generates the 
+#' Takes a SpatialPolygonsDataFrame with summary information, generates the 
 #' appropriate number of random points and returns a SpatialPointsDataFrame
 #' 
 #' @param spdf A SpatialPolygonsDataFrame

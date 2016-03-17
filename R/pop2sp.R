@@ -1,11 +1,11 @@
 #' Pop to Sp
 #' 
-#' Rasterises a census SpacialPolygonsDataFrame
+#' Function that edits and plots a SpacialPolygonsDataFrame
 #' 
 #' @param p Data frame that contains point estimates
 #' @param place Character vector referring to the column containing locations
 #' @param SPDF A SpacialPolygonsDataFrame
-#' @param var Character vector of the variable under concideration
+#' @param var Character vector of the variable under consideration
 #' @param raster Logical to Rasterise a census polygon SPDF possibly containing 
 #' summary data if TRUE.
 #' @param refres Numeric vector of length 2 (x,y): A reference resolution
@@ -20,6 +20,7 @@ pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA,
 	
   require(reshape2)
   require(dplyr)
+  require(lattice)
   
   names(p)[2] = "var"
 	tms = length(p[,place]) / (length(p[,place]) - length(which(p[,place] == ""))) - 1

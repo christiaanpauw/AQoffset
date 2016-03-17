@@ -2,7 +2,7 @@
 % Please edit documentation in R/knipNA.R
 \name{knipNA}
 \alias{knipNA}
-\title{knipNA create a new extent with NA-only columns cut out}
+\title{Cut NA}
 \usage{
 knipNA(r, out = c("extent", "raster")[1])
 }
@@ -12,7 +12,7 @@ knipNA(r, out = c("extent", "raster")[1])
 \item{out}{What to return. Either "extent" for an extent obejct or "raster"}
 }
 \description{
-knipNA create a new extent with NA-only columns cut out
+Create a new extent with NA-only columns cut out
 }
 \references{
 From an answer by Marie Auger-Methe on http://stackoverflow.com/questions/19680079/r-crop-no-data-of-a-raster

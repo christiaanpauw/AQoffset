@@ -13,11 +13,11 @@ rasterSWI(s, reftab = NAQS, idpos = 1, polpos = 2, aveperiodpos = 3,
 \item{reftab}{A data frame with the standards. 
 Colnames are the averaging periods. Rownames are the pollutants.}
 
-\item{idpos}{Numeric. Position of the ID column}
+\item{idpos}{Numeric. Position of the ID}
 
-\item{polpos}{Numeric. Position of the pollutant column}
+\item{polpos}{Numeric. Position of the pollutant}
 
-\item{aveperiodpos}{Numeric. Position of the column containing everage periods}
+\item{aveperiodpos}{Numeric. Position of the average period}
 
 \item{cyclepos}{Numeric. Position of the cycle}
 

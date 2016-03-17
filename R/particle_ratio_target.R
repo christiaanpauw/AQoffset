@@ -6,7 +6,7 @@
 #' @author Christiaan Pauw
 #' @param result What result to return. result ="target" returns the proportion of the offset source 
 #' to be reduced to offset the managed activity at every receptor. result = "effect boundary" 
-#' return a one-layer raster with 1 in all the cells where an offset can take place and NA in all 
+#' returns a one-layer raster with 1 in all the cells where an offset can take place and NA in all 
 #' others. This can be used to select (mask) from other rasters
 #' @param int.eff Proportion of source 2 that can be addressed by intervention
 #' @param effect Do the calculation in terms of an acute effect (effect = "acute"). This approach 
