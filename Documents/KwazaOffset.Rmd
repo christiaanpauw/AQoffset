@@ -53,9 +53,12 @@ new.proj <- "+proj=utm + south + zone=35 ellps=WGS84"
 load(paste(datadir, "/kwaza_household_census.Rda", sep=""))
 kwaN <- as.character(KWA@data$SP_NAME)
 kwaCoor <- coordinates(KWA)
-addkwa <- function(){latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
-addkwa2 <- function(){layer(sp::sp.polygons(KWA, lwd = 10))}
-txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
+addkwa <- function() {latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
+addkwa2 <- function() {layer(sp::sp.polygons(KWA, lwd = 10))}
+txtkwa <- function() {layer(panel.text(x = coordinates(KWA)[,1], 
+                                       y = coordinates(KWA)[,2], 
+                                       label = as.character(KWA@data$SP_NAME), 
+                                       cex = 0.5))}
 
 ```
 
@@ -73,6 +76,7 @@ eskom.base <- eskom * 0.15
 ```
 
 ```{r echo=FALSE}
+# assumes that outcomesStack is a raster stack with 1 layer per outcome
 sumIncidences <- function(outcomesStack) {
   dfIncidences <- data.frame(matrix(ncol = 2), 
                              stringsAsFactors = FALSE)
@@ -194,7 +198,10 @@ The exceedances of the daily PM10 standard related to household emissions occur 
 #xl = expression(paste(mu,plain(g/m)^3))
 # bar_exceed(hh_pm10_exceed, ttl = "Aggregated number of days when PM10 from households \nexceeded specified concentration", plot = FALSE)
 concLevels <- names(hh_pm10_exceed)
-df <- data.frame((cellStats(hh_pm10_exceed, sum) / (nrow(hh_pm10_exceed) * ncol(hh_pm10_exceed) * nlayers(hh_pm10_exceed)) ) , stringsAsFactors = FALSE)
+df <- data.frame((cellStats(hh_pm10_exceed, sum) / 
+                    (nrow(hh_pm10_exceed) * 
+                     ncol(hh_pm10_exceed) * 
+                     nlayers(hh_pm10_exceed))) *100 , stringsAsFactors = FALSE)
 df$concentration <- concLevels
 df[[3]] <- df[[1]]
 df <- df[,2:3]
@@ -365,7 +372,14 @@ rBoDPM10_hhE <- rasterCREP(sl = endlist,
                        bbase.conc = 10, 
                        rrisk.only = FALSE, 
                        verbose = FALSE, 
-                       out = "d")
+                       output = "AM",
+                       ddelta = 1)
+
+# summarise the number of cases across all days
+rBoDPM10_hhE <- lapply(X = rBoDPM10_hhE, FUN = function(bOutcome) {
+  return(calc(x = bOutcome, fun = sum))
+})
+rBoDPM10_hhE <- stack(rBoDPM10_hhE)
 
 # tabulate total incidences per health outcome
 kable(sumIncidences(rBoDPM10_hhE), digits = 2)
@@ -380,7 +394,8 @@ names(rBoDPM10_hhE) <- gsub("all.ages", "all", names(rBoDPM10_hhE))
 
 # plot incidences
 levelplot(crop(rBoDPM10_hhE, kpext),
-          main = "Burden of disease for PM10 resulting from hh emissions,
+          main = "Burden of disease for PM10 
+resulting from hh emissions,
 given as number of cases per health outcome", 
           sub = "182 days",
           par = BuRdTheme) + addkwa() + txtkwa()
@@ -397,8 +412,15 @@ rBoDSO2_hhE <- rasterCREP(sl = endlist,
                       ppopr = people, 
                       bbase.conc = 10, 
                       rrisk.only = FALSE,
-                      out = "d",
-                      verbose = FALSE)
+                      output = "AM",
+                      verbose = FALSE,
+                      ddelta = 1)
+
+# summarise the number of cases across all days
+rBoDSO2_hhE <- lapply(X = rBoDSO2_hhE, FUN = function(bOutcome) {
+  return(calc(x = bOutcome, fun = sum))
+})
+rBoDSO2_hhE <- stack(rBoDSO2_hhE)
 
 # tabulate total incidences per health outcome
 kable(sumIncidences(rBoDSO2_hhE), digits = 2)
@@ -444,7 +466,17 @@ rBoDPM10_Ee <- rasterCREP(sl = endlist,
                        bbase.conc = 10, 
                        rrisk.only = FALSE, 
                        verbose = FALSE, 
-                       out = "d")
+                       output = "AM",
+                       ddelta = 1)
+
+# summarise the number of cases across all days
+rBoDPM10_Ee <- lapply(X = rBoDPM10_Ee, FUN = function(bOutcome) {
+  return(calc(x = bOutcome, fun = sum))
+})
+rBoDPM10_Ee <- stack(rBoDPM10_Ee)
+
+# tabulate total incidences per health outcome
+kable(sumIncidences(rBoDPM10_Ee), digits = 2)
 
 levelplot(crop(rBoDPM10_Ee, kpext),
           main = "Burden of disease for PM10 
@@ -453,14 +485,14 @@ given as number of cases per health outcome",
           sub = "364 days",
           par = BuRdTheme) + addkwa() + txtkwa()
 
-# tabulate total incidences per health outcome
-kable(sumIncidences(rBoDPM10_Ee), digits = 2)
+
+
+
 ```
 
 \pagebreak
 The baseline burden of disease impact for SO2 resulting from the industrial point source is shown below.
 ```{r echo = FALSE, message=FALSE}
-
 rBoDSO2_Ee <- rasterCREP(sl = endlist,
                        pollutant = "SO2", 
                        cconc = kwaza_eskom_24h_simple[[grep(pattern = "so2", 
@@ -470,7 +502,17 @@ rBoDSO2_Ee <- rasterCREP(sl = endlist,
                        bbase.conc = 10, 
                        rrisk.only = FALSE, 
                        verbose = FALSE, 
-                       out = "d")
+                       output = "d",
+                       ddelta = 1)
+
+# summarise the number of cases across all days
+rBoDSO2_Ee <- lapply(X = rBoDSO2_Ee, FUN = function(bOutcome) {
+  return(calc(x = bOutcome, fun = sum))
+})
+rBoDSO2_Ee <- stack(rBoDSO2_Ee)
+
+# tabulate total incidences per health outcome
+kable(sumIncidences(rBoDSO2_Ee), digits = 2)
 
 levelplot(crop(rBoDSO2_Ee, kpext),
           main = "Burden of disease for SO2 
@@ -478,9 +520,6 @@ resulting from industrial point source emissions,
 given as number of cases per health outcome",
 sub = "364 days",
 par = BuRdTheme) + addkwa() + txtkwa()
-
-# tabulate total incidences per health outcome
-kable(sumIncidences(rBoDSO2_Ee), digits = 2)
 ```
 
 

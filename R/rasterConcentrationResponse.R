@@ -1,39 +1,46 @@
 #' rasterConcentrationResponse
 #' @description Excecute a concentration response function on rasterised input data 
-#' @param conc A raster of concentration values
-#' @param popr A raster of population numbers
+#' @param conc A raster object of concentration values for a particular pollutant.
+#' @param popr A raster object of population numbers.
 #' @param base.conc A scalar giving the base concentration of the pollutant
-#' @param fun.form The from of the concentration response function. 
-#' Currently supports "linear"(default) and "log-linear" 
-#' @param beta The Beta values from the original regression model from which the CRF is derived.
-#' Defaults to NULL. If NULL, it is calculated from RR and delta ( beta = log(RR)/delta )
-#' @param RR The relative risk associated with a concentration increase of delta 
-#' @param delta The concentration difference for which RR is defined. Defaults to 10.
-#' @param cases A raster containing the number of cases of the outcome of concern in the population.
+#' @param fun.form The form of the concentration response function. 
+#' Currently supports "linear" (default) and "log-linear" 
+#' @param beta The Beta values from the original regression model from which the
+#' concentration response function (CRF) is derived.
+#' Defaults to NULL. If NULL, it is calculated from RR and delta (beta = log(RR)/delta)
+#' @param RR A single numeric value. The relative risk associated with a 
+#' concentration increase of delta.
+#' @param delta A single numeric value. The concentration difference for which 
+#' RR is defined. Defaults to 10.
+#' @param cases A raster containing the number of cases of the outcome of 
+#' concern in the population.
 #' @param incidence.rate The incidence rate of the outcome of concern.
 #' @param est The type of estimate that the values of RR represent. 
-#' e.g. c("low estimate","cental estimate","high estimate"). Must be the same length as RR
+#' e.g. c("low estimate","cental estimate","high estimate"). Must be the same 
+#' length as RR
 #' @param outcomename User specified name of the outcome. Defaults to NULL.
 #' @param pollutantname User specified name of the pollutant. Defaults to NULL.
 #' @param unit.cost The cost of the outcome per case
-#' @param costing.var The name of the varible containing the unit cost
+#' @param costing.var The name of the variable containing the unit cost
 #' @param verbose Do you want to be annoyed with a lot of messages, or not?
-#' @param debug Set to TRUE if the function misbehaves so you can see what's going on
-
-#' @details pollutant This is used to match the name of the pollutant in the concentration raster 
+#' @param debug Set to TRUE if the function misbehaves so you can see what's 
+#' going on
+#' @details pollutant This is used to match the name of the pollutant in the 
+#' concentration raster 
 #' with that in the concentration response information (typically given as a sicklist)
-
 #' @examples 
 #' cases = people$total * rnorm(n = ncell(people), mean = 0.01, sd = 0.003)
-
+#' @return IF risk.only, the function returns a raster stack with the same number 
+#' of layers as conc; if not...?
+#' # CAN ONLY WORK WITH *ONE* OUTCOME ASSOCIATED WITH *ONE* POLLUTANT AT A TIME
 rasterConcentrationResponse <- function(conc, 
                                         popr, 
                                         base.conc, 
                                         fun.form = c("linear","log-linear")[1],
                                         beta = NULL, 
                                         RR = NULL, 
-                                        delta = 10,
-                                        cases = NULL, 
+                                        delta = 10, 
+                                        cases = NULL,
                                         incidence.rate = NULL,
                                         est = c("low estimate","cental estimate","high estimate"),
                                         outcomename = NULL, 
@@ -41,180 +48,188 @@ rasterConcentrationResponse <- function(conc,
                                         unit.cost = NULL,
                                         costing.var = NULL, 
                                         risk.only = FALSE,
-                                        out = c("all", "popr", "d", "conc", "RR", "AF", "AM")[1],
+                                        out = c("all", "popr", "cases", "conc", "RR", "AF", "AM")[1],
                                         verbose = FALSE, 
-                                        debug = TRUE){
+                                        debug = TRUE) {
   
-  #if (verbose == TRUE) message("beta =", beta)
+  if (attributes(class(popr)) != "raster") {stop("popr must be a raster")}
+  if (attributes(class(conc)) != "raster") {stop("conc must be a raster")}
   
-  if (attributes(class(popr)) != "raster") stop("popr must be a raster")
-  if (attributes(class(conc)) != "raster") stop("conc must be a raster")
-  
-  # Maak seker al die raster pas op mekaar
-  if (all.equal(extent(popr), extent(conc)) == FALSE) {
-    stop("The population and concentration rasters must have the same extent")}
-  
-  if (is.null(cases) & is.null(incidence.rate)) {
-    stop("There must be at least cases or an incidence rate")}
-  if (is.null(cases)==TRUE) {d <- incidence.rate * popr} else {d <- cases}
-  # stoor naam vir later
-  names.RR.orig <- names(RR)
-  if (length(names.RR.orig) == 0) names.RR.orig <- paste("Risk",letters[1:length(RR)], sep="_")
-  if (verbose == TRUE) message("names.RR.orig: ", names.RR.orig, " ", length(names.RR.orig))
-  
-  if(is.null(beta)==TRUE) {
-    if (is.null(RR)) stop("There must be at least a beta or a relative risk (RR) ")
-    if(verbose==TRUE) if (!is.null(names.RR.orig)) message("names RR = ", paste(names.RR.orig, " "))
-    RR = unlist(RR)
-    if(verbose==TRUE) message("delta=", delta)#"log(RR)= ",log(RR)) 
-    if(verbose==TRUE) message("structure of RR: ", str(RR))
-    beta = log(RR)/delta
-    if(verbose==TRUE) message("Defined beta from RR and delta: RR= ", paste(RR," "), "delta=", delta )
+  # Maak seker al die rasters pas op mekaar
+  if (!all.equal(extent(popr), extent(conc))) {
+    stop("The population and concentration rasters must have the same extent.")
   }
+  
+  # If population-wide number of cases of particular health outcome is unknown,
+  # calculate it
+  if (is.null(cases) & is.null(incidence.rate)) {
+    stop("There must be at least cases or an incidence rate.")
+  }
+  if (is.null(cases)) {
+    cases <- popr * incidence.rate
+  }
+  
+  # if 'beta' is NULL, determine it
+  if(is.null(beta)) {
+    if (is.null(RR)) {
+      stop("There must at least be a beta or a relative risk (RR).")
+    }
+
+    beta <- log(RR)/delta
+    if (verbose) {
+      message("Defined beta from RR and delta: ",
+              " RR = ", RR, 
+              " delta = ", delta,
+              " beta = ", beta)
+    }
+  }
+  
   # Verwyder 0 konsentrasies en populasies
   conc[conc == 0] <- NA
   popr[popr == 0] <- NA
-  conc <- mask(conc, popr)
   
-  if (verbose==TRUE) message("RR = ", paste(RR, " "))
-  if (verbose==TRUE) message("base.conc = ", base.conc)
-  if (verbose==TRUE) message("fun.form = ", fun.form)
-  if (verbose==TRUE) message("beta = ", paste(beta, " "))
-  # stel besoedelstof naam
-  # if (is.null(pollutantname)){
-  #   names(conc) <- "pollutant"
-  # } else {
-  #   names(conc) <- pollutantname
-  # }
-  if (verbose==TRUE) message("names conc = ", paste(names(conc), " "))
-  # stel geval name
-  if (is.null(outcomename)){
-    names(d) <- "outcome"
-  } else {
-    names(d) <- outcomename
+  if (verbose) {
+    message("RR = ", paste(RR, " "))
+    message("delta = ", delta)
+    message("beta = ", paste(beta, " "))
+    message("base.conc = ", base.conc)
+    message("fun.form = ", fun.form)
   }
-  
-  # maak die betas tot 'n raster (maak later 'n funksie hiervoor)
-  bs = brick(extent(conc), nl = length(beta), nrows = nrow(conc), ncols = ncol(conc))
-  names(bs) <- names.RR.orig
-  if (verbose == TRUE) message("names bs: ", paste(names(bs), " "))
-  values(bs) <- matrix(rep(beta, ncell(bs)), ncol = length(beta), byrow=TRUE)
-  
+
   # hulpfunksies om op rasters te gebruik binne overlay()
-  exp.maal = function(x,y) return(exp(x * y))
-  mag = function(x,y) return(exp(x ^ y))
+  # exp.maal <- function(x,y) {return(exp(x * y))}
+  # mag <- function(x,y) {return(exp(x ^ y))}
   
-  if(fun.form == "linear"){
-    if(verbose==TRUE) message("Jy is binne in  fun.form == 'linear'")
-    excess.conc = conc - base.conc
+  if (fun.form == "linear") {
+    if (verbose) {
+      message("Jy is binne in  fun.form == 'linear'")
+    }
+    excess.conc <- conc - base.conc
     excess.conc[excess.conc < 0]  <- NA
-    RR = overlay(bs, excess.conc, fun = exp.maal) #RR=exp[beta(X-Xo)] # check teen die oorspronklike beta
-    if(verbose==TRUE) message("Names conc: ", names(conc))
-    if(verbose==TRUE) message("names.RR.orig: ", names.RR.orig)
-    if(verbose==TRUE) message("nlayers RR: ", nlayers(RR))
-    names(RR) <- paste(names(conc), names.RR.orig, names(d), sep="_")
+    RR <- exp(beta * excess.conc)
+    #RR <- overlay(bs, excess.conc, fun = exp.maal) 
+    #RR=exp[beta(X-Xo)] # check teen die oorspronklike beta
+    
+    if (debug) {
+      message("nlayers RR: ", nlayers(RR))
+    }
+    names(RR) <- paste(names(conc), names(cases), sep = "_")
   }
   
-  if(fun.form == "log-linear"){
-    if(verbose==TRUE) message("Jy is binne in  fun.form == 'log.linear'")
+  if (fun.form == "log-linear") {
+    if(verbose) {
+      message("Jy is binne-in fun.form == 'log.linear'")
+    }
     cbreuk <- ((conc+1)/(base.conc+1))
-    cbreak[cbreuk == 0] <- NA
-    RR = overlay(cbreuk, bs, fun = mag)
-    names(RR) <- paste(names(conc), names.RR.orig, sep="_")
+    cbreuk[cbreuk == 0] <- NA
+    #RR <- overlay(cbreuk, bs, fun = mag)
+    RR <- exp(cbreuk ^ beta)
+    names(RR) <- paste(names(conc), sep="_")
   }
   
-  if (risk.only){return(RR)}
+  names(RR) <- paste("RR", names(RR), sep="_")
+  if (risk.only) {return(RR)}
   
-  AF =  (RR-1)/RR  #AF=(RR-1)/RR     # dalk monte carlo hier!
-  if(verbose==TRUE) message("dim AF ", paste(dim(AF), collapse = " by "))
-  if(verbose==TRUE) message("dim d ", paste(dim(d), collapse = " by "))
-  AM =  AF * d #AM = AF * cases
-  if(verbose==TRUE) message("dim AM ", paste(dim(AM), collapse = " by "))
+  # determine the attributable fraction
+  AF <- (RR-1)/RR  #AF=(RR-1)/RR     # dalk monte carlo hier!
+
+  # determine the number of cases that can be attributed to exposure to air 
+  # pollution
+  AM <-  AF * incidence.rate * popr
+  if (debug) {
+    message("dim AM ", paste(dim(AM), collapse = " by "))
+  }
   
   # Sorg dat die name leesbaar is
   names(AF) <- paste("Attr.Fraction", names(AF), sep="_")
-  names(AM) <- paste("Attr.Insidence", names(RR), sep="_")
+  names(AM) <- paste("Attr.Insidence", names(AM), sep="_")
   names(popr) <- paste("Pop", names(popr), sep="_")
-  names(d) <- paste("Cases", names(d), sep="_")
+  names(cases) <- paste("Cases", names(cases), sep="_")
   names(conc) <- paste("Concentration", names(conc), sep="_")
-  names(RR) <- paste("RR", names(RR), sep="_")
   
   #Gee 'n enkele laag uit as die gebruiker so verkies
   if (out =="popr") return(popr)
   if (out =="conc") return(conc)
-  if (out =="d") return(d)
+  if (out =="cases") return(cases)
   if (out =="AF") return(AF)
   if (out =="AM") return(AM)
   
-  #Stapel hulle op mekaar
-  if (out == "all"){
-  out <- stack(popr, d, conc, RR, AF, AM)
-  return(out)
-  }
+  # Andersins, stapel almal opmekaar en return
+  return(stack(popr, cases, conc, RR, AF, AM))
 }
 
 # werk baie presiese name en kategorieë by ¡¡¡¡¡
 
-rasterCREP <- function(sl = endlist, 
+# wrapper function for rasterConcentrationResponse that loops through a sicklist
+# and ensures that the concentration data is sent to above-mentioned function
+# in the correct format for the sickness' effect type (i.e. acute, chronic)
+rasterCREP <- function(sl = NULL, 
                        pollutant = "PM10", 
-                       cconc = year.brick, 
-                       ppopr = people, 
+                       cconc = NULL, 
+                       ppopr = NULL, 
                        bbase.conc = 10, 
+                       ccases = NULL,
                        iincidence.rate = NULL, 
                        rrisk.only = TRUE, 
                        verbose = FALSE,
-                       ...){
+                       output = "all",
+                       ddelta = 10) {
   
-  polidx = which(tolower(summarise.sicklist(sl)$pollutant) == tolower(pollutant))
-  if (length(polidx) < 1) stop("There is no pollutant ", pollutant, " in sl")
+  polidx <- which(tolower(pollutant) == tolower(summarise.sicklist(sl)$pollutant))
+  if (length(polidx) < 1) {
+    stop("There is no pollutant ", pollutant, " in sl")
+  }
   
   # get the outcomes associated with the pollutant
-  sl = sl[polidx] #nou vir pollutant length =1 maar dalk 'n lopp oor meer 
+  sl <- sl[polidx] #nou vir pollutant length =1 maar dalk 'n lopp oor meer 
   
-  ParkEnv = new.env() # ons gaan ons rasters daar bêre
-  
-  if (verbose == TRUE){
+  # maak 'n lys om die rasters in te stoor
+  lsRasters <- vector(mode = "list", length = length(sl))
+  names(lsRasters) <- names(sl)
+    
+  if (verbose) {
     message("pollutant = ", pollutant, "\nrrisk.only = ", rrisk.only)
   } 
   
   # loop through all the outcomes assoc with the pollutant
-  for (i in 1:length(sl)){ 
-    if (verbose == TRUE){
+  for (i in 1:length(sl)) { 
+    if (verbose) {
       message("i: ", i, "\n", class(sl),  " ", length(sl))
       message("sl pollutant: ", sl[[i]]$pollutant)
       message("sl outcome: ", sl[[i]]$end.point)
-      message("sl effect: ", sl[[i]]$Effect, "\n_________________________")
+      message("sl effect: ", sl[[i]]$Effect)
     }
-    x = rasterConcentrationResponse(conc = cconc, 
-                                    popr = ppopr, 
-                                    base.conc = bbase.conc, 
-                                    fun.form = c("linear","log-linear")[1],
-                                    beta = sl[[i]]$beta, 
-                                    RR = sl[[i]]$RR, 
-                                    delta = 10,
-                                    cases = NULL, 
-                                    incidence.rate = sl[[i]][["Incidence.rate"]],
-                                    est = c("low estimate","cental estimate","high estimate"),
-                                    pollutantname = pollutant, 
-                                    outcomename = sl[[i]]$end.point,
-                                    unit.cost = NULL, 
-                                    costing.var = NULL, 
-                                    risk.only = rrisk.only,
-                                    debug = TRUE,
-                                    ...)
-    message("names x: ", names(x))
-    assign(paste("x",as.character(i), sep="_"), x, envir = ParkEnv)
-    if (verbose == TRUE) {message("Jy verlaat sl lus nommer ", i)}
+    
+    if (tolower(sl[[i]]$Effect) %in% c("chronic")) {
+      concObj <- calc(x = cconc, fun = mean, na.rm = TRUE)
+    } else {
+      concObj <- cconc
+    }
+    
+    res <- rasterConcentrationResponse(conc = concObj, 
+                                       popr = ppopr, 
+                                       base.conc = bbase.conc, 
+                                       fun.form = c("linear","log-linear")[1],
+                                       beta = sl[[i]]$beta, 
+                                       RR = sl[[i]]$RR, 
+                                       delta = ddelta,
+                                       cases = ccases,
+                                       incidence.rate = sl[[i]][["Incidence.rate"]],
+                                       est = c("low estimate",
+                                               "cental estimate","high estimate"),
+                                       pollutantname = pollutant, 
+                                       outcomename = sl[[i]]$end.point,
+                                       unit.cost = NULL, 
+                                       costing.var = NULL, 
+                                       risk.only = rrisk.only,
+                                       debug = TRUE,
+                                       out = output)
+    lsRasters[[i]] <- res; rm(res)
   }
   
-  items = length(ls(envir = ParkEnv))
-  s <- brick(extent(cconc), nrows = dim(cconc)[1], ncols = dim(cconc)[2])
-  message("names s: ", names(s))
-  for (i in 1:items){
-    s = addLayer(s, get(ls(envir = ParkEnv)[i], envir = ParkEnv))
-    message(i, "\n _________________________________")
-  }
+  # so at this point lsRasters is a list of raster stacks - one stack per outcome
+  # listed in the sicklist
+  return(lsRasters)
   
-  return(s)
 }
 
