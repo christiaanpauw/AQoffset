@@ -24,3 +24,5 @@ summarise.sicklist <- function(sicklist){
 # df
 # }
 # df
+# }
+

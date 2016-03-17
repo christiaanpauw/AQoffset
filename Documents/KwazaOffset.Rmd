@@ -13,7 +13,8 @@ library(rgdal)
 library(pander)
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
-USER <- c("CJP", "AH")[1]
+
+USER <- c("CJP", "AH", "BS")[3]
 
 if (USER == "CJP") {
   wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
@@ -21,11 +22,22 @@ if (USER == "CJP") {
   rdir <-  file.path(paste(wd, "R/", sep=""))
   datadir <- normalizePath(paste("Data/", sep = ""))
 
+}
+
+
 if (USER == "AH") {
   projdir <- "C:/Users/Alex H/Documents/R/AQoffset/"
   rdir <-  normalizePath(paste(projdir, "R/", sep=""))
   datadir <- normalizePath(paste(projdir, "Data/", sep = ""))
 }
+
+
+if (USER == "BS") {
+  projdir <- "C:/Users/Willem/Desktop/AQOffset/AQoffset"
+  rdir <-  normalizePath(paste(projdir, "R/", sep=""))
+  datadir <- normalizePath(paste(projdir, "Data/", sep = ""))
+}
+  
 
 source(paste(rdir, "/count_exceed.R", sep=""))
 source(paste(rdir, '/raster_dist_sum.R', sep=""))
@@ -49,11 +61,9 @@ kwaCoor <- coordinates(KWA)
 addkwa <- function(){latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
 addkwa2 <- function(){layer(sp::sp.polygons(KWA, lwd = 10))}
 txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
-}
 ```
 
 ```{r echo=FALSE, message=FALSE}
-
 #remove the other datasets here to save memory
 load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
 load(paste(datadir, "/eskom.Rda", sep = ""))
