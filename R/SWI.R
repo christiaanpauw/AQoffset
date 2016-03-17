@@ -82,7 +82,7 @@ rasterSWI <- function(s,
                       polpos = 2, 
                       aveperiodpos = 3, 
                       cyclepos = 5, 
-                      sep = "_", verbose = TRUE){
+                      sep = "_", verbose = FALSE){
   patt = paste('([[:print:]]+)', sep,'{1}', '([[:print:]]+)', sep,'{1}','([[:alnum:]]+)([[:punct:]]*)([[:digit:]]*)', sep="")
   id = gsub(patt, paste('\\', idpos, sep=""), names(s))
   pols = gsub(patt, paste('\\', polpos, sep=""), names(s))
