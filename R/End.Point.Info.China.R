@@ -1,5 +1,6 @@
 ### Health end-point info for use in dose-repsponse functions - China 
 
+<<<<<<< HEAD
 #' Rebase RR
 #' 
 #' Modifies the base concentrtion of a raster
@@ -8,6 +9,8 @@
 #' @param base.orig Numeric. The original base concentration
 #' @export
 
+=======
+>>>>>>> d5ff41ee851c818691bd72758f77a0f8e60d1bdc
 rebase.rr <- function(RR, base.orig = 10) {
   res <- 1 + (RR-1) / base.orig
   return(res)

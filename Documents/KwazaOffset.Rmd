@@ -13,15 +13,8 @@ library(knitr)
 library(rgdal)
 library(pander)
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
-wd <- "C:/Users/Willem/Desktop/AQOffset/AQoffset"
 
-
-#rdir <-  file.path(paste(wd, "/R", sep=""))
-#datadir <- file.path(paste(wd, "/Data/", sep = ""))
-
-rdir <- normalizePath(paste(wd, "/R/", sep=""))
-datadir <- normalizePath(paste(wd, "/Data/", sep = ""))
-
+USER <- c("CJP", "AH", "BS")[3]
 
 if (USER == "CJP") {
   wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
@@ -29,11 +22,22 @@ if (USER == "CJP") {
   rdir <-  file.path(paste(wd, "R/", sep=""))
   datadir <- normalizePath(paste("Data/", sep = ""))
 
+}
+
+
 if (USER == "AH") {
   projdir <- "C:/Users/Alex H/Documents/R/AQoffset/"
   rdir <-  normalizePath(paste(projdir, "R/", sep=""))
   datadir <- normalizePath(paste(projdir, "Data/", sep = ""))
 }
+
+
+if (USER == "BS") {
+  projdir <- "C:/Users/Willem/Desktop/AQOffset/AQoffset"
+  rdir <-  normalizePath(paste(projdir, "R/", sep=""))
+  datadir <- normalizePath(paste(projdir, "Data/", sep = ""))
+}
+  
 
 source(paste(rdir, "/count_exceed.R", sep=""))
 source(paste(rdir, '/raster_dist_sum.R', sep=""))
@@ -48,7 +52,6 @@ source(paste(rdir, '/End.Point.Info.China.R', sep = ""))
 source(paste(rdir, '/summarise.sicklist.R', sep = ""))
 source(paste(rdir, '/rasterConcentrationResponse.R', sep = ""))
 
-
 new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
 
 load(paste(datadir, "/kwaza_household_census.Rda", sep=""))
@@ -57,7 +60,6 @@ kwaCoor <- coordinates(KWA)
 addkwa <- function(){latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
 addkwa2 <- function(){layer(sp::sp.polygons(KWA, lwd = 10))}
 txtkwa <- function(){layer(panel.text(x = coordinates(KWA)[,1], y = coordinates(KWA)[,2], label = as.character(KWA@data$SP_NAME), cex = 0.5))}
-}
 ```
 
 ```{r echo=FALSE, message=FALSE}

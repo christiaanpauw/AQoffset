@@ -157,6 +157,7 @@ rasterConcentrationResponse <- function(conc,
   }
 }
 
+
 #' Raster Concentration Response Enhanced Program
 #' 
 #' Function uses rasterConcentrationResponse, but adds specific names and categories
