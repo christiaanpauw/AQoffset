@@ -2,14 +2,18 @@
 title: "Air quality offset calculations for KwaZamokuhle"
 author: "Christiaan Pauw, Nova Instituut"
 date: "3 December 2015"
-output: word_document
+output: pdf_document
+tables: yes
+
 ---
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
 library(raster)
 library(rasterVis)
 library(knitr)
 library(rgdal)
 library(pander)
+knitr::opts_chunk$set(message=FALSE, warning=FALSE)
+wd <- "C:/Users/Willem/Desktop/AQOffset/AQoffset"
 
 USER <- c("CJP", "AH")[1]
 
@@ -37,6 +41,8 @@ source(paste(rdir, '/project_boundary.R', sep =""))
 source(paste(rdir, '/End.Point.Info.China.R', sep = ""))
 source(paste(rdir, '/summarise.sicklist.R', sep = ""))
 source(paste(rdir, '/rasterConcentrationResponse.R', sep = ""))
+
+
 
 new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
 
@@ -125,7 +131,7 @@ kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption 
 
 The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of KwaZamokuhle is clear.  
 
-```{r echo = FALSE, message=FALSE}
+```{r , echo = FALSE, message=FALSE}
 cat("\n")
 pop2sp(coal.heat, 
        raster = TRUE, 

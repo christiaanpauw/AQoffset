@@ -1,24 +1,29 @@
-#' count_exceed 
-#' @description count excedences of user- provided values in raster
-#' @param s A raster or raster stack
-#' @param pol A pollutant name as a character string that matches a layer in the raster stack s
-#' @param min Numeric. Value of the first cut point
-#' @param max Numeric. Value of the maximum cut point
+#' Count Exceed
+#'
+#' Count excedences of user- provided values in raster
+#'
+#' @param s A raster or raster stack.
+#' @param pol A pollutant name as a character string that matches a layer
+#' in the raster stack s.
+#' @param min Numeric. Value of the first cut point.
+#' @param max Numeric. Value of the maximum cut point.
+#' @param by Numeric. Value that specifies the increment of the sequence.
 #' @return A raster
+#' @export
 
 count_exceed <- function(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALSE){
-  
+
   if (!is.null(pol)){
     idx = grep(pattern = pol, x = names(s))
     if (length(idx) == 0) {
       stop("pol does not match the names of s. Use a valid character string or NULL for everything")}
     s = s[[grep(pol, names(s))]]
-  } 
-  
+  }
+
   ct <- seq(from = min, to = max, by = by)
   b <- brick(extent(s), nl = length(ct))
   res(b) <- res(s)
-  
+
   for (i in 1:length(ct)){
     if (i == 0) {ctv = 0} else {ctv = ct[i]}
     fun <- function(x) {z <- x > ctv ; return(z)}
@@ -27,7 +32,7 @@ count_exceed <- function(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALS
     b = setValues(b, getValues(v), layer = i)
   }
   names(b) <- paste("more.than.",as.character(ct), sep="")
-  #drop layer that has only zeros 
+  #drop layer that has only zeros
   keeps <- which(cellStats(b, sum) != 0)
   b <- b[[keeps]]
   b[b == 0] <- NA
@@ -36,27 +41,32 @@ count_exceed <- function(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALS
       cropext <- knipNA(b[[1]], out = "extent")
       b = crop(b, cropext)
     }
-  } 
+  }
   return(b)
 }
 
-# make a barplot of an exceedance object
-bar_exceed <- function(z, 
-                       cap = "", 
-                       ttl = "", 
-                       axn = TRUE, 
-                       ces.ax = 0.9, 
-                       yl = "Events: days x cell", 
-                       xl = expression(paste(mu,plain(g/m)^3)), 
-                       plot = TRUE,
-                       ...) {
+#' Bar Exceed
+#'
+#' Makes a barplot of n exceedance object
+#'
+#' @param z A raster or raster brick
+#' @param cap Character vector. Contains the caption
+#' @param ttl Character vector. Contains the title
+#' @param axn Logical that draws the other axis (with lty = 0) and labels it if TRUE.
+#' @param ces.ax Numerical used for axis annotation
+#' @param yl A label for the y axis
+#' @param xl A label for the x axis
+#' @param ... Arguments to be passed to/from other methods
+#' @export
+
+bar_exceed <- function(z, cap = "", ttl = "", axn = TRUE, ces.ax = 0.9, yl = "Events: days x cell", xl = expression(paste(mu,plain(g/m)^3)), ...){
   dm = dim(z)
   mxStats <- matrix(cellStats(z, sum))
-  
+
   if (plot) {
-    mp <- barplot(height = mxStats, 
-            beside = TRUE, 
-            las = 1, 
+    mp <- barplot(height = mxStats,
+            beside = TRUE,
+            las = 1,
             main = ttl, ylab = yl, xlab = xl,
             axisnames = axn, ...)
     axis(1, at = mp, labels = gsub("greater_than_|more.than.", ">", names(z)), cex.axis = ces.ax, las = 2)
@@ -64,6 +74,15 @@ bar_exceed <- function(z,
     return(mxStats)
   }
 }
+
+#' Print Exceed
+#'
+#' Print statistics for the cells of each layer of a raster object
+#'
+#' @param z A raster or raster brick
+#' @param type Character vector that contains the desired output. k = kable, l = LaTeX.
+#' @param ttl Character vector that contains the title
+#' @export
 
 print_exceed <- function(z, type = c("k", "l")[1], ttl = "Count of exceedences"){
   dt <- data.frame(cellStats(z, sum))
