@@ -375,8 +375,8 @@ kable(sumIncidences(rBoDPM10), digits = 2)
 
 \pagebreak
 The baseline burden of disease impact for SO2 in the baseline scenario is shown below.
-```{r echo = FALSE, message=FALSE}
 
+```{r echo = FALSE, message=FALSE}
 rBoDSO2 <- rasterCREP(sl = endlist,
                        pollutant = "SO2", 
                        cconc = all_base[[grep("so2", names(all_base))]], 
@@ -428,12 +428,13 @@ Kitchen King = 0.018 * Union * 1.4 * 2 to be conservative ~ 5%
 
 #### Project states from households
 
+
 ```{r echo = FALSE}
-raster_dist_plot(hh_24 * 0.49, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+raster_dist_plot(hh_24 * 0.49, multi =
+                   c("pm10", "so2"), th=BuRdTheme) + addkwa()
 ```
 
 #### Project states (all sources)
-
 
 ```{r echo=FALSE, message=FALSE}
 # maak wees PS deur PS_hh, PS_es
@@ -451,18 +452,17 @@ raster_dist_plot(all_proj, multi = c("pm10", "so2"), mn = "Project states (all s
 all_proj <- mask(crop(all_proj, extent(masker)), masker)
 ```
 
-
 ### Project impacts
 
-#### Standards weighted intake
+#### Project standards weighted intake
+
 
 ```{r echo=FALSE, message=FALSE}
 swi_proj <- SWI(all_proj, pop = people)
 levelplot(swi_proj, par.settings = BuRdTheme, main = "Standards weighted intake in the project scenario", margin = FALSE) + addkwa() + txtkwa()
 ```
 
-
-#### Health risk approach
+#### Projecth health risk approach
 
 Project impacts  
 ```{r echo=FALSE, message=FALSE}
@@ -473,9 +473,33 @@ raster_dist_plot(kwaza_API_proj,
                  sb = "182 days") + addkwa() + txtkwa()
 ```
 
+#### Project burden of disease
+
+```{r echo = FALSE, message=FALSE}
+rBoDPM10_proj <- rasterCREP(sl = endlist,
+                       pollutant = "PM10", 
+                       cconc = all_proj[[grep("pm10", names(all_proj))]], 
+                       ppopr = people, 
+                       bbase.conc = 10, 
+                       rrisk.only = FALSE, 
+                       verbose = FALSE, 
+                       out = "d")
+
+levelplot(crop(rBoDPM10_proj, kpext),
+          main = "Burden of disease for PM10 in the project scenario,
+given as number of cases per health outcome",
+sub = "182 days",
+par = BuRdTheme) + addkwa() + txtkwa()
+
+# tabulate total incidences per health outcome
+kable(sumIncidences(rBoDPM10_proj), digits = 2)
+```
+
+
 ## Impact reduction
 
 #### Particle precursor approach
+
 
 ```{r echo=FALSE, message=FALSE}
 PM_impact <- all_base[[grep("pm10", names(all_base))]] - all_proj[[grep("pm10", names(all_proj))]]
@@ -492,6 +516,13 @@ raster_dist_plot(api_impact,
                  multi = NULL, 
                  mn = "Distribution of API improvement", 
                  sb = "182 days") + addkwa() + txtkwa()
+```
+
+#### Standard weighted intake approach
+
+```{r echo=FALSE, message=FALSE}
+swi_impact <- swi_base - swi_proj
+levelplot(swi_impact, main = "Impact in terms of reduction in standards weighted intake", sub = "Difference between baseline and project scenarion over 182 days", margin = FALSE, par.settings = BuRdTheme) + addkwa() + txtkwa()
 ```
 
 
