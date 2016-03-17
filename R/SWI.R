@@ -35,6 +35,8 @@ nms = unique(gsub("_", "", gsub(patt, "\\2", names(hh_24))))
 idx = match(gsub("_", "", gsub(patt, "\\2", names(hh_24))), nms)
 ss = stackApply(hh_24, indices = idx, fun = mean)
 
+
+ss = mask(ss, people) # this is only for populated areas
 concpop = overlay(ss, people, fun=function(x,y){return(x*y)})
 
 #select relevant NAQS
