@@ -36,6 +36,7 @@ source(paste(rdir, '/pop2sp.R', sep =""))
 source(paste(rdir, '/rasteriseCensus.R', sep =""))
 source(paste(rdir, '/pointifyCensus.R', sep =""))
 source(paste(rdir, '/project_boundary.R', sep =""))
+source(paste(rdir, '/SWI.R', sep =""))
 source(paste(rdir, '/End.Point.Info.China.R', sep = ""))
 source(paste(rdir, '/summarise.sicklist.R', sep = ""))
 source(paste(rdir, '/rasterConcentrationResponse.R', sep = ""))
@@ -326,6 +327,12 @@ With sources that have a very localised dispersion, the particle equivalent impa
 
 The standards weighted intake approach is roughly equivalent to a population weighted air pollution index with the index weights determined by the standard. In this way it is related to the health risk approach that also requires population data. 
 
+```{r echo=FALSE, message=FALSE}
+swi_base <- SWI(all_base, pop = people)
+levelplot(swi_base, par.settings = BuRdTheme, main = "Standards weighted intake in the baseline scenario", margin = FALSE) + addkwa() + txtkwa()
+```
+
+
 ### Burden of disease approach
 
 The burden of disease approach quantifies the actual or expected incidence of adverse health outcomes attributible to the exposure to ambient air pollution, and expresses the impact of the air pollution in terms of the proportion or number of cases of a specific outcome or as a weighted aggregate of such outcomes.
@@ -427,6 +434,7 @@ raster_dist_plot(hh_24 * 0.49, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa(
 
 #### Project states (all sources)
 
+
 ```{r echo=FALSE, message=FALSE}
 # maak wees PS deur PS_hh, PS_es
 hh_24_PS <- hh_24*0.49
@@ -445,6 +453,14 @@ all_proj <- mask(crop(all_proj, extent(masker)), masker)
 
 
 ### Project impacts
+
+#### Standards weighted intake
+
+```{r echo=FALSE, message=FALSE}
+swi_proj <- SWI(all_proj, pop = people)
+levelplot(swi_proj, par.settings = BuRdTheme, main = "Standards weighted intake in the project scenario", margin = FALSE) + addkwa() + txtkwa()
+```
+
 
 #### Health risk approach
 
