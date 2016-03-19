@@ -34,10 +34,11 @@ patt = "([[:alpha:]]+_)([[:alnum:]]+_)([[:print:]]+$)"
 nms = unique(gsub("_", "", gsub(patt, "\\2", names(conc))))
 idx = match(gsub("_", "", gsub(patt, "\\2", names(conc))), nms)
 ss = stackApply(conc, indices = idx, fun = mean)
+names(ss) <- nms
+assign("ss", ss, envir = .GlobalEnv)
 
-#ss = crop(ss, extent(people))
-#ss = mask(ss, people) # this is only for populated areas
-concpop = overlay(ss, people, fun=function(x,y){return(x*y)})
+pop <- crop(pop, extent(ss))
+concpop = overlay(ss, pop, fun=function(x,y){ x * y})
 
 #select relevant NAQS
 #print(NAQS)
@@ -47,7 +48,7 @@ I = concpop * Q
 # Standard intake for each pollutant
 SIL = list()
 for (i in 1:length(nms)) {
-  SIL[[i]] = NAQS.rel[i]*Q*people
+  SIL[[i]] = NAQS.rel[i] * Q * people
 }
 
 SI = stack(SIL)
