@@ -3,7 +3,7 @@
 #' Calculates the target of an offset intervention according to the 
 #' particle equavalence approach (using the particle_ratio function)
 #' 
-#' @author Christiaan Pauw
+#' @author Rebecca Garland, Christiaan Pauw
 
 #' @param result What to return as result. Options: c("target", "effect boundary").
 #' result == "target" returns the proportion of the offset source to be reduced in
