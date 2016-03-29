@@ -197,6 +197,7 @@ rasterCREP <- function(sl = NULL,
                        output = "all",
                        ddelta = 10) {
   
+  ppopr = crop(ppopr, extent(cconc))
   polidx <- which(tolower(pollutant) == tolower(summarise.sicklist(sl)$pollutant))
   if (length(polidx) < 1) {
     stop("There is no pollutant ", pollutant, " in sl")
@@ -223,7 +224,8 @@ rasterCREP <- function(sl = NULL,
     }
     
     if (tolower(sl[[i]]$Effect) %in% c("chronic")) {
-      concObj <- calc(x = cconc, fun = mean, na.rm = TRUE)
+      gemiddeld = function(x) {mean(x, na.rm = TRUE)}
+      concObj <- calc(x = cconc, fun = gemiddeld)
     } else {
       concObj <- cconc
     }
