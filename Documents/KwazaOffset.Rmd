@@ -69,7 +69,7 @@ txtkwa <- function() {layer(panel.text(x = coordinates(KWA)[,1],
 
 #remove the other datasets here to save memory
 load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
-load(paste(datadir2, "/eskom.Rda", sep = ""))
+load(paste(datadir, "/eskom.Rda", sep = ""))
 #load(paste(datadir, "/kwaza_eskom_year_camx.Rda", sep = ""))
 load(paste(datadir, "/kwaza_household_energyRaster.Rda", sep=""))
 load(paste(datadir, "/kwaza_API_hh.Rda", sep=""))
