@@ -15,13 +15,14 @@ library(pander)
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
 
-USER <- c("CJP", "AH", "BS")[2]
+USER <- c("CJP", "AH", "BS")[1]
 
 if (USER == "CJP") {
   wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
   setwd("/Users/christiaanpauw/Documents/Rpakette/AQoffset/")
   rdir <-  file.path(paste(wd, "R/", sep=""))
   datadir <- normalizePath(paste("Data/", sep = ""))
+  datadir2 <- "~/Documents/AQ_DATA/Data/"
 }
 
 if (USER == "AH") {
@@ -68,7 +69,7 @@ txtkwa <- function() {layer(panel.text(x = coordinates(KWA)[,1],
 
 #remove the other datasets here to save memory
 load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
-load(paste(datadir, "/eskom.Rda", sep = ""))
+load(paste(datadir2, "/eskom.Rda", sep = ""))
 #load(paste(datadir, "/kwaza_eskom_year_camx.Rda", sep = ""))
 load(paste(datadir, "/kwaza_household_energyRaster.Rda", sep=""))
 load(paste(datadir, "/kwaza_API_hh.Rda", sep=""))
@@ -201,13 +202,11 @@ The exceedances of the daily PM10 standard related to household emissions occur 
 #xl = expression(paste(mu,plain(g/m)^3))
 # bar_exceed(hh_pm10_exceed, ttl = "Aggregated number of days when PM10 from households \nexceeded specified concentration", plot = FALSE)
 concLevels <- names(hh_pm10_exceed)
-df <- data.frame((cellStats(hh_pm10_exceed, sum) / 
+prc <- c(cellStats(hh_pm10_exceed, sum) / 
                     (nrow(hh_pm10_exceed) * 
                      ncol(hh_pm10_exceed) * 
-                     nlayers(hh_pm10_exceed))) *100 , stringsAsFactors = FALSE)
-df$concentration <- concLevels
-df[[3]] <- df[[1]]
-df <- df[,2:3]
+                     nlayers(hh_pm10_exceed))) *100
+df <- data.frame(concentration = concLevels, ex = prc)
 names(df) <- c("concentration", "%_days_in_exceedance")
 rownames(df) <- NULL
 kable(df)
@@ -271,6 +270,16 @@ allPM10_base <- hh_24[[183:364]]
 allPM10_base <- setValues(allPM10_base, base_PM10_vals)
 allSO2_base <- hh_24[[1:182]]
 all_base <- stack(allPM10_base, allSO2_base)
+
+# create a people raster of the same extent as hh_24
+households <- rasteriseCensus(KWA, ref = all_base, refres = c(nrow(all_base), ncol(all_base)))
+total_households <- calc(households, sum, na.rm = TRUE)
+names(total_households) <- "Total_households"
+total_households[total_households == 0] <- NA
+people <- total_households*3.7
+people[people==0] <- NA
+names(people) <- "total"
+
 
 ```
 
@@ -357,16 +366,6 @@ The burden of disease approach quantifies the actual or expected incidence of ad
 \pagebreak
 The baseline burden of disease impact for PM10 resulting from household emissions is shown below.
 ```{r echo = FALSE, message=FALSE}
-#hh_24
-# create a people raster of the same extent as hh_24
-households <- rasteriseCensus(KWA, ref = hh_24, refres = c(nrow(hh_24), ncol(hh_24)))
-total_households <- calc(households, sum, na.rm = TRUE)
-names(total_households) <- "Total_households"
-total_households[total_households == 0] <- NA
-people <- total_households*3.7
-people[people==0] <- NA
-names(people) <- "total"
-
 # estimate incidences
 rBoDPM10_hhE <- rasterCREP(sl = endlist,
                        pollutant = "PM10", 
@@ -451,19 +450,6 @@ The baseline burden of disease impact for PM10 resulting from the industrial poi
 
 ```{r echo = FALSE, message=FALSE}
 #kwaza_eskom_24h_simple
-# create a people raster of the same extent as kwaza_eskom_24h_simple
-households <- rasteriseCensus(KWA, 
-                              ref = kwaza_eskom_24h_simple, 
-                              refres = c(nrow(kwaza_eskom_24h_simple), 
-                                         ncol(kwaza_eskom_24h_simple)))
-total_households <- calc(households, sum, na.rm = TRUE)
-names(total_households) <- "Total_households"
-total_households[total_households == 0] <- NA
-people <- total_households*3.7
-people[people==0] <- NA
-names(people) <- "total"
-people <- crop(people, extent(all_base))
-
 rBoDPM10 <- rasterCREP(sl = endlist,
                        pollutant = "PM10", 
                        cconc = all_base[[grep("pm10", names(all_base))]], 
