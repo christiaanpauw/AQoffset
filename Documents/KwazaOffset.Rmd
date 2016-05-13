@@ -2,8 +2,7 @@
 title: "Air quality offset calculations for KwaZamokuhle"
 author: "Christiaan Pauw, Nova Instituut"
 date: "3 December 2015"
-output: word_document
-
+output: pdf_document
 ---
 
 ```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
@@ -601,7 +600,7 @@ levelplot(rBoDPM10_impact, main = "Impact in terms of disease burden due to the 
 #### Impact deficit: particle percursor approach
 ```{r echo=FALSE, message=FALSE}
 eskom_deficit <- eskom_kwa_base - eskom_kwa
-raster_dist_plot(eskom_deficit, mn = "Deficit according to the particle precursor approach")+addkwa()
+raster_dist_plot(eskom_deficit, mn = "Deficit according to the particle precursor approach", sb = expression("\\mug/m^2"))+addkwa()
 
 eskom_deficit <- setValues(x = eskom_deficit, values = abs(getValues(eskom_deficit)))
 
@@ -610,7 +609,7 @@ names(eskom_deficit) <- paste("Deficit_pm10_24h", 1:nlayers(eskom_deficit))
 
 hh_prop_pp <- crop(eskom_deficit, kpext) / crop(hh_24, kpext)
 
-raster_dist_plot(hh_prop_pp, mn = "Proportion of household emission require to offset Eskom emissions") + addkwa() + txtkwa()
+raster_dist_plot(hh_prop_pp, mn = "Proportion of household emission required to offset Eskom emissions") + addkwa() + txtkwa()
 ```
 
 #### Impact deficit: health risk approach
@@ -657,7 +656,7 @@ bod_deficit <- lapply(X = bod_deficit , FUN = function(bOutcome) {
 })
 bod_deficit  <- stack(bod_deficit)
 
-names(bod_deficit) <- gsub("among.", "", names())
+names(bod_deficit) <- gsub("among.", "", names(bod_deficit))
 names(bod_deficit) <- gsub("espiratory", "esp.", names(bod_deficit))
 names(bod_deficit) <- gsub("hospital.admissions", "hosp.admin", names(bod_deficit))
 names(bod_deficit) <- gsub("Cases_", "", names(bod_deficit))
@@ -680,13 +679,14 @@ bod.hh <- rBoDPM10_proj <- rasterCREP(sl = endlist,
                        output = "d")
 
 som <- function(x) {sum(x, na.rm = TRUE)}
-  
+ 
+##### !!!!! WAT DOEN HIERDIE EN IS DIT REG ???????? 
 bod.hh <- lapply(X = bod.hh , FUN = function(bOutcome) {
   return(calc(x = bOutcome, fun = som))
 })
 bod.hh  <- stack(bod.hh)
 
-names(bod.hh) <- gsub("among.", "", names())
+names(bod.hh) <- gsub("among.", "", names(bod.hh))
 names(bod.hh) <- gsub("espiratory", "esp.", names(bod.hh))
 names(bod.hh) <- gsub("hospital.admissions", "hosp.admin", names(bod.hh))
 names(bod.hh) <- gsub("Cases_", "", names(bod.hh))
@@ -699,11 +699,9 @@ levelplot(bod.hh,
 sub = "182 days",
 par = BuRdTheme) + addkwa() + txtkwa()
 
-
-
 bod.prop <- bod_deficit  / bod.hh
-
-levelplot(crop(bod.deficit, kpext), main = "Impact deficit in the BoD approach", sub = "Disease burden", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
+cdef <- crop(bod_deficit, kpext)
+levelplot(cdef, main = "Impact deficit in the BoD approach", sub = "Disease burden", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
 
 levelplot(crop(bod.prop, kpext), main = "Required proporion of household BoD", sub = "Disease Burden", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
 
