@@ -9,7 +9,7 @@ count_exceed(s, pol = NULL, min = 0, max = 100, by = 10, knip = FALSE)
 \arguments{
 \item{s}{A raster or raster stack.}
 
-\item{pol}{A pollutant name as a character string that matches a layer 
+\item{pol}{A pollutant name as a character string that matches a layer
 in the raster stack s.}
 
 \item{min}{Numeric. Value of the first cut point.}
