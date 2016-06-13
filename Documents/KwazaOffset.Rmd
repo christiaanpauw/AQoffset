@@ -302,7 +302,7 @@ allSO2_base <- hh_24[[grep("so2", names(hh_24))]]
 allSO2_base <- setValues(allSO2_base, base_SO2_vals)
 
 all_base <- stack(allPM10_base, allSO2_base)
-names(all_base) <- gsub("Households_", "All", names(all_base))
+names(all_base) <- gsub("Households_", "All_", names(all_base))
 
 # create a people raster of the same extent as hh_24
 households <- rasteriseCensus(KWA, ref = all_base, refres = c(nrow(all_base), ncol(all_base)))
@@ -357,7 +357,7 @@ Baseline impact can be determined using different calculation approaches. Four a
 The health risk approach uses an air quality index based on the relative risk of short term mortality associated with every pollutant. Here the pollutants are PM10 and SO~2~, but O~3~ and NO~2~ can potentially be added. The baseline impact represents the combined impact of all pollutants. A summary of the daily API resulting from households is given below.  
 
 ```{r echo=FALSE}
-kwaza_API <- rasterAPI(all_base)
+kwaza_API <- rasterAPI(all_base, verbose = TRUE)
 raster_dist_plot(kwaza_API, 
                  multi = NULL, 
                  mn = "Distribution of baseline API \nfor the baseline scenario", 

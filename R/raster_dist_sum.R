@@ -41,14 +41,17 @@ raster_dist_sum <- function(s, minmax = FALSE, trim = 1/100){
 #' Calculates the averages of unique names within a raster stack
 #' 
 #' @param s A raster stack
-#' @param patt Character vector used to isolate unique values within s
+#' @param patt Character vector used to isolate unique classes within s . typilcally the varying part. e.g
+#' if the layers are names pm10_1, pm10_2 ....the patt is '_[[:digit:]]+$"
 #' @param func The function to be applied on subsets of the raster stack
+#' @param verbose Logical Messages or not
 #' @return Raster with function applied to subsets
 #' @export
 
-raster_ave_type <- function(s, patt = "_24h\\.[[:digit:]]+", func = "mean"){
+raster_ave_type <- function(s, patt = "_24h\\.[[:digit:]]+", func = "mean", verbose = FALSE){
   if (class(s) != "RasterStack") stop("s must be of class RasterStack")
   cats <- unique(gsub(patt, "", names(s)))
+  if (verbose) message(paste(cats, collapse = " ") )
   idx <- lapply(cats, function(x) grep(x, names(s)))
   idx <- do.call("rbind", lapply(1:length(idx), function(i) data.frame(i = idx[[i]], j = i)))[,2]
   res <- stackApply(s, indices = idx, fun = func)
