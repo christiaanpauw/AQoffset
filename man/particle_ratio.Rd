@@ -4,28 +4,30 @@
 \alias{particle_ratio}
 \title{Particle Ratio}
 \usage{
-particle_ratio(source1 = rep(400, 365),
-  conc1 = baseline365[[grep("Indus[[:print:]]*_pm10[[:print:]]",
-  names(baseline365))]], source2 = rep(x = 15, 365),
-  conc2 = baseline365[[grep("H[[:print:]]*_pm10[[:print:]]*",
-  names(baseline365))]])
+particle_ratio(source1 = NULL, conc1 = NULL, source2 = NULL,
+  conc2 = NULL)
 }
 \arguments{
 \item{source1}{numeric vector of the same length as nlayers(conc1). Total emissions}
 
-\item{conc1}{A Raster object with concentrations resulting from source1.}
+\item{conc1}{A Raster object giving the concentrations resulting from source1
+over the area identified by the raster's origin and extent. Source1 is the 
+source to be offset.}
 
-\item{source2}{numeric vector of the same length as nlayers(conc2)}
+\item{source2}{numeric vector of the same length as nlayers(conc2).}
 
-\item{conc2}{A Raster object with concentrations resulting from source2}
+\item{conc2}{A Raster object giving the concentrations resulting from source2 
+over the area identified by the raster's origin and extent. Source2 is the 
+offset source (i.e. the source that does the offsetting).}
 }
 \value{
-A raster or raster stack with the source equavalence ratios (source impact ratio)
-. A large number means there is a large offset opportunity or that the offset source (source 2) has a
-much larger impact than the source to be offset (source1)
+A raster or raster stack with the source equivalence ratios (source 
+impact ratio). A large number means there is a large offset opportunity or 
+that the offset source (source 2) has a much larger impact than the source to
+be offset (source1).
 }
 \description{
-Calculate the equavalence of sources in terms of the resultant
+Calculate the equivalence of sources in terms of the resultant
 concentrations at each receptor.
 }
 \author{
