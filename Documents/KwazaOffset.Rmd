@@ -180,41 +180,9 @@ pander(dta, split.cells = 40,
 ## Baseline states
 
 ```{r echo=FALSE, message=FALSE}
-eskom_kwa <- resample(eskom, hh_24)[[1:182]]
+eskom_kwa <- resample(eskom, hh_24)
 eskom_kwa_base <- eskom_kwa * 0.15
-```
 
-The modelled baseline PM10 and SO~2~ resulting from household emissions in KwaZamokuhle is shown below. The baseline emissions from household coal use are summarised below. The tiles represent the 25th and 50th percentiles, the mean and the 75th and 99th percentiles. The last tile in each row represent the standard deviation. 
-
-```{r echo = FALSE, message=FALSE}
-raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme, mn = "Households (baseline)", sb = "182 days") + addkwa()
-```
-
-The distributions of the PM10 and SO~2~ are fairly similar but the concentration of PM10 is modelled to be higher. It is also clear that the concentration of both PM10 and SO~2~ decreases rapidly with distance from the household sources. 
-
-\pagebreak
-The modelled baseline secondary PM2.5 resulting from the Hendrina power station is shown below. The black dot indicates the position Kwazamokuhle.
-
-```{r echo=FALSE}
-raster_dist_plot(eskom.base, mn = "Secondary sulphate PM2.5 from Hendrina power station", sb = "364 days. Kwazamokuhle is the black dot") + addkwa2()
-```
-
-The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source is modelled to exceed a specified level, is shown below for the baseline scenario. 
-
-```{r echo = FALSE}
-hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 50, max = 300, by = 50, knip = FALSE)
-levelplot(hh_pm10_exceed, main = "Count of days when PM10 from househols \nexceeded specified concentarion", sub = "182 days", par.settings=BuRdTheme) + addkwa()
-```
-
-The exceedances of the daily PM10 standard related to household emissions occur over the southern and eastern side of KwaZamokuhle with the highest exceedance count at every level occurring in KwaZamokuhle SP.
-
-```{r echo=FALSE}
-#xl = expression(paste(mu,plain(g/m)^3))
-# bar_exceed(hh_pm10_exceed, ttl = "Aggregated number of days when PM10 from households \nexceeded specified concentration", plot = FALSE)
-count_exceed_table(hh_pm10_exceed)
-```
-
-```{r echo = FALSE}
 # At this piont you can use setValues for populate the eskom raster with different data
 eskom_kwa_base_c <- crop(eskom_kwa_base, kpext)
 eskom_kwa_proj_c <- eskom_kwa_base_c * 1 / 0.15 # kry proj terug
@@ -236,27 +204,65 @@ idd <- unlist(lapply(1:2, function(i) ifelse(grep(c("so2","pm10")[i], names(esko
 a <- stackApply(eskom_kwa_proj_c, indices = idd, fun = max, na.rm = TRUE)
 cellStats(a, max) == sapply(ESKOMSO2PM[,1:2], max) # test
 
-eskom_pm10_exceed_base = count_exceed(eskom_kwa_base_c[[grep("pm", names(eskom_kwa_base_c))]], pol = NULL, min = 1, max = 30, by = 5, knip = TRUE)
+```
+
+The modelled baseline PM10 and SO~2~ resulting from household emissions in KwaZamokuhle is shown below. The tiles represent the 25th and 50th percentiles, the mean and the 75th and 99th percentiles. The last tile in each row represent the standard deviation. 
+
+```{r echo = FALSE, message=FALSE}
+raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme, mn = "Households (baseline)", sb = "182 days") + addkwa()
+```
+
+The distributions of the PM10 and SO~2~ are fairly similar but the concentration of PM10 is modelled to be higher. It is also clear that the concentration of both PM10 and SO~2~ decreases rapidly with distance from the household sources. 
+
+\pagebreak
+The modelled baseline secondary PM2.5 resulting from the Hendrina power station is shown below. The black dot indicates the position Kwazamokuhle.
+
+```{r echo=FALSE}
+raster_dist_plot(eskom_kwa_base, mn = "Secondary sulphate particulates from Hendrina power station\n in the baseline scenario in the region of KwaZamokuhle", sb = "364 days") + addkwa()
+```
+
+
+### Exceedence of specified concentrations in the baseline scenario 
+
+The count of days where the PM10 concentrations that resulted from household emissions and the industrial point source is modelled to exceed a specified level, is shown below for the baseline scenario. 
+
+```{r echo = FALSE}
+hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 50, max = 300, by = 50, knip = FALSE)
+levelplot(hh_pm10_exceed, main = "Count of days when PM10 from households \nexceeded specified concentration", sub = "182 days", par.settings=BuRdTheme) + addkwa()
+```
+
+The exceedances of the daily PM10 standard related to household emissions occur over the southern and eastern side of KwaZamokuhle with the highest exceedance count at every level occurring in KwaZamokuhle SP.
+
+```{r echo=FALSE}
+#xl = expression(paste(mu,plain(g/m)^3))
+# bar_exceed(hh_pm10_exceed, ttl = "Aggregated number of days when PM10 from households \nexceeded specified concentration", plot = FALSE)
+count_exceed_table(hh_pm10_exceed)
+```
+
+```{r echo = FALSE}
+eskom_pm10_exceed_base = count_exceed(eskom_kwa_base_c[[grep("pm", names(eskom_kwa_base_c))]], pol = NULL, min = 0, max = 20, by = 1, knip = TRUE)
 
 eskom_pm10_exceed_proj = count_exceed(eskom_kwa_proj_c[[grep("pm", names(eskom_kwa_proj_c))]], pol = NULL, min = 1, max = 30, by = 5, knip = TRUE)
 
-levelplot(eskom_pm10_exceed_base, main = "Count of days when secondary PM2.5 from \nEskom exceeded specified concentration in the baseline scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
+levelplot(eskom_pm10_exceed_base, main = "Count of days when concentrations of secondary PM from \nEskom exceeded specified concentration in the baseline scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
 
-levelplot(eskom_pm10_exceed_proj, main = "Count of days when secondary PM2.5 from \nEskom exceeded specified concentration in the project scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
+count_exceed_table(eskom_pm10_exceed_base, cp = "Count of days when concentrations of secondary PM from \nEskom exceeded specified concentration in the baseline scenario")
+```
 
+The count of days where SO~2~ from the industrial point source exceeded the specified level for the baseline scenario is shown below. 
+
+
+```{r echo=FALSE}
 eskom_so2_exceed_base = count_exceed(eskom_kwa_base_c[[grep("so2", names(eskom_kwa_base_c))]], pol = NULL, min = 0, max = 10, by = 1, knip = TRUE)
 
 eskom_so2_exceed_proj = count_exceed(eskom_kwa_base_c[[grep("so2", names(eskom_kwa_proj_c))]], pol = NULL, min = 0, max = 10, by = 1, knip = TRUE)
 
 levelplot(eskom_so2_exceed_base, main = "Count of days when secondary SO2 from \nEskom exceeded specified concentration in the baseline scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
-
-levelplot(eskom_so2_exceed_proj, main = "Count of days when secondary SO2 from \nEskom exceeded specified concentration in the project scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
 ```
 
 ```{r echo=FALSE}
 #bar_exceed(eskom_pm10_exceed, ttl = "Aggregated of days when PM10 from Eskom \nexceeded specified concentration")
-count_exceed_table(eskom_pm10_exceed_base, cp = "Baseline exceedence count Eskom")
-count_exceed_table(eskom_pm10_exceed_proj, cp = "Project exceedence count Eskom")
+count_exceed_table(eskom_pm10_exceed_base, cp = "Baseline exceedence count: PM form Eskom")
 ```
 
 \pagebreak
@@ -264,6 +270,7 @@ The count of days where SO~2~ concentration that resulted from household emissio
 
 ```{r echo=FALSE}
 hh_so2_exceed = count_exceed(crop(hh_24, kpext), pol = "so2", min = 100, max = 300, by = 25, knip = FALSE)
+
 levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
 ```
 
@@ -274,8 +281,6 @@ Occurrences of exceedances of the daily SO~2~ standard related to coal combustio
 count_exceed_table(hh_so2_exceed)
 ```
 
-The count of days where SO~2~ from the industrial point source exceeded the specified level for the baseline scenario is not shown in the previous plot because all values are below the minimum level. 
-
 ### Combined baseline states
 
 ```{r echo=FALSE, message=FALSE}
@@ -285,7 +290,6 @@ yddE <- gsub("pm10.", "", grep("pm", names(eskom_kwa_base_c), value = T))
 yddE2 <- gsub("so2.", "", grep("so2", names(eskom_kwa_base_c), value = T))
 ydd <- gsub("Households_pm10_24h.", "", grep("pm", names(hh_24), value = T)) 
 ydd2 <- gsub("Households_so2_24h.", "", grep("so2", names(hh_24), value = T)) 
-
 base_PM10_vals_hh <- getValues(hh_24[[grep("pm", names(hh_24))]])
 base_PM10_vals_E <- getValues(eskom_kwa_base_c[[grep("pm", names(eskom_kwa_base_c))]])[match(ydd, yddE)]
 base_PM10_vals <- base_PM10_vals_E + base_PM10_vals_hh
@@ -509,10 +513,39 @@ Kitchen King = 0.018 * Union * 1.4 * 2 to be conservative ~ 5%
 
 #### Project states from households
 
-
 ```{r echo = FALSE}
-raster_dist_plot(hh_24 * 0.49, mn = "Project states from households ", sb = "182 days", multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+hh_24_proj <- hh_24 * 0.49
+raster_dist_plot(hh_24_proj, mn = "Project states from households ", sb = "182 days", multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
 ```
+
+The number of high concentration events resulting from household emissions are modelled to decreased in the project scenario.
+```{r echo=FALSE}
+hh_24_proj_exceed_pm <- count_exceed(hh_24_proj, pol = "pm", min = 10, max= 100, by =10)
+levelplot(hh_24_proj_exceed, main = "Count of days when PM from households \nexceeded specified concentration in the project scenario", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
+count_exceed_table(hh_24_proj_exceed_pm)
+```
+
+#### Project states from Eskom
+
+A summary of the atmospheric states resulting from Eskom emissions in the project scenario over a period of 364 days is shown below
+```{r}
+raster_dist_plot(eskom_kwa_proj_c, mn = "Project states from Eskom", sb = "364 days", multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+```
+
+Eskom is modelled to contribute very little to high PM concentrations with most days modelled to have less than 6ug/m3 
+```{r echo = FALSE}
+#levelplot(eskom_pm10_exceed_proj, main = "Count of days when secondary PM from \nEskom exceeded specified concentration in the project scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
+
+count_exceed_table(eskom_pm10_exceed_proj, cp = "Project exceedance count: PM from Eskom. Daily standard is 75")
+```
+
+SO~2~ from Eskom is also very low with no day modelled to have more than 5 ug/m3 of SO~2~ as a result of Eskom emissions
+```{r echo = FALSE}
+#levelplot(eskom_so2_exceed_proj, main = "Count of days when secondary SO2 from \nEskom exceeded specified concentration in the project scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
+
+count_exceed_table(eskom_so2_exceed_proj, cp = "Project exceedance count: SO~2~ from Eskom. Daily standard is 125")
+```
+
 
 #### Project states (all sources)
 
@@ -522,10 +555,12 @@ hh_24_PS <- hh_24 * 0.49
 proj_PM10_vals <- getValues(hh_24_PS[[183:364]]) + getValues(eskom_kwa)
 allPM10_proj <- hh_24_PS[[183:364]]
 allPM10_proj <- setValues(allPM10_proj, proj_PM10_vals)
+
 allSO2_proj <- hh_24_PS[[1:182]]
+
 all_proj <- stack(allPM10_proj, allSO2_proj)
 
-raster_dist_plot(all_proj, multi = c("pm10", "so2"), mn = "Project states (all sources)", sb = "182 days") + addkwa()
+raster_dist_plot(resample(all_proj, y = raster(kpext, nrow=100, ncol = 100)), multi = c("pm10", "so2"), mn = "Project states (all sources)", sb = "182 days") + addkwa()
 ```
 
 ```{r echo=FALSE, message=FALSE}
@@ -547,7 +582,7 @@ levelplot(swi_proj, par.settings = BuRdTheme, main = "Standards weighted intake 
 Project impacts  
 ```{r echo=FALSE, message=FALSE}
 kwaza_API_proj <- rasterAPI(all_proj)
-raster_dist_plot(kwaza_API_proj, 
+raster_dist_plot(resample(kwaza_API_proj,y = raster(kpext, ncol = 100, nrow=100)),
                  multi = NULL, 
                  mn = "Distribution of baseline API \nfor the project scenario", 
                  sb = "182 days") + addkwa() + txtkwa()
@@ -739,7 +774,7 @@ levelplot(cdef, main = "Impact deficit in the BoD approach", sub = "Disease burd
 
 levelplot(crop(bod.prop, kpext), main = "Required proporion of household BoD", sub = "Disease Burden", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
 
-mean(cellStats(bod.deficit, sum))
+cellStats(bod_deficit, sum)
 ```
 
 
