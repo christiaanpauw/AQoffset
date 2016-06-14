@@ -5,48 +5,50 @@
 \title{Particle Ratio Target}
 \usage{
 particle_ratio_offset(result = c("target", "effect boundary")[1],
-  int.eff = 0.5, effect = c("acute", "chronic")[1], units = NULL,
-  minrat = 100, source1 = rep(40, 365),
-  conc1 = baseline365[[grep("Indus[[:print:]]*_pm10[[:print:]]",
-  names(baseline365))]], source2 = rep(x = 15, 365),
-  conc2 = baseline365[[grep("H[[:print:]]*_pm10[[:print:]]*",
-  names(baseline365))]])
+  int.eff = 0.5, effect = c("shortterm", "longterm")[1], units = NULL,
+  minrat = 100, source1 = rep(40, 365), conc1 = NULL, source2 = rep(x =
+  15, 365), conc2 = NULL)
 }
 \arguments{
-\item{result}{What result to return. result ="target" returns the proportion of the offset source 
-to be reduced to offset the managed activity at every receptor. result = "effect boundary" 
-returns a one-layer raster with 1 in all the cells where an offset can take place and NA in all 
-others. This can be used to select (mask) from other rasters}
+\item{result}{What to return as result. Options: c("target", "effect boundary").
+result == "target" returns the proportion of the offset source to be reduced in
+order to offset the managed activity at every receptor. 
+result == "effect boundary" returns a one-layer raster with 1 in all the cells
+where an offset can take place and NA in all others. This can be used to 
+select (mask) from other rasters.}
 
-\item{int.eff}{Proportion of source 2 that can be addressed by intervention}
+\item{int.eff}{Proportion of source 2 that can be addressed by intervention.}
 
-\item{effect}{Do the calculation in terms of an acute effect (effect = "acute"). This approach 
-give the result as exceedance counts (standard must not be NULL). effect = "chronic" aggregates
-the concentrations}
+\item{effect}{Options: c("shortterm", "longterm"). 
+effect == "shortterm": do the calculation in terms of an immediate/short-term 
+effect. This approach gives the result as exceedance counts (standard must 
+not be NULL). 
+effect = "longterm" aggregates the concentrations.}
 
-\item{units}{Numeric of how many units is source 2 made up. If NULL report proportion default NULL}
+\item{units}{Numeric. How many units does source 2 consists of?. If NULL, 
+report proportion default NULL.}
 
-\item{minrat}{The minimum source ratio for which an offset cn be done}
+\item{minrat}{The minimum source ratio for which an offset can be done.}
 
-\item{source1}{Numeric vector of the same length as nlayers(conc1). Total emissions}
+\item{source1}{Numeric. Vector of the same length as nlayers(conc1). Total emissions.}
 
-\item{conc1}{A Raster object with concentrations resulting from source1. Average emissions}
+\item{conc1}{A Raster object with concentrations resulting from source1. Average emissions.}
 
-\item{source2}{numeric vector of the same length as nlayers(conc2)}
+\item{source2}{Numeric. Vector of the same length as nlayers(conc2).}
 
-\item{conc2}{A Raster object with concentrations resulting from source2}
+\item{conc2}{A Raster. Object with concentrations resulting from source2.}
 }
 \value{
 A raster with the target expressed as proportion of the offset source
 to be reduced to offset the managed activity at every receptor (when result = "target") 
-or the boudary of the area that can be offset using the particle equavalence approach  when the 
-efficiency of the intervention is eff
+or the boudary of the area that can be offset using the particle equivalence approach when the 
+efficiency of the intervention is int.eff.
 }
 \description{
 Calculates the target of an offset intervention according to the 
 particle equavalence approach (using the particle_ratio function)
 }
 \author{
-Christiaan Pauw
+Rebecca Garland, Christiaan Pauw
 }
 
