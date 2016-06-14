@@ -4,9 +4,9 @@
 \alias{rasterCREP}
 \title{Raster Concentration Response Enhanced Program}
 \usage{
-rasterCREP(sl = endlist, pollutant = "PM10", cconc = year.brick,
-  ppopr = people, bbase.conc = 10, iincidence.rate = NULL,
-  rrisk.only = TRUE, verbose = FALSE, ...)
+rasterCREP(sl = NULL, pollutant = "PM10", cconc = NULL, ppopr = NULL,
+  bbase.conc = 10, ccases = NULL, iincidence.rate = NULL,
+  rrisk.only = TRUE, verbose = FALSE, output = "all", ddelta = 10)
 }
 \arguments{
 \item{sl}{Sicklist}

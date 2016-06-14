@@ -4,7 +4,8 @@
 \alias{raster_ave_type}
 \title{Raster Average Type}
 \usage{
-raster_ave_type(s, patt = "_24h\\\\.[[:digit:]]+", func = "mean")
+raster_ave_type(s, patt = "_24h\\\\.[[:digit:]]+", func = "mean",
+  verbose = FALSE)
 }
 \arguments{
 \item{s}{A raster stack}
@@ -12,6 +13,8 @@ raster_ave_type(s, patt = "_24h\\\\.[[:digit:]]+", func = "mean")
 \item{patt}{Character vector used to isolate unique values within s}
 
 \item{func}{The function to be applied on subsets of the raster stack}
+
+\item{verbose}{Logical Messages or not}
 }
 \value{
 Raster with function applied to subsets

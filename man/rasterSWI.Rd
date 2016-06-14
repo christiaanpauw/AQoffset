@@ -5,7 +5,7 @@
 \title{Raster SWI}
 \usage{
 rasterSWI(s, reftab = NAQS, idpos = 1, polpos = 2, aveperiodpos = 3,
-  cyclepos = 5, sep = "_", verbose = TRUE)
+  cyclepos = 5, sep = "_", verbose = FALSE)
 }
 \arguments{
 \item{s}{A raster or raster stack}
@@ -26,6 +26,6 @@ Colnames are the averaging periods. Rownames are the pollutants.}
 \item{verbose}{Logical that displays function messages if TRUE.}
 }
 \description{
-Creates a raster for the standards weighted intake
+Creates a raster for the standars weighted intake
 }
 

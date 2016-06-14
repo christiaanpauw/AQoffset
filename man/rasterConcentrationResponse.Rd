@@ -9,32 +9,38 @@ rasterConcentrationResponse(conc, popr, base.conc, fun.form = c("linear",
   incidence.rate = NULL, est = c("low estimate", "cental estimate",
   "high estimate"), outcomename = NULL, pollutantname = NULL,
   unit.cost = NULL, costing.var = NULL, risk.only = FALSE,
-  out = c("all", "popr", "d", "conc", "RR", "AF", "AM")[1], verbose = FALSE,
-  debug = TRUE)
+  out = c("all", "popr", "cases", "conc", "RR", "AF", "AM")[1],
+  verbose = FALSE, debug = TRUE)
 }
 \arguments{
 \item{conc}{A raster of concentration values}
 
-\item{popr}{A raster of population numbers}
+\item{popr}{A raster of population numbers
+rasterConcentrationResponse}
 
 \item{base.conc}{A scalar giving the base concentration of the pollutant}
 
-\item{fun.form}{The from of the concentration response function. 
-Currently supports "linear"(default) and "log-linear"}
+\item{fun.form}{The form of the concentration response function. 
+Currently supports "linear" (default) and "log-linear"}
 
-\item{beta}{The Beta values from the original regression model from which the CRF is derived.
-Defaults to NULL. If NULL, it is calculated from RR and delta ( beta = log(RR)/delta )}
+\item{beta}{The Beta values from the original regression model from which the
+concentration response function (CRF) is derived.
+Defaults to NULL. If NULL, it is calculated from RR and delta (beta = log(RR)/delta)}
 
-\item{RR}{The relative risk associated with a concentration increase of delta}
+\item{RR}{A single numeric value. The relative risk associated with a 
+concentration increase of delta.}
 
-\item{delta}{The concentration difference for which RR is defined. Defaults to 10.}
+\item{delta}{A single numeric value. The concentration difference for which 
+RR is defined. Defaults to 10.}
 
-\item{cases}{A raster containing the number of cases of the outcome of concern in the population.}
+\item{cases}{A raster containing the number of cases of the outcome of 
+concern in the population.}
 
 \item{incidence.rate}{The incidence rate of the outcome of concern.}
 
 \item{est}{The type of estimate that the values of RR represent. 
-e.g. c("low estimate","cental estimate","high estimate"). Must be the same length as RR}
+e.g. c("low estimate","cental estimate","high estimate"). Must be the same 
+length as RR}
 
 \item{outcomename}{User specified name of the outcome. Defaults to NULL.}
 
@@ -50,13 +56,26 @@ e.g. c("low estimate","cental estimate","high estimate"). Must be the same lengt
 
 \item{verbose}{Do you want to be annoyed with a lot of messages, or not?}
 
-\item{debug}{Set to TRUE if the function misbehaves so you can see what's going on}
+\item{debug}{Set to TRUE if the function misbehaves so you can see what's 
+going on}
+
+\item{conc}{A raster object of concentration values for a particular pollutant.}
+
+\item{popr}{A raster object of population numbers.}
+}
+\value{
+IF risk.only, the function returns a raster stack with the same number 
+of layers as conc; if not...?
+# CAN ONLY WORK WITH *ONE* OUTCOME ASSOCIATED WITH *ONE* POLLUTANT AT A TIME
 }
 \description{
 Excecute a concentration response function on rasterised input data
 }
 \details{
-pollutant This is used to match the name of the pollutant in the concentration raster 
+Excecute a concentration response function on rasterised input data
+
+pollutant This is used to match the name of the pollutant in the 
+concentration raster 
 with that in the concentration response information (typically given as a sicklist)
 }
 \examples{

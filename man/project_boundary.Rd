@@ -7,7 +7,7 @@
 project_boundary(r, period = 1/365, target_period = "both",
   thresh_acute = 19, period_acute = 1/365, thresh_chronic = 2.5,
   period_chronic = 365/365, chronic_cutoff = 0.9, vebose = FALSE,
-  return.mask = FALSE, maskname = "masker")
+  return.mask = FALSE, maskname = "masker", only.mask = FALSE)
 }
 \arguments{
 \item{r}{Raster* object with concentrations resulting from an activity}
@@ -33,6 +33,8 @@ Default 0.9}
 when TRUE}
 
 \item{maskname}{Character vector. The name attributed to the masked resolution}
+
+\item{only.mask}{Logical If TRUE the function only returns a mask and not the raster}
 
 \item{verbose}{Logical Messages or not}
 }
