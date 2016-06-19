@@ -18,7 +18,8 @@ raster_dist_plot <- function(ss,
                              multi = list(NULL, 
                                           c("IndustryY_pm10", "IndustryX_so2"))[[1]], 
                              mn = "", 
-                             sb ="",th = BuRdTheme,
+                             sb ="",
+                             th = BuRdTheme,
                              scales=list(draw=FALSE),
                              ...){
   if (!require(rasterVis)){
@@ -45,7 +46,15 @@ raster_dist_plot <- function(ss,
     }
     res = stack(res2)
     lo = c(6,length(multi))
-    levelplot(res, par.settings = th, layout = lo, main = mn, sub =sb, scales =scales, ...)
+    mmv <- min(minValue(res))
+    message(mmv)
+    if (mmv > 0){
+      att <- seq(0, max(maxValue(res)), length = 20)
+    } else {
+      att <- seq(mmv, max(maxValue(res)), length = 20)
+    }
+    
+    levelplot(res, par.settings = th, layout = lo, main = mn, sub =sb, scales =scales, at = att)
   }
   
 }

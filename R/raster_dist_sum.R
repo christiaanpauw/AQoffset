@@ -48,7 +48,7 @@ raster_dist_sum <- function(s, minmax = FALSE, trim = 1/100){
 #' @return Raster with function applied to subsets
 #' @export
 
-raster_ave_type <- function(s, patt = "_24h\\.[[:digit:]]+", func = "mean", verbose = FALSE){
+raster_ave_type <- function(s, patt = "_24h\\.[[:digit:]]+", func = "mean", verbose = FALSE, ...){
   if (class(s) != "RasterStack") stop("s must be of class RasterStack")
   cats <- unique(gsub(patt, "", names(s)))
   if (verbose) message(paste(cats, collapse = " ") )
