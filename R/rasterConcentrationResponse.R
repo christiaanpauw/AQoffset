@@ -59,7 +59,7 @@ rasterConcentrationResponse <- function(conc,
                                         risk.only = FALSE,
                                         out = c("all", "popr", "cases", "conc", "RR", "AF", "AM")[1],
                                         verbose = FALSE, 
-                                        debug = TRUE) {
+                                        debug = FALSE, ...) {
   
   if (attributes(class(popr)) != "raster") {stop("popr must be a raster")}
   if (attributes(class(conc)) != "raster") {stop("conc must be a raster")}
@@ -204,7 +204,7 @@ rasterCREP <- function(sl = NULL,
   }
   
   # get the outcomes associated with the pollutant
-  sl <- sl[polidx] #nou vir pollutant length =1 maar dalk 'n lopp oor meer 
+  sl <- sl[polidx] #nou vir pollutant length =1 maar dalk 'n loop oor meer 
   
   # maak 'n lys om die rasters in te stoor
   lsRasters <- vector(mode = "list", length = length(sl))
@@ -246,7 +246,7 @@ rasterCREP <- function(sl = NULL,
                                        unit.cost = NULL, 
                                        costing.var = NULL, 
                                        risk.only = rrisk.only,
-                                       debug = TRUE,
+                                       debug = FALSE,
                                        out = output)
     lsRasters[[i]] <- res; rm(res)
   }
