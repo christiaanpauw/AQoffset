@@ -16,13 +16,8 @@
 consolodateAdditiveOutcomes <- function(r, polnames = c("PM10", "SO2")){
   nn <- gsub(paste(polnames, collapse = "|"), "", names(r))
   outs <- unique(nn)
-  chronics <- grep("Chronic|chronic", nn)
   idx <- match(nn , outs)
-  if (length(chronics) > 0) idx <- idx[-match(chronics, idx)]
   res <- stackApply(r[[idx]], idx, sum,  na.rm = TRUE)
-  if (length(chronics) > 0) res2 <- stackApply(r[[chronics]], chronics, mean,  na.rm = TRUE)
   names(res) <- outs[idx]
-  names(res2) <- outs[chronics]
-  if (length(chronics) > 0) res <- stack(res, res2)
   res
 }
