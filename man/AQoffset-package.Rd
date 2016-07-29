@@ -19,9 +19,9 @@ License: \tab GPL \cr
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-Christiaan.J. Pauw
+Christiaan. J. Pauw
 
-Maintainer: Christiaan.J. Pauw
+Maintainer: Christiaan. J. Pauw
 }
 \references{
 ~~ Literature or other references for background information ~~
@@ -33,5 +33,7 @@ Maintainer: Christiaan.J. Pauw
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-~~ simple examples of the most important functions ~~
+# not run
+kwaza_API <- rasterAPI(all_base, idpos = 1, polpos = 2, cyclepos = 5)
+swi_base <- SWI(all_base, pop = people)
 }
