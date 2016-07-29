@@ -16,7 +16,7 @@
 
 pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA, 
                    var = "SP_NAME" , raster = FALSE, refres = c(40, 40), 
-                   plot = FALSE, debug = FALSE, ... ){
+                   plot = FALSE, debug = FALSE, resamp = FALSE, ... ){
 	
   require(reshape2)
   require(dplyr)
@@ -54,6 +54,7 @@ pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA,
 		if (debug == TRUE) assign("r", r, envir = .GlobalEnv)
 		
 		if (plot == TRUE){
+		  if (resamp) r <- resample(r, raster(extent(r), ncol = 100, nrow = 100))
 		  levelplot(r, ...) 
 		}
 }
