@@ -8,10 +8,11 @@
 #' @param s A raster stack
 #' @param minmax Logical. Do you want minimum and maximum
 #' @param trim Proportion of data excluded from range 
+#' @param meanonly logical Export only the mean
 #' @return A raster
 #' @export
 
-raster_dist_sum <- function(s, minmax = FALSE, trim = 1/100){
+raster_dist_sum <- function(s, minmax = FALSE, trim = 1/100, meanonly = FALSE){
   if (nlayers(s) < 10) stop("Not much use making a 7 point summary with so few layers, is it?\n Yours has ", nlayers(s) )
   if (trim > 1 | trim < 0) stop("trim must be between 0 and 1: default is 1% thus 0.01")
   require(openair)
@@ -33,7 +34,11 @@ raster_dist_sum <- function(s, minmax = FALSE, trim = 1/100){
   } 
   s2 <- calc(s, sumfun)
   s2[s2==0] <- NA
-  s2
+  if (meanonly){
+    s2[grep("mean", names(s2))]
+  } else{
+    s2
+  }
 }
 
 #' Raster Average Type
