@@ -10,7 +10,7 @@ rasterConcentrationResponse(conc, popr, base.conc, fun.form = c("linear",
   "high estimate"), outcomename = NULL, pollutantname = NULL,
   unit.cost = NULL, costing.var = NULL, risk.only = FALSE,
   out = c("all", "popr", "cases", "conc", "RR", "AF", "AM")[1],
-  verbose = FALSE, debug = TRUE)
+  verbose = FALSE, debug = FALSE, ...)
 }
 \arguments{
 \item{conc}{A raster of concentration values}

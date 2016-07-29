@@ -5,7 +5,8 @@
 \title{Pop to Sp}
 \usage{
 pop2sp(p = fuel_house, place = "place", SPDF = KWA, var = "SP_NAME",
-  raster = FALSE, refres = c(40, 40), plot = FALSE, debug = FALSE, ...)
+  raster = FALSE, refres = c(40, 40), plot = FALSE, debug = FALSE,
+  resamp = FALSE, ...)
 }
 \arguments{
 \item{p}{Data frame that contains point estimates}

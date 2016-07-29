@@ -4,7 +4,7 @@
 \alias{raster_dist_sum}
 \title{Raster Distribution Summary}
 \usage{
-raster_dist_sum(s, minmax = FALSE, trim = 1/100)
+raster_dist_sum(s, minmax = FALSE, trim = 1/100, meanonly = FALSE)
 }
 \arguments{
 \item{s}{A raster stack}
@@ -12,6 +12,8 @@ raster_dist_sum(s, minmax = FALSE, trim = 1/100)
 \item{minmax}{Logical. Do you want minimum and maximum}
 
 \item{trim}{Proportion of data excluded from range}
+
+\item{meanonly}{logical Export only the mean}
 }
 \value{
 A raster

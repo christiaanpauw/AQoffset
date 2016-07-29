@@ -6,7 +6,8 @@
 \usage{
 raster_dist_plot(ss, multi = list(NULL, c("IndustryY_pm10",
   "IndustryX_so2"))[[1]], mn = "", sb = "", th = BuRdTheme,
-  scales = list(draw = FALSE), ...)
+  scales = list(draw = FALSE), meanonly = FALSE, tab_out = FALSE,
+  debug = FALSE, beginnul = FALSE, ...)
 }
 \arguments{
 \item{ss}{A raster stack}
@@ -23,7 +24,11 @@ raster_dist_plot(ss, multi = list(NULL, c("IndustryY_pm10",
 these components must be a numeric vector of length 2 defining the range for each marginal plot.
 Default contains a logical that prevents drawing marginal graphics}
 
-\item{...}{Arguments to be passed to/from other methods}
+\item{meanonly}{Logical Return only the mean}
+
+\item{tab_out}{Logical Write out a table}
+
+\item{...}{Arguments to be passed to raster_dist_sum}
 }
 \description{
 Convenience function to summarise a raster stack and plot the result as a 

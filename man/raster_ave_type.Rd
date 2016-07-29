@@ -5,12 +5,13 @@
 \title{Raster Average Type}
 \usage{
 raster_ave_type(s, patt = "_24h\\\\.[[:digit:]]+", func = "mean",
-  verbose = FALSE)
+  verbose = FALSE, ...)
 }
 \arguments{
 \item{s}{A raster stack}
 
-\item{patt}{Character vector used to isolate unique values within s}
+\item{patt}{Character vector used to isolate unique classes within s . typilcally the varying part. e.g
+if the layers are names pm10_1, pm10_2 ....the patt is '_[[:digit:]]+$"}
 
 \item{func}{The function to be applied on subsets of the raster stack}
 
