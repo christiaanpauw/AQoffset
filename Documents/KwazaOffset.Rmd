@@ -1,8 +1,16 @@
 ---
 title: "Air quality offset calculations for KwaZamokuhle"
 author: "Christiaan Pauw, Nova Instituut"
-date: "3 December 2015"
-output: pdf_document
+date: "15 June 2016"
+output:
+  word_document:
+    toc: yes
+    toc_depth: '4'
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
 ---
 
 ```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
@@ -12,6 +20,7 @@ library(knitr)
 library(rgdal)
 library(pander)
 library(lubridate)
+library(gridExtra)
 
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
@@ -51,6 +60,7 @@ source(paste(rdir, '/End.Point.Info.China.R', sep = ""))
 source(paste(rdir, '/summarise.sicklist.R', sep = ""))
 source(paste(rdir, '/rasterConcentrationResponse.R', sep = ""))
 source(paste(rdir, 'count_exceed_table.R', sep = ""))
+source(paste(rdir, 'aggregateCREPstack.R', sep = ""))
 
 new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
 
@@ -82,6 +92,8 @@ load(paste(datadir, "/hh_24.Rda", sep=""))
 load(paste(datadir, "/EOP-fuel_users.Rda", sep=""))
 kpext <- extent(KWA)
 eskom.base <- eskom * 0.15
+ylabel <- expression(paste("Distribution of daily average ", mu, g/m^{3}, "over 364 days"))
+hylabel <- expression(paste("Distribution of daily average ", mu, g/m^{3}, "over 182 days"))
 ```
 
 ```{r echo=FALSE}
@@ -150,13 +162,9 @@ The approximate spatial distribution of the households by coal use are shown bel
 
 ```{r , echo = FALSE, message=FALSE}
 cat("\n")
-pop2sp(coal.heat, 
-       raster = TRUE, 
-       refres = c(10,10), 
-       plot = TRUE, 
-       par.settings=BuRdTheme, 
+pop2sp(coal.heat, raster = TRUE, scales = list(draw = FALSE),refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, resamp = TRUE, 
        main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", 
-       sub="'Yes' is coal use, 'No' is no coal use") + addkwa()
+       sub="'Yes' is coal use, 'No' is no coal use") + addkwa() + txtkwa()
 cat("\n")
 ```
 
@@ -180,47 +188,49 @@ pander(dta, split.cells = 40,
 ## Baseline states
 
 ```{r echo=FALSE, message=FALSE}
-eskom_kwa <- resample(eskom, hh_24)
-eskom_kwa_base <- eskom_kwa * 0.15
+eskom_kwa <- brick(extent(hh_24), ncol = ncol(hh_24), nrow = nrow(hh_24), nl = 364)
 
 # At this piont you can use setValues for populate the eskom raster with different data
-eskom_kwa_base_c <- crop(eskom_kwa_base, kpext)
-eskom_kwa_proj_c <- eskom_kwa_base_c * 1 / 0.15 # kry proj terug
+PM <- matrix(sapply(1:364 ,function(i) rep(ESKOMSO2PM[i,1] , nrow(hh_24) * ncol(hh_24))), ncol = 364)
 
-PM <- matrix(sapply(1:364 ,function(i) rep(ESKOMSO2PM[i,1] , 84)), ncol = 364)
-SO2 <- matrix(sapply(1:364 ,function(i) rep(ESKOMSO2PM[i,2] , 84)), ncol = 364)
+# Change ppb to ug/m3: WHO 25C 1013mb 1ppb SO2 = 2.62 ug/m3
+SO2 <- matrix(sapply(1:364 ,function(i) rep(ESKOMSO2PM[i,2] * 2.62 , nrow(hh_24) * ncol(hh_24))), ncol = 364)
 
-eskom_kwa_proj_c_pm <- setValues(eskom_kwa_proj_c, PM)
-names(eskom_kwa_proj_c_pm)  <- paste("pm10", ESKOMSO2PM$yd)
+# Set Values
+eskom_kwa_proj_c_pm <- setValues(eskom_kwa, PM)
+names(eskom_kwa_proj_c_pm)  <- paste("Eskom_24h_pm10", ESKOMSO2PM$yd)
 
-eskom_kwa_proj_c_so2 <- setValues(eskom_kwa_proj_c, SO2)
-names(eskom_kwa_proj_c_so2)  <- paste("so2", ESKOMSO2PM$yd)
+eskom_kwa_proj_c_so2 <- setValues(eskom_kwa, SO2)
+names(eskom_kwa_proj_c_so2)  <- paste("Eskom_24h_so2", ESKOMSO2PM$yd)
 
-eskom_kwa_proj_c <- stack(eskom_kwa_proj_c_pm, eskom_kwa_proj_c_so2)
-eskom_kwa_base_c <- eskom_kwa_proj_c * 0.15
+eskom_kwa_proj <- stack(eskom_kwa_proj_c_pm, eskom_kwa_proj_c_so2)
+# The baseline scenario (complinace) is 15% of the project scenario
+eskom_kwa_base <- eskom_kwa_proj * 0.15
 
 # test
-idd <- unlist(lapply(1:2, function(i) ifelse(grep(c("so2","pm10")[i], names(eskom_kwa_proj_c)), i, NA)))
-a <- stackApply(eskom_kwa_proj_c, indices = idd, fun = max, na.rm = TRUE)
-cellStats(a, max) == sapply(ESKOMSO2PM[,1:2], max) # test
-
+idd <- unlist(lapply(1:2, function(i) ifelse(grep(c("so2","pm10")[i], names(eskom_kwa_proj)), i, NA)))
+a <- stackApply(eskom_kwa_proj, indices = idd, fun = max, na.rm = TRUE)
+cellStats(a, max) == sapply(ESKOMSO2PM[,1:2] * matrix(rep(c(1, 2.62), nrow(ESKOMSO2PM)), ncol = 2, byrow = TRUE), max) # test
 ```
 
 The modelled baseline PM10 and SO~2~ resulting from household emissions in KwaZamokuhle is shown below. The tiles represent the 25th and 50th percentiles, the mean and the 75th and 99th percentiles. The last tile in each row represent the standard deviation. 
 
 ```{r echo = FALSE, message=FALSE}
-raster_dist_plot(hh_24, multi = c("pm10", "so2"), th=BuRdTheme, mn = "Households (baseline)", sb = "182 days") + addkwa()
+raster_dist_plot(resample(hh_24, raster(extent(hh_24), ncol =100, nrow=100)), multi = c("pm10", "so2"), th=BuRdTheme, mn = "Households (baseline)", sb = "182 days") + addkwa()
 ```
 
 The distributions of the PM10 and SO~2~ are fairly similar but the concentration of PM10 is modelled to be higher. It is also clear that the concentration of both PM10 and SO~2~ decreases rapidly with distance from the household sources. 
 
 \pagebreak
-The modelled baseline secondary PM2.5 resulting from the Hendrina power station is shown below. The black dot indicates the position Kwazamokuhle.
+The modelled baseline secondary PM2.5 resulting from the Hendrina power station is shown below. 
 
 ```{r echo=FALSE}
-raster_dist_plot(eskom_kwa_base, mn = "Secondary sulphate particulates from Hendrina power station\n in the baseline scenario in the region of KwaZamokuhle", sb = "364 days") + addkwa()
+raster_dist_plot(crop(eskom_kwa_base, kpext), multi = c("pm10", "so2"), mn = "Secondary sulphate particulates and SO2 from Hendrina PS\n in the baseline scenario in the region of KwaZamokuhle", sb = ylabel) + addkwa() + txtkwa()
 ```
 
+```{r Echo = TRUE}
+kable(raster_dist_plot(eskom_kwa_base, multi = c("pm10", "so2"), tab_out = TRUE), digits = 2, caption = "Secondary sulphate particulates and SO2 from Hendrina PS in the baseline scenario in the region of KwaZamokuhle (annual ug/m3)")
+```
 
 ### Exceedence of specified concentrations in the baseline scenario 
 
@@ -239,10 +249,12 @@ The exceedances of the daily PM10 standard related to household emissions occur 
 count_exceed_table(hh_pm10_exceed)
 ```
 
-```{r echo = FALSE}
-eskom_pm10_exceed_base = count_exceed(eskom_kwa_base_c[[grep("pm", names(eskom_kwa_base_c))]], pol = NULL, min = 0, max = 20, by = 1, knip = TRUE)
+As far as the Industrial point source is concerned, the baseline scenario is the compliance scenario. For this reasons the baseline emissions and the associated ambient concentrations are very low. 
 
-eskom_pm10_exceed_proj = count_exceed(eskom_kwa_proj_c[[grep("pm", names(eskom_kwa_proj_c))]], pol = NULL, min = 1, max = 30, by = 5, knip = TRUE)
+```{r echo = FALSE}
+eskom_pm10_exceed_base = count_exceed(eskom_kwa_base[[grep("pm", names(eskom_kwa_base))]], pol = NULL, min = 0, max = 20, by = 1, knip = TRUE)
+
+eskom_pm10_exceed_proj = count_exceed(eskom_kwa_proj[[grep("pm", names(eskom_kwa_proj))]], pol = NULL, min = 1, max = 30, by = 5, knip = TRUE)
 
 levelplot(eskom_pm10_exceed_base, main = "Count of days when concentrations of secondary PM from \nEskom exceeded specified concentration in the baseline scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
 
@@ -253,9 +265,9 @@ The count of days where SO~2~ from the industrial point source exceeded the spec
 
 
 ```{r echo=FALSE}
-eskom_so2_exceed_base = count_exceed(eskom_kwa_base_c[[grep("so2", names(eskom_kwa_base_c))]], pol = NULL, min = 0, max = 10, by = 1, knip = TRUE)
+eskom_so2_exceed_base = count_exceed(eskom_kwa_base[[grep("so2", names(eskom_kwa_base))]], pol = NULL, min = 0, max = 10, by = 1, knip = TRUE)
 
-eskom_so2_exceed_proj = count_exceed(eskom_kwa_base_c[[grep("so2", names(eskom_kwa_proj_c))]], pol = NULL, min = 0, max = 10, by = 1, knip = TRUE)
+eskom_so2_exceed_proj = count_exceed(eskom_kwa_base[[grep("so2", names(eskom_kwa_proj))]], pol = NULL, min = 0, max = 10, by = 1, knip = TRUE)
 
 levelplot(eskom_so2_exceed_base, main = "Count of days when secondary SO2 from \nEskom exceeded specified concentration in the baseline scenario", sub = "364 days", scales=list(draw=FALSE), par.settings=BuRdTheme) + addkwa()
 ```
@@ -269,7 +281,7 @@ count_exceed_table(eskom_pm10_exceed_base, cp = "Baseline exceedence count: PM f
 The count of days where SO~2~ concentration that resulted from household emissions is modelled to exceed a specified level, is shown below for the baseline scenario. 
 
 ```{r echo=FALSE}
-hh_so2_exceed = count_exceed(crop(hh_24, kpext), pol = "so2", min = 100, max = 300, by = 25, knip = FALSE)
+hh_so2_exceed = count_exceed(hh_24, pol = "so2", min = 100, max = 300, by = 25, knip = FALSE)
 
 levelplot(hh_so2_exceed, main = "Count of days when SO2 from households \nexceeded specified concentration", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
 ```
@@ -286,27 +298,39 @@ count_exceed_table(hh_so2_exceed)
 ```{r echo=FALSE, message=FALSE}
 hh_24[is.na(hh_24)] <- 0
 # subset for the same days of the year
-yddE <- gsub("pm10.", "", grep("pm", names(eskom_kwa_base_c), value = T))
-yddE2 <- gsub("so2.", "", grep("so2", names(eskom_kwa_base_c), value = T))
-ydd <- gsub("Households_pm10_24h.", "", grep("pm", names(hh_24), value = T)) 
-ydd2 <- gsub("Households_so2_24h.", "", grep("so2", names(hh_24), value = T)) 
+yddE <- gsub("Eskom_24h_pm10.", "", grep("pm10", names(eskom_kwa_base), value = T))
+yddE2 <- gsub("Eskom_24h_so2.", "", grep("so2", names(eskom_kwa_base), value = T))
+ydd <- gsub("HH_pm10_24h.", "", grep("pm", names(hh_24), value = T)) 
+ydd2 <- gsub("HH_so2_24h.", "", grep("so2", names(hh_24), value = T)) 
 base_PM10_vals_hh <- getValues(hh_24[[grep("pm", names(hh_24))]])
-base_PM10_vals_E <- getValues(eskom_kwa_base_c[[grep("pm", names(eskom_kwa_base_c))]])[match(ydd, yddE)]
+base_PM10_vals_E <- getValues(eskom_kwa_base[[grep("pm", names(eskom_kwa_base))]])[match(ydd, yddE)]
 base_PM10_vals <- base_PM10_vals_E + base_PM10_vals_hh
 
 base_SO2_vals_hh <- getValues(hh_24[[grep("so2", names(hh_24))]])
-base_SO2_vals_E <- getValues(eskom_kwa_base_c[[grep("so2", names(eskom_kwa_base_c))]])[match(ydd2, yddE2)]
+base_SO2_vals_E <- getValues(eskom_kwa_base[[grep("so2", names(eskom_kwa_base))]])[match(ydd2, yddE2)]
 base_SO2_vals <- base_SO2_vals_E + base_SO2_vals_hh
 
-# Set the values. Use the hh_24 raster as a frame
-allPM10_base <- hh_24[[grep("pm", names(hh_24))]]
-allPM10_base <- setValues(allPM10_base, base_PM10_vals)
+# a PM stack
+allPM10_base <- stack(hh_24[[grep("pm", names(hh_24))]], eskom_kwa_base[[grep("pm10", names(eskom_kwa_base))]])
+# get only the days of the year that correspond
+yd <- gsub("Eskom_24h_pm10.|Households_pm10_24h.", "", names(allPM10_base))
+corrdays <- yd[which(duplicated(yd))]
+allPM10_base <- stackApply(allPM10_base, indices = match(yd , corrdays), sum)
+names(allPM10_base) <- gsub("index_", "All_pm10_24h.", names(allPM10_base) )
 
-allSO2_base <- hh_24[[grep("so2", names(hh_24))]]
-allSO2_base <- setValues(allSO2_base, base_SO2_vals)
+# a SO2 stack
+allSO2_base <- stack(hh_24[[grep("so2", names(hh_24))]], eskom_kwa_base[[grep("so2", names(eskom_kwa_base))]])
+yd <- gsub("Eskom_24h_so2.|Households_so2_24h.", "", names(allSO2_base))
+corrdays <- yd[which(duplicated(yd))]
+allSO2_base <- stackApply(allSO2_base, indices = na.omit(match(yd , corrdays)), sum)
+names(allSO2_base) <- gsub("index_", "All_so2_24h.", names(allSO2_base) )
 
+# verenigde PM10 en SO2
 all_base <- stack(allPM10_base, allSO2_base)
-names(all_base) <- gsub("Households_", "All_", names(all_base))
+all_base <- all_base[[-grep("NA", names(all_base))]]
+names(all_base) <- gsub("HH_", "All_", names(all_base))
+
+combined_base <- stack(hh_24, eskom_kwa_base, all_base)
 
 # create a people raster of the same extent as hh_24
 households <- rasteriseCensus(KWA, ref = all_base, refres = c(nrow(all_base), ncol(all_base)))
@@ -320,6 +344,14 @@ all.equal(extent(people) , extent(all_base))
 ```
 
 
+```{r echo=TRUE}
+raster_dist_plot(resample(all_base, raster(extent(all_base), ncol = 100, nrow = 100)), multi = c("pm10", "so2"), meanonly = TRUE, mn = "Mean 24h baseline concentrations \nin the baseline scenario from households and Eskom", sb = hylabel) + addkwa() + txtkwa()
+```
+
+```{r echo=FALSE}
+kable(raster_dist_plot(all_base, multi = c("pm10", "so2"),tab_out  = TRUE), caption = "Mean 24h baseline concentrations \nin the baseline scenario from households and Eskom (ug/m3 over 182 days)", digits = 2)
+```
+
 # Project boundary
 The spatial extent of the project boundary is the overlapping extent of the ambient contribution of the baseline emissions above 2 ug/m3 per year or 19 ug/m3 per day in PM10 or SO~2~, and the same for project emissions from the managed activity. Project emissions from the managed activity are the emissions from Eskom in the business-as-usual scenario. Baseline emissions from households are the emissions from households before implementation of the intervention. 
 
@@ -328,7 +360,7 @@ The spatial extent of the project boundary is the overlapping extent of the ambi
 The baseline emissions from household coal use are summarised below. The tiles represent the 1st, 25th and 50th percentiles, the mean and the 75th and 99th percentiles. The last three tiles represent the standard deviation, inter-quartile range and 99% range of the data. 
 
 ```{r echo=FALSE, message=FALSE}
-raster_dist_plot(all_base, multi = c("pm10", "so2"), mn = "Definition of the project boundary", sb = "(182 days)", th=BuRdTheme) + addkwa()
+raster_dist_plot(all_base, multi = c("pm10", "so2"), mn = "Definition of the project boundary", sb = hylabel, th=BuRdTheme) + addkwa()
 ```
 
 \pagebreak
@@ -336,14 +368,20 @@ The extent of the impact of household emissions in the baseline scenario above a
 
 ```{r echo = FALSE, message=FALSE}
 masker <- project_boundary(r = hh_24, target_period = 'acute', only.mask = TRUE)
-# Nie eskom nie want dan is daar nie 'n projke nie
+# Nie eskom nie want dan is daar nie 'n projek nie
 #eskom_kwa_base <- project_boundary(r = eskom_kwa_base, target_period = 'acute', return.mask = FALSE)
+hh_24 <- project_boundary(r = hh_24, target_period = 'acute', return.mask = FALSE)
+eskom_kwa_proj <- resample(eskom_kwa_proj, hh_24)
+
 all_base <- project_boundary(r = all_base, target_period = 'acute', return.mask = FALSE)
 
 cat("\n")
-raster_dist_plot(all_base, 
-                 mn = "Definition of the project boundary", 
-                 sb = "Non-blank areas are where daily or \n annual PM10 exceed the threshold (182 days)") + addkwa() + txtkwa()
+raster_dist_plot(all_base, multi = c("pm10", "so2"), meanonly = FALSE, mn = expression(paste("Definition of the project boundary: 24h ", mu,g/m^{3})),  sb = "Non-blank areas are where daily or \n annual PM10 exceed the threshold (182 days)") + addkwa() + txtkwa()
+```
+
+Summary
+```{r echo=FALSE}
+raster_dist_plot(resample(all_base, raster(extent(all_base), ncol = 100, nrow=100)), multi = c("pm10", "so2"), meanonly = TRUE, mn = expression(paste("Definition of the project boundary: 24h ", mu,g/m^{3})),  sb = "Non-blank areas are where daily or \n annual PM10 exceed the threshold (182 days)") + addkwa() + txtkwa()
 ```
 
 It is clear from the application of the threshold that, if the modelling is correct, the impact of domestic burning is localised in close proximity to the emissions. The project boundary includes the whole of the main place KwaZamokuhle. Of all the sub-places that make up the main place KwaZamokuhle, the highest mean and maximum concentrations are found in KwaZamokuhle SP. 
@@ -361,11 +399,17 @@ Baseline impact can be determined using different calculation approaches. Four a
 The health risk approach uses an air quality index based on the relative risk of short term mortality associated with every pollutant. Here the pollutants are PM10 and SO~2~, but O~3~ and NO~2~ can potentially be added. The baseline impact represents the combined impact of all pollutants. A summary of the daily API resulting from households is given below.  
 
 ```{r echo=FALSE}
-kwaza_API <- rasterAPI(all_base, verbose = TRUE)
-raster_dist_plot(kwaza_API, 
+kwaza_API <- rasterAPI(all_base, idpos = 1, polpos = 2, cyclepos = 5)
+raster_dist_plot(kwaza_API,  multi = NULL,  mn = "Distribution of baseline API \nfor the baseline scenario", sb = "Air pollution index over 182 days") + addkwa() + txtkwa()
+
+kable(raster_dist_plot(kwaza_API, tab_out = TRUE, multi = NULL), caption = "Distribution (mean of percentiles) of baseline API \nfor the baseline scenario", digits = 2)
+```
+
+```{r echo = FALSE}
+raster_dist_plot(kwaza_API, meanonly = TRUE,
                  multi = NULL, 
-                 mn = "Distribution of baseline API \nfor the baseline scenario", 
-                 sb = "182 days") + addkwa() + txtkwa()
+                 mn = "Distribution of baseline API \nfor the baseline scenario",
+                 sb = "Mean index value over 182 days") + addkwa() + txtkwa()
 ```
 
 \pagebreak
@@ -385,19 +429,37 @@ KwaZamokuhle SP has the highest health risk related to short term exposure.
 
 With sources that have a very localised dispersion, the particle equivalent impact (as PM10 equivalent) of that source is simply the concentration of the PM10 emitted by that source at every receptor; therefore, in the case of household emissions, the baseline impact is the same as the baseline state of PM10 shown above. 
 
+The contribution of households and Eskom to particulate concentrations are shown below, first in detail and thereafter only the contribution to the 182 day mean. 
+
+```{R echo = FALSE}
+raster_dist_plot(crop(combined_base, hh_24), multi = c("Households_pm10_24h\\.","Eskom_24h_pm10\\.", "All_pm10_24h\\."), meanonly = TRUE, mn = "Baseline PM contribution", sb = hylabel) + addkwa() + txtkwa()
+```
+
 ### Standards weighted intake
 
 The standards weighted intake approach is roughly equivalent to a population weighted air pollution index with the index weights determined by the standard. In this way it is related to the health risk approach that also requires population data. 
 
 ```{r echo=FALSE, message=FALSE}
 swi_base <- SWI(all_base, pop = people)
-levelplot(swi_base, par.settings = BuRdTheme, main = "Standards weighted intake in the baseline scenario", margin = FALSE) + addkwa() + txtkwa()
+pp <- resample(crop(people, extent(swi_base)), raster(extent(all_base), nrow=100, ncol=100))
+
+p1 <- rasterVis::levelplot(pp, par.settings = BuRdTheme, main = "Population density", margin = FALSE, scales = list(draw = FALSE)) + addkwa() + txtkwa()
+
+p3 <- levelplot(resample(swi_base, raster(extent(all_base), ncol = 100, nrow=100)), par.settings = BuRdTheme, scales = list(draw = FALSE), main = "SWI: baseline scenario", margin = FALSE) + addkwa() + txtkwa()
+
+grid.arrange(p1, p3, ncol=2)
 ```
 
 
 ### Burden of disease approach
 
 The burden of disease approach quantifies the actual or expected incidence of adverse health outcomes attributible to the exposure to ambient air pollution, and expresses the impact of the air pollution in terms of the proportion or number of cases of a specific outcome or as a weighted aggregate of such outcomes.
+
+The method requires estimates of the incidence rates as well as the total susseptible population of each of the outcomes to be quantified. The method furthermore requires concentration response functions for every outcome. If a monatary estimate of the impact is to be made, a cost estimate per case is also needed. In some cases the concentration response fucntion is defined for PM2.5 but exposure data is availible for PM10. I such cases one needs to make an assumption of the fraction of PM10 that is PM2.5. Chronic and acute effects have to be treated seperately. 
+
+```{r echo = FALSE}
+kable(summarise.sicklist(endlist)[,c(1:5, 12:15)],digits = 2, caption = "Assumptions for burden of disease calculations")
+```
 
 \pagebreak
 The baseline burden of disease impact for PM10 in the baseline scenario is shown below.
@@ -414,25 +476,12 @@ rBoDPM10 <- rasterCREP(sl = endlist,
                        output = "AM",
                        ddelta = 1)
 
-# summarise the number of cases across all days
-rBoDPM10 <- lapply(X = rBoDPM10, FUN = function(bOutcome) {
-  return(calc(x = bOutcome, fun = sum))
-})
-rBoDPM10 <- stack(rBoDPM10)
-
+rBoDPM10 <- aggregateCREPstack(rBoDPM10)
 # tabulate total incidences per health outcome
 kable(sumIncidences(rBoDPM10), digits = 2)
 
-names(rBoDPM10) <- gsub("among.", "", names(rBoDPM10))
-names(rBoDPM10) <- gsub("espiratory", "esp.", names(rBoDPM10))
-names(rBoDPM10) <- gsub("hospital.admissions", "hosp.admin", names(rBoDPM10))
-names(rBoDPM10) <- gsub("Cases_", "", names(rBoDPM10))
-names(rBoDPM10) <- gsub("due.to.", "", names(rBoDPM10))
-names(rBoDPM10) <- gsub("Cardiovascular", "CV", names(rBoDPM10))
-names(rBoDPM10) <- gsub("all.ages", "all", names(rBoDPM10))
-
 # plot incidences
-levelplot(crop(rBoDPM10, kpext), 
+levelplot(crop(rBoDPM10, kpext), scales = list(draw = FALSE),
 main = "Burden of disease for PM10 resulting from household emissions,
 given as number of cases per health outcome", 
           sub = "182 days",
@@ -455,21 +504,10 @@ rBoDSO2 <- rasterCREP(sl = endlist,
                       ddelta = 1)
 
 # summarise the number of cases across all days
-rBoDSO2 <- lapply(X = rBoDSO2, FUN = function(bOutcome) {
-  return(calc(x = bOutcome, fun = sum))
-})
-rBoDSO2 <- stack(rBoDSO2)
+rBoDSO2 <- aggregateCREPstack(rBoDSO2)
 
 # tabulate total incidences per health outcome
 kable(sumIncidences(rBoDSO2), digits = 2)
-
-names(rBoDSO2) <- gsub("among.", "", names(rBoDSO2))
-names(rBoDSO2) <- gsub("espiratory", "esp.", names(rBoDSO2))
-names(rBoDSO2) <- gsub("hospital.admissions", "hosp.admin", names(rBoDSO2))
-names(rBoDSO2) <- gsub("Cases_", "", names(rBoDSO2))
-names(rBoDSO2) <- gsub("due.to.", "", names(rBoDSO2))
-names(rBoDSO2) <- gsub("Cardiovascular", "CV", names(rBoDSO2))
-names(rBoDSO2) <- gsub("all.ages", "all", names(rBoDSO2))
 
 levelplot(crop(rBoDSO2, kpext),
           main = "Burden of disease for SO2 
@@ -514,22 +552,25 @@ Kitchen King = 0.018 * Union * 1.4 * 2 to be conservative ~ 5%
 #### Project states from households
 
 ```{r echo = FALSE}
-hh_24_proj <- hh_24 * 0.49
-raster_dist_plot(hh_24_proj, mn = "Project states from households ", sb = "182 days", multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+hh_24_proj <- hh_24 * 0.48
+raster_dist_plot(hh_24_proj, mn = "Project states from households ", sb = "182 days", multi = c("pm10", "so2"), th=BuRdTheme) + addkwa() + txtkwa()
 ```
 
 The number of high concentration events resulting from household emissions are modelled to decreased in the project scenario.
+
 ```{r echo=FALSE}
 hh_24_proj_exceed_pm <- count_exceed(hh_24_proj, pol = "pm", min = 10, max= 100, by =10)
-levelplot(hh_24_proj_exceed, main = "Count of days when PM from households \nexceeded specified concentration in the project scenario", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
+
+levelplot(resample(crop(hh_24_proj_exceed_pm, kpext), raster(kpext, ncol = 100, nrow = 100)), main = "Count of days when PM from households \nexceeded specified concentration in the project scenario", sub = "182 days", par = BuRdTheme, scales=list(draw=FALSE)) + addkwa() + txtkwa()
+
 count_exceed_table(hh_24_proj_exceed_pm)
 ```
 
 #### Project states from Eskom
 
-A summary of the atmospheric states resulting from Eskom emissions in the project scenario over a period of 364 days is shown below
-```{r}
-raster_dist_plot(eskom_kwa_proj_c, mn = "Project states from Eskom", sb = "364 days", multi = c("pm10", "so2"), th=BuRdTheme) + addkwa()
+A summary of the atmospheric states resulting from Eskom emissions in the project scenario over a period of 364 days is shown below. 
+```{r echo = FALSE}
+raster_dist_plot(eskom_kwa_proj, mn = "Modelled project states from Eskom", sb = ylabel, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa() + txtkwa()
 ```
 
 Eskom is modelled to contribute very little to high PM concentrations with most days modelled to have less than 6ug/m3 
@@ -546,35 +587,54 @@ SO~2~ from Eskom is also very low with no day modelled to have more than 5 ug/m3
 count_exceed_table(eskom_so2_exceed_proj, cp = "Project exceedance count: SO~2~ from Eskom. Daily standard is 125")
 ```
 
-
 #### Project states (all sources)
 
-```{r echo=FALSE, message=FALSE}
-# maak wees PS deur PS_hh, PS_es
-hh_24_PS <- hh_24 * 0.49
-proj_PM10_vals <- getValues(hh_24_PS[[183:364]]) + getValues(eskom_kwa)
-allPM10_proj <- hh_24_PS[[183:364]]
-allPM10_proj <- setValues(allPM10_proj, proj_PM10_vals)
+In the project scenario, PM and SO2 emissions from households would be approximately 49% of the baseline scenario. Eskom emissions of SO~2~ in the project scenario is the business-as-usual emissions which is approximately 6.7 times higher than emissions in the compliance scenario (which is the baseline scenario). Since household emissions were only availible for 182 days, the combined comparison is only done for 182 days. 
 
-allSO2_proj <- hh_24_PS[[1:182]]
+```{r echo=FALSE, message=FALSE}
+
+raster_dist_plot(hh_24_proj, mn = "Project states from Households", sb = ylabel, multi = c("pm10", "so2"), th=BuRdTheme) + addkwa() + txtkwa()
+```
+
+```{r echo=FALSE}
+allPM10_proj <- stack(hh_24_proj[[grep("pm10", names(hh_24_proj))]], eskom_kwa_proj[[grep("pm10", names(eskom_kwa_proj))]])
+yd <- gsub("Eskom_24h_pm10.|Households_pm10_24h.", "", names(allPM10_proj))
+corrdays <- yd[which(duplicated(yd))]
+allPM10_proj <- stackApply(allPM10_proj, indices = match(yd , corrdays), sum)
+names(allPM10_proj) <- gsub("index_", "All_pm10_24h.", names(allPM10_proj))
+
+allSO2_proj <- stack(hh_24_proj[[grep("so2", names(hh_24))]], eskom_kwa_proj[[grep("so2", names(eskom_kwa_proj))]])
+yd <- gsub("Eskom_24h_so2.|Households_so2_24h.", "", names(allSO2_proj))
+corrdays <- yd[which(duplicated(yd))]
+allSO2_proj <- stackApply(allSO2_proj, indices = match(yd , corrdays), sum)
+names(allSO2_proj) <- gsub("index_", "All_so2_24h.", names(allSO2_proj))
 
 all_proj <- stack(allPM10_proj, allSO2_proj)
 
-raster_dist_plot(resample(all_proj, y = raster(kpext, nrow=100, ncol = 100)), multi = c("pm10", "so2"), mn = "Project states (all sources)", sb = "182 days") + addkwa()
+combined_proj <- stack(hh_24_proj, eskom_kwa_proj, all_proj)
+
+raster_dist_plot(resample(all_proj, y = raster(extent(all_proj), nrow=100, ncol = 100)), multi = c("pm10", "so2"), mn = "Project states (all sources)", sb = hylabel) + addkwa() + txtkwa()
 ```
 
-```{r echo=FALSE, message=FALSE}
-all_proj <- mask(crop(all_proj, extent(masker)), masker)
-```
+To summarise the project states, the mean concentrations resulting from households and Eskom as well as the mean combined project state is shown below.
 
 ### Project impacts
 
 #### Project standards weighted intake
 
-
 ```{r echo=FALSE, message=FALSE}
 swi_proj <- SWI(all_proj, pop = people)
-levelplot(swi_proj, par.settings = BuRdTheme, main = "Standards weighted intake in the project scenario", margin = FALSE) + addkwa() + txtkwa()
+
+swi_proj_p <- resample(swi_proj, raster(kpext, nrow=100, ncol =100))
+pp <- resample(crop(people, extent(swi_proj_p)), raster(kpext, nrow=100, ncol=100))
+swi_proj_stack <- stack(pp , swi_proj_p )
+names(swi_proj_stack ) <- c("People", "Std.Weighted Intake")
+
+p1 <- levelplot(pp, par.settings = BuRdTheme, main = "Population density", margin = FALSE, scales = list(draw = FALSE))+ addkwa() + txtkwa()
+
+p2 <- levelplot(swi_proj_p, par.settings = BuRdTheme, main = "Project SWI", margin = FALSE, scales = list(draw = FALSE)) + addkwa() + txtkwa()
+
+grid.arrange(p1, p2, ncol=2)
 ```
 
 #### Projecth health risk approach
@@ -582,10 +642,8 @@ levelplot(swi_proj, par.settings = BuRdTheme, main = "Standards weighted intake 
 Project impacts  
 ```{r echo=FALSE, message=FALSE}
 kwaza_API_proj <- rasterAPI(all_proj)
-raster_dist_plot(resample(kwaza_API_proj,y = raster(kpext, ncol = 100, nrow=100)),
-                 multi = NULL, 
-                 mn = "Distribution of baseline API \nfor the project scenario", 
-                 sb = "182 days") + addkwa() + txtkwa()
+
+raster_dist_plot(resample(kwaza_API_proj,y = raster(kpext, ncol = 100, nrow=100)), multi = NULL, mn = "Distribution of project API \nfor the project scenario", sb = "182 days") + addkwa() + txtkwa()
 ```
 
 #### Project burden of disease
@@ -600,89 +658,105 @@ rBoDPM10_proj <- rasterCREP(sl = endlist,
                        verbose = FALSE, 
                        output = "AM")
 
-rBoDPM10_proj <- lapply(X = rBoDPM10_proj , FUN = function(bOutcome) {
-  return(calc(x = bOutcome, fun = sum))
-})
-rBoDPM10_proj  <- stack(rBoDPM10_proj )
+rBoDPM10_proj <- aggregateCREPstack(rBoDPM10_proj)
 
-names(rBoDPM10_proj) <- gsub("among.", "", names(rBoDPM10_proj))
-names(rBoDPM10_proj) <- gsub("espiratory", "esp.", names(rBoDPM10_proj))
-names(rBoDPM10_proj) <- gsub("hospital.admissions", "hosp.admin", names(rBoDPM10_proj))
-names(rBoDPM10_proj) <- gsub("Cases_", "", names(rBoDPM10_proj))
-names(rBoDPM10_proj) <- gsub("due.to.", "", names(rBoDPM10_proj))
-names(rBoDPM10_proj) <- gsub("Cardiovascular", "CV", names(rBoDPM10_proj))
-names(rBoDPM10_proj) <- gsub("all.ages", "all", names(rBoDPM10_proj))
-
-levelplot(rBoDPM10_proj,
+levelplot(resample(rBoDPM10_proj, raster(kpext, nrow=100, ncol = 100)), scales = list(draw = FALSE),
           main = "Burden of disease for PM10 in the project scenario,
 given as number of cases per health outcome",
 sub = "182 days",
 par = BuRdTheme) + addkwa() + txtkwa()
 
 # tabulate total incidences per health outcome
-kable(sumIncidences(rBoDPM10_proj), digits = 2)
+kable(sumIncidences(rBoDPM10_proj), digits = 2, caption = "Estimated burden of disease in the project scenario")
 ```
 
-## Impact reduction
+# Impact reduction
 
-### Particle precursor approach
+## Particle precursor approach
+
+The impact of the project scenario in terms of PM10 concentrations are shown below
 
 ```{r echo=FALSE, message=FALSE}
 PM_impact <- all_base[[grep("pm10", names(all_base))]] - all_proj[[grep("pm10", names(all_proj))]]
-raster_dist_plot(PM_impact, mn = "Impact of the project activtiy on PM10 concentrations", sb = "182 days") +addkwa() + txtkwa() 
 
+raster_dist_plot(resample(PM_impact, raster(extent(all_base), ncol=100, nrow=100)), mn = "Impact of the project activtiy on PM10 concentrations", sb = "Daily differenence between baseline and project scenario over 182 days") +addkwa() + txtkwa() 
 ```
 
-### Health risk approach
+```{r echo=FALSE}
+raster_dist_plot(resample(PM_impact, raster(extent(all_base), ncol=100, nrow=100)), meanonly = TRUE, mn = "Impact of the project activtiy on PM10 concentrations", sb = "Mean daily differenence between baseline and project scenario over 182 days") +addkwa() + txtkwa() 
+```
+
+In the same wat as above, the impact of the project scenario on SO~2~ concentrations are shown below. 
+
+```{r echo=FALSE}
+SO2_impact <- all_base[[grep("so2", names(all_base))]] - all_proj[[grep("so2", names(all_proj))[1:182]]]
+
+raster_dist_plot(resample(SO2_impact, raster(kpext, ncol=100, nrow=100)), mn = "Impact of the project activtiy on SO2 concentrations (ug/m3)", sb = "Daily differenence between baseline and project scenario over 182 days") +addkwa() + txtkwa() 
+```
+
+##Health risk approach
 
 ```{r echo=FALSE, message=FALSE}
 api_impact <- kwaza_API - kwaza_API_proj
-raster_dist_plot(api_impact, 
-                 multi = NULL, 
-                 mn = "Distribution of API improvement", 
-                 sb = "182 days") + addkwa() + txtkwa()
+api_impact <- mask(api_impact, masker)
+raster_dist_plot(resample(api_impact, raster(extent(all_base), ncol=100, nrow=100)),  multi = NULL,  mn = "Distribution of daily API improvement due to the project scenario",   sb = "182 days") + addkwa() + txtkwa()
 ```
 
-### Standard weighted intake approach
+```{r echo = FALSE}
+raster_dist_plot(resample(api_impact, raster(extent(all_base), ncol=100, nrow=100)),  meanonly = TRUE, multi = NULL,  mn = "Mean daily API improvement due to the project scenario",   sb = "182 days") + addkwa() + txtkwa()
+```
+
+## Standard weighted intake approach
 
 ```{r echo=FALSE, message=FALSE}
 swi_base[is.na(swi_base)] <- 0
 swi_proj[is.na(swi_proj)] <- 0
 swi_impact <- swi_base - swi_proj
 swi_impact[swi_impact==0] <- NA
-levelplot(swi_impact, main = "Impact in terms of reduction in standards weighted intake", sub = "Difference between baseline and project scenarion over 182 days", margin = FALSE, par.settings = BuRdTheme) + addkwa() + txtkwa()
+levelplot(resample(swi_impact, raster(kpext, ncol=100, nrow=100)), main = "Impact in terms of reduction in standards weighted intake", sub = "Difference between baseline and project scenarion over 182 days", margin = FALSE, par.settings = BuRdTheme) + addkwa() + txtkwa()
 ```
 
-### Burden of disease approach 
+## Burden of disease approach 
 
 ```{r echo=FALSE, message=FALSE}
 rBoDPM10[is.na(rBoDPM10)]  <- 0
 rBoDPM10_proj[is.na(rBoDPM10_proj)] <- 0
 rBoDPM10_impact <- rBoDPM10 - rBoDPM10_proj
 rBoDPM10_impact[rBoDPM10_impact==0] <- NA
-levelplot(rBoDPM10_impact, main = "Impact in terms of disease burden due to the \n implementation of the project activity", sub = "number of cases", par = BuRdTheme) + addkwa() + txtkwa()
+rBoDPM10_impact <- resample(rBoDPM10_impact, raster(extent(all_base), nrow=100, ncol=100))
+levelplot(rBoDPM10_impact, 
+          main = "Impact in terms of disease burden due to the \n implementation of the project activity", 
+          sub = "number of cases", 
+          par = BuRdTheme, 
+          scales = list(draw = FALSE)) + addkwa() + txtkwa()
+
+kable(sumIncidences(rBoDPM10_impact), digits = 2, caption = "Estimated burden of disease improvement within the project boundary")
 ```
 
 ## Impact (number to implement)
 
-
 #### Impact deficit: particle percursor approach
 ```{r echo=FALSE, message=FALSE}
-eskom_deficit <- eskom_kwa_base - eskom_kwa
-raster_dist_plot(eskom_deficit, mn = "Deficit according to the particle precursor approach", sb = expression("\\mug/m^2"))+addkwa()
+eskom_deficit <- eskom_kwa_base - eskom_kwa_proj
+plabel <- expression(paste("Daily average ", mu, g/m^{3}, " PM"))
 
 eskom_deficit <- setValues(x = eskom_deficit, values = abs(getValues(eskom_deficit)))
 
+summary(cellStats(eskom_deficit, mean))
+
 eskom_deficit[eskom_deficit == 0] <- 0.000001
 names(eskom_deficit) <- paste("Deficit_pm10_24h", 1:nlayers(eskom_deficit))
+raster_dist_plot(eskom_deficit, mn = "Daily impact deficit according to the \nparticle precursor approach", sb = plabel) +addkwa()
+```
 
+```{r echo=FALSE}
 hh_prop_pp <- crop(eskom_deficit, kpext) / crop(hh_24, kpext)
 
 raster_dist_plot(hh_prop_pp, mn = "Proportion of household emission required to offset Eskom emissions") + addkwa() + txtkwa()
 ```
 
 #### Impact deficit: health risk approach
-
+The 
 ```{r echo=FALSE, message=FALSE}
 api.deficit <- rasterAPI(eskom_deficit)
 api.hh <- rasterAPI(hh_24)
@@ -699,9 +773,9 @@ swi.deficit <- SWI(eskom_deficit)
 swi.hh <- SWI(hh_24)
 swi.prop <- swi.deficit  / swi.hh
 
-levelplot(crop(swi.deficit, kpext), main = "Impact deficit in the SWI approach", sub = "Standards weighted intake", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
+levelplot(resample(crop(swi.deficit, kpext),raster(kpext, ncol = 100, nrow = 100)), main = "Impact deficit in the SWI approach", sub = "Standards weighted intake", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
 
-levelplot(crop(swi.prop, kpext), main = "Required proporion of household SWI", sub = "Standards weighted intake", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
+levelplot(resample(crop(swi.prop, kpext), raster(kpext, ncol = 100, nrow = 100)), main = "Required proporion of household SWI", sub = "Standards weighted intake", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
 
 mean(cellStats(swi.deficit, sum))
 ```
@@ -709,72 +783,52 @@ mean(cellStats(swi.deficit, sum))
 #### Impact deficit: BoD
 
 ```{r echo=FALSE, message=FALSE}
-bod_deficit <- rBoDPM10_proj <- rasterCREP(sl = endlist,
-                       pollutant = "pm10", 
-                       cconc = eskom_kwa, 
+bod_deficit <- rasterCREP(sl = endlist,
+                       pollutant = c("pm10","so2"), 
+                       cconc = eskom_deficit, 
                        ppopr = people, 
-                       bbase.conc = 10, 
+                       bbase.conc = 0, 
                        rrisk.only = FALSE, 
                        verbose = FALSE, 
-                       output = "d")
-
-som <- function(x) {sum(x, na.rm = TRUE)}
+                       output = "AM")
   
-bod_deficit <- lapply(X = bod_deficit , FUN = function(bOutcome) {
-  return(calc(x = bOutcome, fun = som))
-})
-bod_deficit  <- stack(bod_deficit)
+bod_deficit <- aggregateCREPstack(bod_deficit)
 
-names(bod_deficit) <- gsub("among.", "", names(bod_deficit))
-names(bod_deficit) <- gsub("espiratory", "esp.", names(bod_deficit))
-names(bod_deficit) <- gsub("hospital.admissions", "hosp.admin", names(bod_deficit))
-names(bod_deficit) <- gsub("Cases_", "", names(bod_deficit))
-names(bod_deficit) <- gsub("due.to.", "", names(bod_deficit))
-names(bod_deficit) <- gsub("Cardiovascular", "CV", names(bod_deficit))
-names(bod_deficit) <- gsub("all.ages", "all", names(bod_deficit))
-
-levelplot(bod_deficit,
+levelplot(resample(bod_deficit, raster(kpext, ncol = 100, nrow = 100)),
           main = "Burden of disease deficit",
-sub = "182 days",
+sub = "Cases over 182 days. Reference concentration: 0",
 par = BuRdTheme) + addkwa() + txtkwa()
+kable(sumIncidences(bod_deficit), digits = 2)
+```
 
-bod.hh <- rBoDPM10_proj <- rasterCREP(sl = endlist,
+```{r echo=FALSE}
+bod.hh <- rasterCREP(sl = endlist,
                        pollutant = c("pm10", "so2"), 
-                       cconc = hh_24, 
+                       cconc = resample(crop(hh_24,eskom_deficit), eskom_deficit),
                        ppopr = people, 
                        bbase.conc = 10, 
                        rrisk.only = FALSE, 
                        verbose = FALSE, 
-                       output = "d")
+                       output = "AM")
 
-som <- function(x) {sum(x, na.rm = TRUE)}
- 
-##### !!!!! WAT DOEN HIERDIE EN IS DIT REG ???????? 
-bod.hh <- lapply(X = bod.hh , FUN = function(bOutcome) {
-  return(calc(x = bOutcome, fun = som))
-})
-bod.hh  <- stack(bod.hh)
-
-names(bod.hh) <- gsub("among.", "", names(bod.hh))
-names(bod.hh) <- gsub("espiratory", "esp.", names(bod.hh))
-names(bod.hh) <- gsub("hospital.admissions", "hosp.admin", names(bod.hh))
-names(bod.hh) <- gsub("Cases_", "", names(bod.hh))
-names(bod.hh) <- gsub("due.to.", "", names(bod.hh))
-names(bod.hh) <- gsub("Cardiovascular", "CV", names(bod.hh))
-names(bod.hh) <- gsub("all.ages", "all", names(bod.hh))
+bod.hh <- aggregateCREPstack(bod.hh)
 
 levelplot(bod.hh,
-          main = "Burden of disease deficit",
-sub = "182 days",
-par = BuRdTheme) + addkwa() + txtkwa()
+          main = "Burden of disease households", sub = "Cases over 182 days. Reference concentration: 10", par = BuRdTheme) + addkwa() + txtkwa()
 
-bod.prop <- bod_deficit  / bod.hh
-cdef <- crop(bod_deficit, kpext)
-levelplot(cdef, main = "Impact deficit in the BoD approach", sub = "Disease burden", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
+kable(sumIncidences(bod.hh), digits = 2)
+```
 
-levelplot(crop(bod.prop, kpext), main = "Required proporion of household BoD", sub = "Disease Burden", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
-
-cellStats(bod_deficit, sum)
+```{r echo=FALSE}
+# bod.prop <- bod_deficit  / bod.hh
+# 
+# maks <- function(x) max(x, na.rm = TRUE)
+# 
+# bod.prop <- calc(bod.prop, maks)
+# 
+# levelplot(d.prop, main = "Required % of household required \nto offset the impact of the managed activity (BoD apporach)", sub = "Disease burden", margin = FALSE, par = BuRdTheme) + addkwa() + txtkwa()
+# 
+# kable(sumIncidences(bod.prop), digits = 2, caption = "BoD improvement within the project boundary due to the project activity")
 ```
 
 
