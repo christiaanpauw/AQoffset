@@ -7,7 +7,7 @@
 raster_dist_plot(ss, multi = list(NULL, c("IndustryY_pm10",
   "IndustryX_so2"))[[1]], mn = "", sb = "", th = BuRdTheme,
   scales = list(draw = FALSE), meanonly = FALSE, tab_out = FALSE,
-  debug = FALSE, beginnul = FALSE, ...)
+  debug = FALSE, beginnul = FALSE, diverge = FALSE, ...)
 }
 \arguments{
 \item{ss}{A raster stack}

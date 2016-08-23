@@ -2,7 +2,8 @@
 % Please edit documentation in R/rasteriseCensus.R
 \name{sexify}
 \alias{sexify}
-\title{Sexify}
+\title{Sexify
+Change  SPDF to match a se proportion}
 \usage{
 sexify(x, prop = 0.5)
 }
@@ -12,6 +13,7 @@ sexify(x, prop = 0.5)
 \item{prop}{Numeric that contains the sex proportion}
 }
 \description{
+Sexify
 Change  SPDF to match a se proportion
 }
 
