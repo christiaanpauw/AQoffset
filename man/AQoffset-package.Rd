@@ -16,7 +16,7 @@ Version: \tab 1.0\cr
 Date: \tab 2015-03-10\cr
 License: \tab GPL \cr
 }
-~~ An overview of how to use the package, including the most important functions ~~
+
 }
 \author{
 Christiaan. J. Pauw
@@ -24,14 +24,12 @@ Christiaan. J. Pauw
 Maintainer: Christiaan. J. Pauw
 }
 \references{
-~~ Literature or other references for background information ~~
+Air Quality Offsets Protocol
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
-\keyword{ package }
-\seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
+
+\keyword{ Air Quality Offset }
+
+
 \examples{
 # not run
 kwaza_API <- rasterAPI(all_base, idpos = 1, polpos = 2, cyclepos = 5)
