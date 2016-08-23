@@ -25,7 +25,7 @@ raster_dist_plot <- function(ss,
                              scales=list(draw=FALSE), 
                              meanonly = FALSE, 
                              tab_out = FALSE,
-                             debug = FALSE, beginnul = FALSE,
+                             debug = FALSE, beginnul = FALSE, diverge = FALSE,
                              ...){
   if (!require(rasterVis)){
     message("Ek probeer raserVis installeer")
@@ -67,8 +67,8 @@ raster_dist_plot <- function(ss,
     lo = c(6,length(multi))
     mmv <- min(minValue(res))
     if (beginnul) mmv <- 0
-    message(mmv)
-    if (mmv > 0){
+    message("Minimum value",mmv)
+    if (mmv >= 0){
       att <- seq(0, max(maxValue(res)), length = 20)
     } else {
       att <- seq(mmv, max(maxValue(res)), length = 20)
@@ -86,9 +86,10 @@ raster_dist_plot <- function(ss,
     
     if (meanonly){
       res <- res[[grep("mean", names(res))]]
-      levelplot(res, par.settings = th, main = mn, sub =sb, scales = scales)
+      p <- levelplot(res, par.settings = th, main = mn, sub =sb, scales = scales, axs = "i")
     } else {
-      levelplot(res, par.settings = th, layout = lo, main = mn, sub =sb, scales =scales, at = att)
+      p <- levelplot(res, par.settings = th, layout = lo, main = mn, sub =sb, scales =scales, at = att, axs = "i")
     }
-    }
+  } 
+  if (diverge) {diverge0(p, ramp = "RdBu")} else {p}
 }
