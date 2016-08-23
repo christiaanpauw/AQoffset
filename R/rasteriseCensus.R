@@ -33,15 +33,17 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
   for (i in 1:length(srl)){
     ct = unique(srl[[i]]@data$category)
     if (verbose == TRUE) message(i," " , ct, "\nrefres is ", paste(refres, " "))
-    vls = rasterize(SpatialPoints(srl[[i]]), fun = "count", raster(extent(b), nrow = refres[1], ncol = refres[2]))
+    vls = rasterize(x = SpatialPoints(srl[[i]]),
+                    y = b,  
+                    fun = "count")
     b = setValues(b, getValues(vls), layer = i)
   }
   names(b) <- cts
   return(b)
+  # grid : spp = SpatialGrid(points2grid(SpatialPoints(coordinates(b))))
 }
 
 #' Sexify
-#' 
 #' Change  SPDF to match a se proportion
 #' 
 #' @param x A SpatialPolygonsDataFrame
@@ -53,3 +55,12 @@ sexify <- function(x, prop = 0.5){
   res
 }
 
+
+#' gridzle
+#' Maak 'n rooster (SpatialGrid) van 'n raster
+#' @param r raster
+
+gridzle <- function(r){
+  res = SpatialGrid(points2grid(SpatialPoints(coordinates(r))))
+  res
+}
