@@ -86,9 +86,9 @@ raster_dist_plot <- function(ss,
     
     if (meanonly){
       res <- res[[grep("mean", names(res))]]
-      p <- levelplot(res, par.settings = th, main = mn, sub =sb, scales = scales, axs = "i")
+      p <- levelplot(res, par.settings = th, main = mn, sub =sb, scales = scales)
     } else {
-      p <- levelplot(res, par.settings = th, layout = lo, main = mn, sub =sb, scales =scales, at = att, axs = "i")
+      p <- levelplot(res, par.settings = th, layout = lo, main = mn, sub =sb, scales =scales, at = att)
     }
   } 
   if (diverge) {diverge0(p, ramp = "RdBu")} else {p}
