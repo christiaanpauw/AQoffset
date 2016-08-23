@@ -97,34 +97,7 @@ hylabel <- expression(paste("Distribution of daily average ", mu, g/m^{3}, "over
 ```
 
 ```{r echo=FALSE}
-# assumes that outcomesStack is a raster stack with 1 layer per outcome
-sumIncidences <- function(outcomesStack) {
-  dfIncidences <- data.frame(matrix(ncol = 2), 
-                             stringsAsFactors = FALSE)
-  names(dfIncidences) <- c("outcome", "total_cases")
-  dfIncidences <- dfIncidences[-1,]
-  
-  for (i in 1:nlayers(outcomesStack)) {
-    outcome <- tolower(names(outcomesStack)[i])
-    totalIncidences <- sum(getValues(outcomesStack[[i]]), na.rm = TRUE)
-    dfIncidences[nrow(dfIncidences) +1,] <- c(outcome, totalIncidences)
-  }
-  dfIncidences$outcome <- gsub(pattern = "cases_", 
-                               replacement = "", 
-                               x = dfIncidences$outcome, 
-                               fixed = TRUE)
-  dfIncidences$outcome <- gsub(pattern = "..", 
-                               replacement = ".", 
-                               x = dfIncidences$outcome, 
-                               fixed = TRUE)
-  dfIncidences$outcome <- gsub(pattern = ".", 
-                               replacement = " ", 
-                               x = dfIncidences$outcome, 
-                               fixed = TRUE)
-  
-  dfIncidences$total_cases <- as.numeric(dfIncidences$total_cases)
-  return(dfIncidences)
-}
+# sumIncidences
 ```
 
 # Baseline scenario
@@ -238,7 +211,7 @@ The count of days where the PM10 concentrations that resulted from household emi
 
 ```{r echo = FALSE}
 hh_pm10_exceed = count_exceed(hh_24, pol = "pm10", min = 50, max = 300, by = 50, knip = FALSE)
-levelplot(hh_pm10_exceed, main = "Count of days when PM10 from households \nexceeded specified concentration", sub = "182 days", par.settings=BuRdTheme) + addkwa()
+rasterVis::levelplot(hh_pm10_exceed, main = "Count of days when PM10 from households \nexceeded specified concentration", sub = "182 days", par.settings=viridisTheme()) + addkwa()
 ```
 
 The exceedances of the daily PM10 standard related to household emissions occur over the southern and eastern side of KwaZamokuhle with the highest exceedance count at every level occurring in KwaZamokuhle SP.
@@ -643,7 +616,7 @@ Project impacts
 ```{r echo=FALSE, message=FALSE}
 kwaza_API_proj <- rasterAPI(all_proj)
 
-raster_dist_plot(resample(kwaza_API_proj,y = raster(kpext, ncol = 100, nrow=100)), multi = NULL, mn = "Distribution of project API \nfor the project scenario", sb = "182 days") + addkwa() + txtkwa()
+api_p <- raster_dist_plot(resample(kwaza_API_proj,y = raster(kpext, ncol = 100, nrow=100)), multi = NULL, mn = "Distribution of project API \nfor the project scenario", sb = "182 days") + addkwa() + txtkwa()
 ```
 
 #### Project burden of disease
