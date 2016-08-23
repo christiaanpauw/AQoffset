@@ -46,21 +46,7 @@ if (USER == "BS") {
   datadir <- normalizePath(paste(projdir, "Data/", sep = ""))
 }
   
-source(paste(rdir, "/count_exceed.R", sep=""))
-source(paste(rdir, '/raster_dist_sum.R', sep=""))
-source(paste(rdir, '/API.R', sep=""))
-source(paste(rdir, '/knipNA.R', sep =""))
-source(paste(rdir, '/raster_dist_plot.R', sep =""))
-source(paste(rdir, '/pop2sp.R', sep =""))
-source(paste(rdir, '/rasteriseCensus.R', sep =""))
-source(paste(rdir, '/pointifyCensus.R', sep =""))
-source(paste(rdir, '/project_boundary.R', sep =""))
-source(paste(rdir, '/SWI.R', sep =""))
-source(paste(rdir, '/End.Point.Info.China.R', sep = ""))
-source(paste(rdir, '/summarise.sicklist.R', sep = ""))
-source(paste(rdir, '/rasterConcentrationResponse.R', sep = ""))
-source(paste(rdir, 'count_exceed_table.R', sep = ""))
-source(paste(rdir, 'aggregateCREPstack.R', sep = ""))
+library(AQoffset)
 
 new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
 
