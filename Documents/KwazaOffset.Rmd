@@ -3,14 +3,14 @@ title: "Air quality offset calculations for KwaZamokuhle"
 author: "Christiaan Pauw, Nova Instituut"
 date: "15 June 2016"
 output:
-  word_document:
-    toc: yes
-    toc_depth: '4'
   pdf_document:
     fig_caption: yes
     number_sections: yes
     toc: yes
     toc_depth: 4
+  word_document:
+    toc: yes
+    toc_depth: '4'
 ---
 
 ```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
@@ -48,9 +48,12 @@ if (USER == "BS") {
   
 library(AQoffset)
 
-new.proj <- "+proj=utm + south + zone=35 ellps=WGS84" 
+new.proj <- "+proj=utm +south +zone=35 +ellps=WGS84" 
+kwa.proj <- "+proj=utm +zone=35 +south +datum=WGS84 +units=km +ellps=WGS84 +towgs84=0,0,0"
 
 load(paste(datadir, "/kwaza_household_census.Rda", sep=""))
+load(paste(datadir, "/kwazapopRaster.Rda", sep = "")) # sy naam in r3
+r3 <- r3*2.3 # lelike hack om die bevolking reg te kry - Worldpop is verkeerd
 kwaN <- as.character(KWA@data$SP_NAME)
 kwaCoor <- coordinates(KWA)
 ESKOMSO2PM <- read.table("Data/ESKOMSO2PM.txt", sep = "\t" ,header = TRUE)
@@ -59,17 +62,16 @@ ESKOMSO2PM$date <- dmy_hms(ESKOMSO2PM$date, tz = "Africa/Johannesburg")
 ESKOMSO2PM$yd <- yday(ESKOMSO2PM$date)
 
 addkwa <- function() {latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
-addkwa2 <- function() {layer(sp::sp.polygons(KWA, lwd = 10))}
-txtkwa <- function() {layer(panel.text(x = coordinates(KWA)[,1], 
+addkwa2 <- function() {latticeExtra::layer(sp::sp.polygons(KWA, lwd = 10))}
+txtkwa <- function() {latticeExtra::layer(panel.text(x = coordinates(KWA)[,1], 
                                        y = coordinates(KWA)[,2], 
                                        label = as.character(KWA@data$SP_NAME), 
                                        cex = 0.5))}
 ```
 
 ```{r echo=FALSE, message=FALSE}
-
 #remove the other datasets here to save memory
-load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
+#load(paste(datadir, "/kwaza_eskom_24h_camx.Rda", sep = ""))
 load(paste(datadir, "/eskom.Rda", sep = ""))
 #load(paste(datadir, "/kwaza_eskom_year_camx.Rda", sep = ""))
 load(paste(datadir, "/kwaza_household_energyRaster.Rda", sep=""))
@@ -113,18 +115,14 @@ kable(kwa_census_fuel_df, row.names = FALSE, caption = "Solid fuel use for heati
 
 It is known however that because the Census asks only a question about the *main* energy carrier, the number of solid fuel users are underestimated. The results of the survey lead to a substantially higher estimate compared to the census. The estimates of coal using households per sub-place derived from the household survey are shown in Table 3. It is clear that the number of coal using households derived from the survey results is substantially higher. 
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, fmessage=FALSE}
 kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption = "Estimated number of coal using households per subplace with upper and lower bound of the 95% confidence interval")
 ```
 
 The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of KwaZamokuhle is clear.  
 
 ```{r , echo = FALSE, message=FALSE}
-cat("\n")
-pop2sp(coal.heat, raster = TRUE, scales = list(draw = FALSE),refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, resamp = TRUE, 
-       main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", 
-       sub="'Yes' is coal use, 'No' is no coal use") + addkwa() + txtkwa()
-cat("\n")
+pop2sp(coal.heat, SPDF = KWA, raster = TRUE, scales = list(draw = FALSE),refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, resamp = TRUE,  main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa() + txtkwa()
 ```
 
 Baseline emissions are calculated from the results of a domestic fuel use survey. The estimates for fuel consumption based on the household survey are shown in Table 4. Winter coal consumption is understandably higher than summer consumption. Once again KwaZamokuhle SP has the highest consumption. 
@@ -184,7 +182,7 @@ The distributions of the PM10 and SO~2~ are fairly similar but the concentration
 The modelled baseline secondary PM2.5 resulting from the Hendrina power station is shown below. 
 
 ```{r echo=FALSE}
-raster_dist_plot(crop(eskom_kwa_base, kpext), multi = c("pm10", "so2"), mn = "Secondary sulphate particulates and SO2 from Hendrina PS\n in the baseline scenario in the region of KwaZamokuhle", sb = ylabel) + addkwa() + txtkwa()
+raster_dist_plot(crop(eskom_kwa_base, kpext), multi = c("pm10", "so2"), mn = "Secondary sulphate particulates and SO2 from Hendrina PS\n in the baseline scenario in the region of KwaZamokuhle", sb = ylabel) + txtkwa() + addkwa() 
 ```
 
 ```{r Echo = TRUE}

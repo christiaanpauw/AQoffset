@@ -5,7 +5,7 @@
 #' @param p Data frame that contains point estimates
 #' @param place Character vector referring to the column containing locations
 #' @param SPDF A SpacialPolygonsDataFrame
-#' @param var Character vector of the variable under consideration
+#' @param var Character Name of the variable under consideration
 #' @param raster Logical to Rasterise a census polygon SPDF possibly containing 
 #' summary data if TRUE.
 #' @param refres Numeric vector of length 2 (x,y): A reference resolution
@@ -35,7 +35,7 @@ pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA,
 		m = melt(p)
 		m = m[!is.na(m$var), ]
 		d =  dcast(m , place ~ var + variable, sum)
-		dropidx = grep("NA_", names(d))
+		dropidx = grep("NA_|^$", names(d))
 		if (length(dropidx) > 0) d = d[, -dropidx]
 		
 		# Maak die name kleinletters 

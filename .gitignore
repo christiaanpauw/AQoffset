@@ -30,3 +30,5 @@ KwaZamokuhleMP
 *.pdf
 *.Rmd
 *.txt
+Data/kwaza_household_census.Rda
+Data/kwaza_eskom_24h_camx.Rda

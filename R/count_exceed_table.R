@@ -2,6 +2,7 @@
 #' @param x a raster stack resultsing from the count_exceed function
 #' @author Christiaan J Pauw
 #' @param cp Character The caption
+#' @export
 
 count_exceed_table <- function(x, cp = "", ...){
   #bar_exceed(x, ttl = "Aggregated count of days when SO2 from \nhouseholds exceeded specified concentration")

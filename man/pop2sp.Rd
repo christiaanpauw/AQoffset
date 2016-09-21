@@ -15,7 +15,7 @@ pop2sp(p = fuel_house, place = "place", SPDF = KWA, var = "SP_NAME",
 
 \item{SPDF}{A SpacialPolygonsDataFrame}
 
-\item{var}{Character vector of the variable under consideration}
+\item{var}{Character Name of the variable under consideration}
 
 \item{raster}{Logical to Rasterise a census polygon SPDF possibly containing 
 summary data if TRUE.}
