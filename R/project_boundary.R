@@ -41,8 +41,7 @@ project_boundary <- function(r,
                              vebose = FALSE, 
                              return.mask = FALSE, 
                              maskname = "masker", 
-                             only.mask = FALSE, 
-                             debug = FALSE){
+                             only.mask = FALSE){
   if (target_period == "acute" | target_period == "both"){
     # maak seker die vergemiddeldingsperiod is reg
     # jy kan opsom maar nie afsom nie. i.e. jy kan ure dae maak maar nie andersom nie
@@ -76,7 +75,6 @@ project_boundary <- function(r,
   # knip die kante af
   #assign("res", res, envir = .GlobalEnv)
   if (any(getValues(res) == 0)) res[which(getValues(res) == 0)] = NA
-  if (debug == TRUE) assign("res", res, envir = .GlobalEnv)
   res = knipNA(res, out = "raster")
   
   # oorweeg dit op die bestek as 'n blok op google earth te druk
