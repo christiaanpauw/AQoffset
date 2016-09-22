@@ -14,7 +14,7 @@ if (length(out) != 1) stop("out must be either 'extent' or 'raster' \n it's curr
 if (is.na(match(out,  c("extent", "raster")))) stop(paste("\nout must be either 'extent' or 'raster'\n it is currently " , out, sep=""))
 
 #Transform the raster into a matrix that identifies whether the values are NA or not.
-r1NaM <- is.na(as.matrix(r))
+r1NaM <- matrix(is.na(getValues(r)), nrow = nrow(r))
 
 #Find the columns and rows that are not completely filled by NAs
 colNotNA <- which(colSums(r1NaM) != nrow(r))
