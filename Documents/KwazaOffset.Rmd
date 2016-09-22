@@ -47,7 +47,7 @@ if (USER == "BS") {
 }
   
 library(AQoffset)
-
+wgs.proj <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 new.proj <- "+proj=utm +south +zone=35 +ellps=WGS84" 
 kwa.proj <- "+proj=utm +zone=35 +south +datum=WGS84 +units=km +ellps=WGS84 +towgs84=0,0,0"
 
@@ -61,6 +61,13 @@ colnames(ESKOMSO2PM)[3] <- "date"
 ESKOMSO2PM$date <- dmy_hms(ESKOMSO2PM$date, tz = "Africa/Johannesburg") 
 ESKOMSO2PM$yd <- yday(ESKOMSO2PM$date)
 
+KWA_R <- spTransform(KWA, CRS(wgs.proj))
+
+addkwaR <- function() {latticeExtra::layer(sp::sp.polygons(KWA_R, lwd = 0.25))}
+txtkwaR <- function() {latticeExtra::layer(panel.text(x = coordinates(KWA_R)[,1], 
+                                       y = coordinates(KWA_R)[,2], 
+                                       label = as.character(KWA_R@data$SP_NAME), 
+                                       cex = 0.5))}
 addkwa <- function() {latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
 addkwa2 <- function() {latticeExtra::layer(sp::sp.polygons(KWA, lwd = 10))}
 txtkwa <- function() {latticeExtra::layer(panel.text(x = coordinates(KWA)[,1], 
@@ -317,7 +324,7 @@ The spatial extent of the project boundary is the overlapping extent of the ambi
 The baseline emissions from household coal use are summarised below. The tiles represent the 1st, 25th and 50th percentiles, the mean and the 75th and 99th percentiles. The last three tiles represent the standard deviation, inter-quartile range and 99% range of the data. 
 
 ```{r echo=FALSE, message=FALSE}
-raster_dist_plot(all_base, multi = c("pm10", "so2"), mn = "Definition of the project boundary", sb = hylabel, th=BuRdTheme) + addkwa()
+raster_dist_plot(all_baseR, scales = list(TRUE), multi = c("pm10", "so2"), mn = "Definition of the project boundary", sb = hylabel, th=BuRdTheme) + addkwaR()
 ```
 
 \pagebreak
@@ -389,7 +396,7 @@ With sources that have a very localised dispersion, the particle equivalent impa
 The contribution of households and Eskom to particulate concentrations are shown below, first in detail and thereafter only the contribution to the 182 day mean. 
 
 ```{R echo = FALSE}
-raster_dist_plot(crop(combined_base, hh_24), multi = c("Households_pm10_24h\\.","Eskom_24h_pm10\\.", "All_pm10_24h\\."), meanonly = TRUE, mn = "Baseline PM contribution", sb = hylabel) + addkwa() + txtkwa()
+raster_dist_plot(crop(combined_baseR, hh_24), multi = c("Households_pm10_24h\\.","Eskom_24h_pm10\\.", "All_pm10_24h\\."), meanonly = TRUE, mn = "Baseline PM contribution", sb = hylabel) + addkwa() + txtkwa()
 ```
 
 ### Standards weighted intake
