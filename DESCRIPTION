@@ -2,12 +2,12 @@ Package: AQoffset
 Type: Package
 Title: Makes calculation needed for air quality offsetting
 Version: 1.0
-Date: 2015-03-10
+Date: 2015-02-01
 Author: Christiaan J. Pauw
 Maintainer: Christiaan J. Pauw <christiaan.pauw@nova.org.za>
-Description: Uses rasterised outputs of dispersion models or other air quality models and population data to calculate 
-air quality impacts and the impact of offsets.
-Imports:  Hmisc, RgoogleMaps,  dplyr,  lattice,  ncdf4,  openair, plyr, reshape2
-Depends: knitr, raster, rasterVis, gridExtra, lubridate, pander, rgdal
+Description: Uses rasterised outputs of dispersion models or other air quality models and population data to calculate air quality impacts and the impact of offsets.
+Imports: Hmisc, RgoogleMaps, ncdf4, openair, plyr
+Depends: knitr, raster, rasterVis, gridExtra, lubridate, pander, rgdal, dplyr,  lattice, reshape2
 License: GPL
+Depends: knitr, raster, rasterVis, gridExtra, lubridate, pander, rgdal
 RoxygenNote: 5.0.1
