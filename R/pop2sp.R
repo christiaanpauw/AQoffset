@@ -32,9 +32,9 @@ pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA,
 		p$place <- tolower(p$place)
 		p$place <- gsub(" ", "\\.", p$place)
 		
-		m = melt(p)
+		m = melt(p, id.vars = c("place", "var"))
 		m = m[!is.na(m$var), ]
-		d =  dcast(m , place ~ var + variable, sum)
+		d =  reshape2::dcast(m , place ~ var + variable, sum)
 		dropidx = grep("NA_|^$", names(d))
 		if (length(dropidx) > 0) d = d[, -dropidx]
 		
@@ -48,11 +48,9 @@ pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA,
 		SPDF@data = d[match(SPDF@data$place, d$place), ]
 		
 		if (raster == FALSE) return(SPDF)
-		if (debug) assign("SODF", SPDF, envir = .GlobalEnv)
-		r = rasteriseCensus(SPDF, ref = extent(SPDF), refres = refres)
-		
-		if (debug) assign("r", r, envir = .GlobalEnv)
-		
+		#if (debug) assign("SODF", SPDF, envir = .GlobalEnv)
+		r = rasteriseCensus(x = SPDF, ref = extent(SPDF), refres = refres, ...)
+	
 		if (plot == TRUE){
 		  if (resamp) r <- resample(r, raster(extent(r), ncol = 100, nrow = 100))
 		  levelplot(r, ...) 
