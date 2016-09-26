@@ -4,10 +4,10 @@
 \alias{pointifyCensus}
 \title{Pointify Census Polygon}
 \usage{
-pointifyCensus(spdf, dropnames = c("ID", "OBJECTID", "Geometry_s",
-  "GAVPrimar0", "Geometry_1", "SP_CODE", "SP_Code", "MP_CODE", "MP_Code",
-  "MN_CODE", "MN_MDB_C", "DC_MN_C", "Shape_Leng", "Shape_Area", "fakeData",
-  "GAVPrimary", "Total"), verbose = TRUE, debug = TRUE, ...)
+pointifyCensus(spdf, erwe = NULL, dropnames = c("ID", "OBJECTID",
+  "Geometry_s", "GAVPrimar0", "Geometry_1", "SP_CODE", "SP_Code", "MP_CODE",
+  "MP_Code", "MN_CODE", "MN_MDB_C", "DC_MN_C", "Shape_Leng", "Shape_Area",
+  "fakeData", "GAVPrimary", "Total"), verbose = TRUE, debug = TRUE, ...)
 }
 \arguments{
 \item{spdf}{A SpatialPolygonsDataFrame}
