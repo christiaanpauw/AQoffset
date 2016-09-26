@@ -27,6 +27,8 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 USER <- c("CJP", "AH", "BS")[1]
 
 if (USER == "CJP") {
+  load("/Users/christiaanpauw/Documents/GIS_Spatial/R/kwazamokuhle.erwe.Rda")
+  load("/Users/christiaanpauw/Documents/GIS_Spatial/R/PRSA.Rda")
   wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
   setwd("/Users/christiaanpauw/Documents/Rpakette/AQoffset/")
   rdir <-  file.path(paste(wd, "R/", sep=""))
@@ -56,12 +58,16 @@ load(paste(datadir, "/kwazapopRaster.Rda", sep = "")) # sy naam in r3
 r3 <- r3*2.3 # lelike hack om die bevolking reg te kry - Worldpop is verkeerd
 kwaN <- as.character(KWA@data$SP_NAME)
 kwaCoor <- coordinates(KWA)
+
 ESKOMSO2PM <- read.table("Data/ESKOMSO2PM.txt", sep = "\t" ,header = TRUE)
 colnames(ESKOMSO2PM)[3] <- "date"
 ESKOMSO2PM$date <- dmy_hms(ESKOMSO2PM$date, tz = "Africa/Johannesburg") 
 ESKOMSO2PM$yd <- yday(ESKOMSO2PM$date)
 
 KWA_R <- spTransform(KWA, CRS(wgs.proj))
+kwazaUTM <- spTransform(kwaza, CRS("+proj=utm +zone=35 +south +datum=WGS84 +units=km +ellps=WGS84 +towgs84=0,0,0"))
+kwazaUTM$n <- 1
+kwazaUTM <- kwazaUTM[,grep("n", names(kwazaUTM@data))]
 
 addkwaR <- function() {latticeExtra::layer(sp::sp.polygons(KWA_R, lwd = 0.25))}
 txtkwaR <- function() {latticeExtra::layer(panel.text(x = coordinates(KWA_R)[,1], 
@@ -74,7 +80,14 @@ txtkwa <- function() {latticeExtra::layer(panel.text(x = coordinates(KWA)[,1],
                                        y = coordinates(KWA)[,2], 
                                        label = as.character(KWA@data$SP_NAME), 
                                        cex = 0.5))}
+
 ```
+
+```{r echo=FALSE}
+kr <- rasterize(kwazaUTM, r3, "n", fun="count")
+levelplot(kr) + latticeExtra::layer(sp::sp.polygons(kwazaUTM, lwd = 0.25))
+```
+
 
 ```{r echo=FALSE, message=FALSE}
 #remove the other datasets here to save memory
@@ -129,7 +142,7 @@ kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption 
 The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of KwaZamokuhle is clear.  
 
 ```{r , echo = FALSE, message=FALSE}
-pop2sp(coal.heat, SPDF = KWA, raster = TRUE, scales = list(draw = FALSE),refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, resamp = TRUE,  main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa() + txtkwa()
+pop2sp(coal.heat, SPDF = KWA, raster = TRUE, scales = list(draw = FALSE), refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, resamp = TRUE,  main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa() + txtkwa()
 ```
 
 Baseline emissions are calculated from the results of a domestic fuel use survey. The estimates for fuel consumption based on the household survey are shown in Table 4. Winter coal consumption is understandably higher than summer consumption. Once again KwaZamokuhle SP has the highest consumption. 
@@ -295,9 +308,11 @@ all_base <- all_base[[-grep("NA", names(all_base))]]
 names(all_base) <- gsub("HH_", "All_", names(all_base))
 
 combined_base <- stack(hh_24, eskom_kwa_base, all_base)
+```
 
+```{r echo=FALSE}
 # create a people raster of the same extent as hh_24
-households <- rasteriseCensus(KWA, ref = all_base, refres = c(nrow(all_base), ncol(all_base)))
+households <- rasteriseCensus(KWA, ref = all_base, refres = c(nrow(all_base), ncol(all_base)), verbose = TRUE)
 total_households <- calc(households, sum, na.rm = TRUE)
 names(total_households) <- "Total_households"
 total_households[total_households == 0] <- NA
