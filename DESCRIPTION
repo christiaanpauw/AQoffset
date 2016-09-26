@@ -7,7 +7,7 @@ Author: Christiaan J. Pauw
 Maintainer: Christiaan J. Pauw <christiaan.pauw@nova.org.za>
 Description: Uses rasterised outputs of dispersion models or other air quality models and population data to calculate 
 air quality impacts and the impact of offsets.
-Imports:  Hmisc, RgoogleMaps,  dplyr,  knitr,  lattice,  ncdf4,  openair, plyr, raster, rasterVis, reshape2, gridExtra, lubridate, 
-pander, rgdal, 
+Imports:  Hmisc, RgoogleMaps,  dplyr,  lattice,  ncdf4,  openair, plyr, reshape2
+Depends: knitr, raster, rasterVis, gridExtra, lubridate, pander, rgdal
 License: GPL
 RoxygenNote: 5.0.1

@@ -14,13 +14,6 @@ output:
 ---
 
 ```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
-library(raster)
-library(rasterVis)
-library(knitr)
-library(rgdal)
-library(pander)
-library(lubridate)
-library(gridExtra)
 
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
