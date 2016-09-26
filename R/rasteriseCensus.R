@@ -23,12 +23,14 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
                             drpnames=c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", 
                                        "SP_CODE", "SP_Code", "MP_CODE", "MP_Code", "MN_CODE", "MN_MDB_C", 
                                        "DC_MN_C", "Shape_Leng", "Shape_Area", "fakeData", "GAVPrimary", 
-                                       "Total"), ...){
-  res = pointifyCensus(spdf = x, dropnames = drpnames, verbose = TRUE)
+                                       "Total"),...){
+  ress = pointifyCensus(spdf = x, dropnames = drpnames, verbose = TRUE)
   rm(x)
-  srl = split(res, res$category)
+  srl = split(ress, ress@data$category)
+  #if (verbose) assign("srl", srl, envir = .GlobalEnv)
+  if (verbose) message("srl gemaak \n unique(x@data$category) is ", paste(unique(ress@data$category), " "))
   cts = as.character(sapply(srl, function(x) unique(x@data$category)))
-  rm(res)
+  rm(ress)
   b = brick(ref, nl = length(srl), nrow = refres[1], ncol = refres[2])
   for (i in 1:length(srl)){
     ct = unique(srl[[i]]@data$category)
