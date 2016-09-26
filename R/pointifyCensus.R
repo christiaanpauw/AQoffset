@@ -1,3 +1,4 @@
+load("/Users/christiaanpauw/Documents/GIS_Spatial/R/kwazamokuhle.erwe.Rda")
 #' Pointify Census Polygon
 #' 
 #' Takes a SpatialPolygonsDataFrame with summary information, generates the 
@@ -12,7 +13,7 @@
 #' @export
 
 
-pointifyCensus <- function(spdf, 
+pointifyCensus <- function(spdf, erwe = NULL, 
                            dropnames=c("ID", "OBJECTID", "Geometry_s", "GAVPrimar0", "Geometry_1", 
                                        "SP_CODE","SP_Code", "MP_CODE", "MP_Code" ,"MN_CODE", "MN_MDB_C", "DC_MN_C",
                                        "Shape_Leng", "Shape_Area", "fakeData", "GAVPrimary", "Total"),
