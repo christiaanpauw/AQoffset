@@ -48,10 +48,10 @@ pop2sp <- function(p = fuel_house, place = "place", SPDF = KWA,
 		SPDF@data = d[match(SPDF@data$place, d$place), ]
 		
 		if (raster == FALSE) return(SPDF)
-		
+		if (debug) assign("SODF", SPDF, envir = .GlobalEnv)
 		r = rasteriseCensus(SPDF, ref = extent(SPDF), refres = refres)
 		
-		if (debug == TRUE) assign("r", r, envir = .GlobalEnv)
+		if (debug) assign("r", r, envir = .GlobalEnv)
 		
 		if (plot == TRUE){
 		  if (resamp) r <- resample(r, raster(extent(r), ncol = 100, nrow = 100))
