@@ -27,7 +27,7 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
   ress = pointifyCensus(spdf = x, dropnames = drpnames, verbose = TRUE)
   rm(x)
   srl = split(ress, ress@data$category)
-  #if (verbose) assign("srl", srl, envir = .GlobalEnv)
+  if (verbose) assign("ress", ress, envir = .GlobalEnv)
   if (verbose) message("srl gemaak \n unique(x@data$category) is ", paste(unique(ress@data$category), " "))
   cts = as.character(sapply(srl, function(x) unique(x@data$category)))
   rm(ress)
