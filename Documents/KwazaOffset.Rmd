@@ -14,14 +14,11 @@ output:
 ---
 
 ```{r global_options, echo=FALSE, message=FALSE, warning=FALSE}
-
 knitr::opts_chunk$set(message=FALSE, warning=FALSE)
 
 USER <- c("CJP", "AH", "BS")[1]
 
 if (USER == "CJP") {
-  load("/Users/christiaanpauw/Documents/GIS_Spatial/R/kwazamokuhle.erwe.Rda")
-  load("/Users/christiaanpauw/Documents/GIS_Spatial/R/PRSA.Rda")
   wd <- "/Users/christiaanpauw/Documents/Rpakette/AQoffset/"
   setwd("/Users/christiaanpauw/Documents/Rpakette/AQoffset/")
   rdir <-  file.path(paste(wd, "R/", sep=""))
@@ -29,51 +26,21 @@ if (USER == "CJP") {
   datadir2 <- "~/Documents/AQ_DATA/Data/"
 }
 
-if (USER == "AH") {
-  projdir <- "C:/Users/Alex H/Documents/R/AQoffset/"
-  rdir <-  normalizePath(paste(projdir, "R/", sep=""))
-  datadir <- normalizePath(paste(projdir, "Data/", sep = ""))
-}
+```
 
-if (USER == "BS") {
-  projdir <- "C:/Users/Willem/Desktop/AQOffset/AQoffset"
-  rdir <-  normalizePath(paste(projdir, "R/", sep=""))
-  datadir <- normalizePath(paste(projdir, "Data/", sep = ""))
-}
-  
+```{r}
 library(AQoffset)
+library(AQoffsetData)
+
 wgs.proj <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
 new.proj <- "+proj=utm +south +zone=35 +ellps=WGS84" 
 kwa.proj <- "+proj=utm +zone=35 +south +datum=WGS84 +units=km +ellps=WGS84 +towgs84=0,0,0"
+```
 
-load(paste(datadir, "/kwaza_household_census.Rda", sep=""))
-load(paste(datadir, "/kwazapopRaster.Rda", sep = "")) # sy naam in r3
-r3 <- r3*2.3 # lelike hack om die bevolking reg te kry - Worldpop is verkeerd
-kwaN <- as.character(KWA@data$SP_NAME)
-kwaCoor <- coordinates(KWA)
-
-ESKOMSO2PM <- read.table("Data/ESKOMSO2PM.txt", sep = "\t" ,header = TRUE)
-colnames(ESKOMSO2PM)[3] <- "date"
-ESKOMSO2PM$date <- dmy_hms(ESKOMSO2PM$date, tz = "Africa/Johannesburg") 
-ESKOMSO2PM$yd <- yday(ESKOMSO2PM$date)
-
-KWA_R <- spTransform(KWA, CRS(wgs.proj))
+```{r}
 kwazaUTM <- spTransform(kwaza, CRS("+proj=utm +zone=35 +south +datum=WGS84 +units=km +ellps=WGS84 +towgs84=0,0,0"))
 kwazaUTM$n <- 1
 kwazaUTM <- kwazaUTM[,grep("n", names(kwazaUTM@data))]
-
-addkwaR <- function() {latticeExtra::layer(sp::sp.polygons(KWA_R, lwd = 0.25))}
-txtkwaR <- function() {latticeExtra::layer(panel.text(x = coordinates(KWA_R)[,1], 
-                                       y = coordinates(KWA_R)[,2], 
-                                       label = as.character(KWA_R@data$SP_NAME), 
-                                       cex = 0.5))}
-addkwa <- function() {latticeExtra::layer(sp::sp.polygons(KWA, lwd = 0.25))}
-addkwa2 <- function() {latticeExtra::layer(sp::sp.polygons(KWA, lwd = 10))}
-txtkwa <- function() {latticeExtra::layer(panel.text(x = coordinates(KWA)[,1], 
-                                       y = coordinates(KWA)[,2], 
-                                       label = as.character(KWA@data$SP_NAME), 
-                                       cex = 0.5))}
-
 ```
 
 ```{r echo=FALSE}
@@ -88,8 +55,7 @@ levelplot(kr) + latticeExtra::layer(sp::sp.polygons(kwazaUTM, lwd = 0.25))
 load(paste(datadir, "/eskom.Rda", sep = ""))
 #load(paste(datadir, "/kwaza_eskom_year_camx.Rda", sep = ""))
 load(paste(datadir, "/kwaza_household_energyRaster.Rda", sep=""))
-load(paste(datadir, "/kwaza_API_hh.Rda", sep=""))
-load(paste(datadir, "/hh_24.Rda", sep=""))
+
 load(paste(datadir, "/EOP-fuel_users.Rda", sep=""))
 kpext <- extent(KWA)
 eskom.base <- eskom * 0.15
@@ -135,7 +101,7 @@ kable(data.frame(coal.heat[!is.na(coal.heat[,2]), ], row.names = NULL), caption 
 The approximate spatial distribution of the households by coal use are shown below. The high concentration of coal users in the southern and eastern parts of KwaZamokuhle is clear.  
 
 ```{r , echo = FALSE, message=FALSE}
-pop2sp(coal.heat, SPDF = KWA, raster = TRUE, scales = list(draw = FALSE), refres = c(10,10), plot = TRUE, par.settings=BuRdTheme, resamp = TRUE,  main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use") + addkwa() + txtkwa()
+pop2sp(coal.heat, SPDF = KWA, raster = TRUE, scales = list(draw = FALSE), refres = c(10,10), plot = TRUE, par.settings = BuRdTheme, resamp = TRUE,  main = "Approximate location of coal users for heating: \nPoint estimate with 95% CI ", sub="'Yes' is coal use, 'No' is no coal use", verbose = TRUE) + addkwa() + txtkwa()
 ```
 
 Baseline emissions are calculated from the results of a domestic fuel use survey. The estimates for fuel consumption based on the household survey are shown in Table 4. Winter coal consumption is understandably higher than summer consumption. Once again KwaZamokuhle SP has the highest consumption. 
@@ -232,7 +198,6 @@ count_exceed_table(eskom_pm10_exceed_base, cp = "Count of days when concentratio
 ```
 
 The count of days where SO~2~ from the industrial point source exceeded the specified level for the baseline scenario is shown below. 
-
 
 ```{r echo=FALSE}
 eskom_so2_exceed_base = count_exceed(eskom_kwa_base[[grep("so2", names(eskom_kwa_base))]], pol = NULL, min = 0, max = 10, by = 1, knip = TRUE)
