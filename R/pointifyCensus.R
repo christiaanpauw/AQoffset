@@ -1,4 +1,3 @@
-load("/Users/christiaanpauw/Documents/GIS_Spatial/R/kwazamokuhle.erwe.Rda")
 #' Pointify Census Polygon
 #' 
 #' Takes a SpatialPolygonsDataFrame with summary information, generates the 
