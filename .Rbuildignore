@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 ^R/crop_worldpop\.R
 ^R/saveEskomSO2\.R
+^R/leesKwazaLandsat\.R
