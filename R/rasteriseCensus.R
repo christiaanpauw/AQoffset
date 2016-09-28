@@ -29,7 +29,7 @@ rasteriseCensus <- function(x, ref = ext, verbose = FALSE, refres,
   srl = split(ress, ress@data$category)
   if (verbose) message("srl gemaak \n unique(x@data$category) is ", paste(unique(ress@data$category), " "))
   cts = as.character(sapply(srl, function(x) unique(x@data$category)))
-  rm(ress)
+  
   b = brick(ref, nl = length(srl), nrow = refres[1], ncol = refres[2])
   for (i in 1:length(srl)){
     ct = unique(srl[[i]]@data$category)
