@@ -4,7 +4,9 @@
 \alias{SWI}
 \title{Standards Weighted Intake}
 \usage{
-SWI(conc, NAQS = NULL, pop = people, ap = "Annual", Q = 8)
+SWI(conc, NAQS = NULL, pop = people, ap = "Annual", Q = 8, idpos = 1,
+  polpos = 3, aveperiodpos = 2, cyclepos = 5, sep = "_",
+  verbose = FALSE)
 }
 \arguments{
 \item{conc}{Raster. The concentration of every pollutant}
@@ -16,6 +18,16 @@ SWI(conc, NAQS = NULL, pop = people, ap = "Annual", Q = 8)
 \item{ap}{Character verctor. "Annual" or "Daily"}
 
 \item{Q}{Numeric. Breathing rate in m3 per person per day}
+
+\item{idpos}{Numeric referring to the ID position}
+
+\item{polpos}{Numeric referring to the position of the pollutant.}
+
+\item{aveperiodpos}{Numeric referring to the average period position.}
+
+\item{cyclepos}{Numeric referring to the cycle position.}
+
+\item{sep}{Character vector containing the seperator to be used.}
 }
 \description{
 Calculates the total effective intake of pollutants by using
