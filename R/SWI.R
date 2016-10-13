@@ -8,13 +8,23 @@
 #' @param pop Raster. The number of people in each grid cell
 #' @param ap Character verctor. "Annual" or "Daily"
 #' @param Q Numeric. Breathing rate in m3 per person per day
+#' @param idpos Numeric referring to the ID position
+#' @param polpos Numeric referring to the position of the pollutant.
+#' @param aveperiodpos Numeric referring to the average period position.
+#' @param cyclepos Numeric referring to the cycle position.
+#' @param sep Character vector containing the seperator to be used.
 #' @export
 
 SWI <- function(conc, 
                 NAQS = NULL, 
                 pop = people, 
                 ap = "Annual", 
-                Q = 8
+                Q = 8,
+                idpos = 1, 
+                polpos = 3, 
+                aveperiodpos = 2, 
+                cyclepos = 5,
+                sep = "_", verbose = FALSE
                 ){
 
   if (is.null(NAQS)){
@@ -30,12 +40,26 @@ SWI <- function(conc,
 }
 
 #isolate present compounds and find their indices
-patt = "([[:alpha:]]+_)([[:alnum:]]+_)([[:print:]]+$)"
-nms = unique(gsub("_", "", gsub(patt, "\\2", names(conc))))
-idx = match(gsub("_", "", gsub(patt, "\\2", names(conc))), nms)
+#patt = "([[:alpha:]]+_)([[:alnum:]]+_)([[:print:]]+$)"
+patt = paste('([[:print:]]+)', sep,'{1}', '([[:print:]]+)', sep,'{1}','([[:alnum:]]+)([[:punct:]]*)([[:digit:]]*)', sep="")
+id = gsub(patt, paste('\\', idpos, sep=""), names(conc))
+pols = gsub(patt, paste('\\', polpos, sep=""), names(conc))
+per = gsub(patt, paste('\\', aveperiodpos, sep=""), names(conc))
+cyc = gsub(patt, paste('\\', cyclepos, sep=""), names(conc))
+patt2 = '([[:digit:]]*)([[:alpha:]]*)'
+per.d = gsub(patt2, "\\1", per)
+per.l = gsub(patt2, "\\2", per)
+if (verbose == TRUE) message("patt: ", unique(patt))
+if (verbose == TRUE) message("id: ",  paste(unique(id), " "))
+if (verbose == TRUE) message("pols: ", paste(unique(pols), ""))
+if (verbose == TRUE) message("per: ", unique(per))
+if (verbose == TRUE) message("per.d: ", unique(per.d))
+if (verbose == TRUE) message("per.l: ", unique(per.l))
+nms = unique(pols)
+idx = match(pols, unique(pols))
 ss = stackApply(conc, indices = idx, fun = mean)
 names(ss) <- nms
-assign("ss", ss, envir = .GlobalEnv)
+#assign("ss", ss, envir = .GlobalEnv)
 
 pop <- crop(pop, extent(ss))
 concpop = overlay(ss, pop, fun=function(x,y){ x * y})
@@ -48,7 +72,7 @@ I = concpop * Q
 # Standard intake for each pollutant
 SIL = list()
 for (i in 1:length(nms)) {
-  SIL[[i]] = NAQS.rel[i] * Q * people
+  SIL[[i]] = NAQS.rel[i] * Q * pop #was people
 }
 
 SI = stack(SIL)
