@@ -1,6 +1,7 @@
 #' aggregateCREPstack
 #' @param r Raster stack from output from rasterCREP 
 #' @param fun function Default to sum
+#' @export
 
 aggregateCREPstack <- function(r){
   # summarise the number of cases across all days
