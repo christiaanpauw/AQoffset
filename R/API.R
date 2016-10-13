@@ -171,7 +171,7 @@ rasterAPI <- function(s,
   if (aggregate == TRUE & per_source == TRUE) return(id.s)
   
   # aggregate to one score per day
-  if (verbose == TRUE) message("tab$cycle ", tab$cycle)
+  if (verbose == TRUE) message("head van tab$cycle ", head(paste(tab$cycle, " ")), 10)
   api <- stackApply(psi, indices = match(tab$cycle, unique(tab$cycle)), fun = sum)
   
   if (aggregate == TRUE){
