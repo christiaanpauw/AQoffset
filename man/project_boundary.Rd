@@ -15,7 +15,7 @@ project_boundary(r, period = 1/365, target_period = "both",
 \item{period}{Numeric The averaging period represented by each layer of r expressed as
 a fraction of 365 days, i.e. 1/365 for daily values, 1/24/365 for hourly values}
 
-\item{target_period}{Character Apply function for a chronic or an acute scenario or both. 
+\item{target_period}{Character Apply function for a chronic or an acute scenario or both.
 options are "chronic", "acute", "both". Defaults to "both"}
 
 \item{thresh_acute}{Numeric The threshold for the 24 hour averaging period}
@@ -26,7 +26,7 @@ options are "chronic", "acute", "both". Defaults to "both"}
 
 \item{period_chronic}{The period for which the chronic threshold is valid. Default 365/365}
 
-\item{chronic_cutoff}{Numeric Proportion data needed to construct a valid chronic estimate. 
+\item{chronic_cutoff}{Numeric Proportion data needed to construct a valid chronic estimate.
 Default 0.9}
 
 \item{return.mask}{Logical that assigns the masked resolution to the global environment
@@ -40,15 +40,15 @@ when TRUE}
 }
 \value{
 A single layer raster shruck to the minimum
-neccesary extent and with NAs in all remaining cells within that 
-extent that falls outside of the project boundary and 1 in the cells 
-that fall within. This object is then used as a mask to select the valid 
-region for further steps in the air pollution impacts or offsets 
+neccesary extent and with NAs in all remaining cells within that
+extent that falls outside of the project boundary and 1 in the cells
+that fall within. This object is then used as a mask to select the valid
+region for further steps in the air pollution impacts or offsets
 accouting
 }
 \description{
-The Air Pollution Impacts Protocol requires that a project bounbary be 
-defined as that the spatial and temporal extent of the atmospheric states resulting 
+The Air Pollution Impacts Protocol requires that a project bounbary be
+defined as that the spatial and temporal extent of the atmospheric states resulting
 from an activity above a certain threshold. This function takes a raster of concentrations
 resulting from an activity and a threshold value and selects the valid project extent
 }

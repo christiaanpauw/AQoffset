@@ -7,12 +7,13 @@
 raster_dist_plot(ss, multi = list(NULL, c("IndustryY_pm10",
   "IndustryX_so2"))[[1]], mn = "", sb = "", th = BuRdTheme,
   scales = list(draw = FALSE), meanonly = FALSE, tab_out = FALSE,
-  debug = FALSE, beginnul = FALSE, diverge = FALSE, ...)
+  debug = FALSE, verbose = FALSE, beginnul = FALSE, maksimum = NULL,
+  diverge = FALSE, ...)
 }
 \arguments{
 \item{ss}{A raster stack}
 
-\item{multi}{A list containing a character vector of layer name components or NULL}
+\item{multi}{A character vector of layer name components or NULL}
 
 \item{mn}{The main title of the resulting plot as a character string. Defaults to empty string}
 
@@ -32,6 +33,6 @@ Default contains a logical that prevents drawing marginal graphics}
 }
 \description{
 Convenience function to summarise a raster stack and plot the result as a 
-trellis plot
+trellis plot summarising the distribution by quantiles
 }
 

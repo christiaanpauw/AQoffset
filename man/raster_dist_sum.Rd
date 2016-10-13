@@ -20,7 +20,7 @@ A raster
 }
 \description{
 Summarise a many layered raster stack into a 7 point summary 
-stack. It gives the the followng percentiles: 1%, 25%, median, 75% and 99%
+stack. It gives the the following percentiles: 1%, 25%, median, 75% and 99%
 and mean, standard deviation, and inter quartile range and arbitrary user specified 
 range. Optionally provides minimum and maximum
 }
