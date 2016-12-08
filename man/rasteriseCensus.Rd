@@ -4,15 +4,22 @@
 \alias{rasteriseCensus}
 \title{Rasterise Census Subplace}
 \usage{
-rasteriseCensus(x, ref = ext, verbose = FALSE, refres, drpnames = c("ID",
-  "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID", "SP_CODE", "SP_Code",
-  "MP_CODE", "MP_Code", "MN_CODE", "MN_MDB_C", "DC_MN_C", "Shape_Leng",
-  "Shape_Area", "fakeData", "GAVPrimary", "Total"), ...)
+rasteriseCensus(x, ref = NULL, cleanSP = TRUE, spcode = "SP_Name",
+  weightraster = NULL, verbose = FALSE, refres = NULL,
+  drpnames = c("ID", "Geometry_s", "GAVPrimar0", "Geometry_1", "OBJECTID",
+  "SP_CODE", "SP_Code", "MP_CODE", "MP_Code", "MN_CODE", "MN_MDB_C", "DC_MN_C",
+  "Shape_Leng", "Shape_Area", "fakeData", "GAVPrimary", "Total"), ...)
 }
 \arguments{
 \item{x}{A SpatialPolygonsDataFrame}
 
 \item{ref}{An extent object}
+
+\item{cleanSP}{Logical Do you want to remove rows where *spcode* is NA}
+
+\item{spcode}{Character name of variable for which rows are removed when NA}
+
+\item{weightraster}{Raster with weights - typically a population raster like the utput from worldpop}
 
 \item{verbose}{Print messages or not}
 
@@ -26,10 +33,10 @@ rasteriseCensus(x, ref = ext, verbose = FALSE, refres, drpnames = c("ID",
 Rasterise a census polygon SPDF possibly containing summary data.
 The function randomly assign the correct number of sample units
 in each of a number of categories e.g. energy carrier for heating:
-as summarised in each row of the SPDF as points to a polygon   
-It can be used to: 
-make a total 
-make number of people 
+as summarised in each row of the SPDF as points to a polygon
+It can be used to:
+make a total
+make number of people
 make sex distribution make age distribution
 }
 
